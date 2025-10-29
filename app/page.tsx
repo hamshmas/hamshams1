@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { handleNumberInput, parseNumberFromFormatted } from "@/utils/formatNumber";
+import minimumLivingCostData from "@/data/minimumLivingCost.json";
 
 interface FormData {
   totalDebt: number;
@@ -38,8 +40,9 @@ export default function Home() {
   const calculateReductionRate = () => {
     const { totalDebt, monthlyIncome, assetValue, dependents } = formData;
 
-    // 최저생계비 기준 (2024년 기준, 단순화)
-    const minimumLivingCost = 1000000 + (dependents * 300000);
+    // 최저생계비 데이터에서 가져오기
+    const dependentsKey = String(Math.min(dependents, 10)) as keyof typeof minimumLivingCostData;
+    const minimumLivingCost = minimumLivingCostData[dependentsKey] || minimumLivingCostData["0"];
 
     // 변제 가능 금액 = (월 소득 - 최저생계비) × 60개월
     const monthlyRepayment = Math.max(monthlyIncome - minimumLivingCost, 0);
@@ -145,7 +148,17 @@ function StepOne({
   onNext: (value: number) => void;
   initialValue: number;
 }) {
-  const [value, setValue] = useState(initialValue.toString());
+  const [value, setValue] = useState(initialValue > 0 ? initialValue.toLocaleString() : "");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = handleNumberInput(e.target.value);
+    setValue(formatted);
+  };
+
+  const handleSubmit = () => {
+    const numericValue = parseNumberFromFormatted(value);
+    onNext(numericValue);
+  };
 
   return (
     <div className="space-y-6">
@@ -157,9 +170,10 @@ function StepOne({
       </div>
       <div>
         <input
-          type="number"
+          type="text"
+          inputMode="numeric"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={handleChange}
           className="w-full text-3xl font-bold border-b-2 border-gray-300 focus:border-blue-600 outline-none py-4 text-gray-900"
           placeholder="0"
           autoFocus
@@ -167,8 +181,8 @@ function StepOne({
         <p className="text-right text-gray-600 mt-2">원</p>
       </div>
       <button
-        onClick={() => onNext(Number(value))}
-        disabled={!value || Number(value) <= 0}
+        onClick={handleSubmit}
+        disabled={!value || parseNumberFromFormatted(value) <= 0}
         className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
       >
         다음
@@ -186,7 +200,17 @@ function StepTwo({
   onBack: () => void;
   initialValue: number;
 }) {
-  const [value, setValue] = useState(initialValue.toString());
+  const [value, setValue] = useState(initialValue > 0 ? initialValue.toLocaleString() : "");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = handleNumberInput(e.target.value);
+    setValue(formatted);
+  };
+
+  const handleSubmit = () => {
+    const numericValue = parseNumberFromFormatted(value);
+    onNext(numericValue);
+  };
 
   return (
     <div className="space-y-6">
@@ -198,9 +222,10 @@ function StepTwo({
       </div>
       <div>
         <input
-          type="number"
+          type="text"
+          inputMode="numeric"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={handleChange}
           className="w-full text-3xl font-bold border-b-2 border-gray-300 focus:border-blue-600 outline-none py-4 text-gray-900"
           placeholder="0"
           autoFocus
@@ -215,8 +240,8 @@ function StepTwo({
           이전
         </button>
         <button
-          onClick={() => onNext(Number(value))}
-          disabled={!value || Number(value) < 0}
+          onClick={handleSubmit}
+          disabled={!value || parseNumberFromFormatted(value) < 0}
           className="w-2/3 bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
           다음
@@ -235,7 +260,17 @@ function StepThree({
   onBack: () => void;
   initialValue: number;
 }) {
-  const [value, setValue] = useState(initialValue.toString());
+  const [value, setValue] = useState(initialValue > 0 ? initialValue.toLocaleString() : "");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = handleNumberInput(e.target.value);
+    setValue(formatted);
+  };
+
+  const handleSubmit = () => {
+    const numericValue = parseNumberFromFormatted(value);
+    onNext(numericValue);
+  };
 
   return (
     <div className="space-y-6">
@@ -247,9 +282,10 @@ function StepThree({
       </div>
       <div>
         <input
-          type="number"
+          type="text"
+          inputMode="numeric"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={handleChange}
           className="w-full text-3xl font-bold border-b-2 border-gray-300 focus:border-blue-600 outline-none py-4 text-gray-900"
           placeholder="0"
           autoFocus
@@ -264,8 +300,8 @@ function StepThree({
           이전
         </button>
         <button
-          onClick={() => onNext(Number(value))}
-          disabled={!value || Number(value) < 0}
+          onClick={handleSubmit}
+          disabled={!value || parseNumberFromFormatted(value) < 0}
           className="w-2/3 bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
           다음
@@ -284,7 +320,11 @@ function StepFour({
   onBack: () => void;
   initialValue: number;
 }) {
-  const [value, setValue] = useState(initialValue.toString());
+  const [value, setValue] = useState(initialValue > 0 ? initialValue.toString() : "");
+
+  const handleSubmit = () => {
+    onNext(Number(value));
+  };
 
   return (
     <div className="space-y-6">
@@ -297,11 +337,14 @@ function StepFour({
       <div>
         <input
           type="number"
+          inputMode="numeric"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           className="w-full text-3xl font-bold border-b-2 border-gray-300 focus:border-blue-600 outline-none py-4 text-gray-900"
           placeholder="0"
           autoFocus
+          min="0"
+          max="10"
         />
         <p className="text-right text-gray-600 mt-2">명</p>
       </div>
@@ -313,7 +356,7 @@ function StepFour({
           이전
         </button>
         <button
-          onClick={() => onNext(Number(value))}
+          onClick={handleSubmit}
           disabled={!value || Number(value) < 0}
           className="w-2/3 bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
