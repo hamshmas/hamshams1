@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { handleNumberInput, parseNumberFromFormatted, convertManwonToWon, convertWonToManwon } from "@/utils/formatNumber";
+import { calculatePresentValue, findMinimumRepaymentPeriod } from "@/utils/leibnizCalculation";
 import minimumLivingCostData from "@/data/minimumLivingCost.json";
 
 interface FormData {
@@ -55,15 +56,29 @@ export default function Home() {
     // 선형 보간으로 최저생계비 계산
     const minimumLivingCost = floorCost * (1 - fraction) + ceilCost * fraction;
 
-    // 변제 가능 금액 = (월 소득 - 최저생계비) × 36개월
+    // 월 변제 가능 금액
     const monthlyRepayment = Math.max(monthlyIncome - minimumLivingCost, 0);
-    const totalRepayment = monthlyRepayment * 36;
 
     // 청산가치 (자산 가액)
     const liquidationValue = assetValue;
 
-    // 변제액은 청산가치와 변제 가능 금액 중 큰 금액
-    const repaymentAmount = Math.max(totalRepayment, liquidationValue);
+    // 라이프니츠식으로 최소 변제기간 찾기 (36~60개월)
+    const repaymentPeriod = findMinimumRepaymentPeriod(monthlyRepayment, liquidationValue, 36, 60);
+
+    let totalRepaymentPV: number;
+    let liquidationValueViolation = false;
+
+    if (repaymentPeriod === null) {
+      // 60개월로도 청산가치를 충족하지 못함
+      totalRepaymentPV = calculatePresentValue(monthlyRepayment, 60);
+      liquidationValueViolation = true;
+    } else {
+      // 적절한 변제기간 찾음
+      totalRepaymentPV = calculatePresentValue(monthlyRepayment, repaymentPeriod);
+    }
+
+    // 최종 변제액 (현재가치 기준)
+    const repaymentAmount = Math.max(totalRepaymentPV, liquidationValue);
 
     // 탕감률 계산
     const reductionAmount = totalDebt - repaymentAmount;
@@ -73,7 +88,10 @@ export default function Home() {
       reductionRate: Math.max(0, Math.min(100, reductionRate)),
       repaymentAmount: Math.max(0, repaymentAmount),
       reductionAmount: Math.max(0, reductionAmount),
-      monthlyPayment: repaymentAmount > 0 ? repaymentAmount / 36 : 0,
+      monthlyPayment: monthlyRepayment,
+      repaymentPeriod: repaymentPeriod || 60,
+      liquidationValueViolation,
+      usedLeibnizFormula: true,
     };
   };
 
@@ -473,6 +491,9 @@ function ResultPage({
     repaymentAmount: number;
     reductionAmount: number;
     monthlyPayment: number;
+    repaymentPeriod: number;
+    liquidationValueViolation: boolean;
+    usedLeibnizFormula: boolean;
   };
   formData: FormData;
   onRestart: () => void;
@@ -553,10 +574,19 @@ function ResultPage({
 
         <div className="flex justify-between items-center py-2">
           <span className="text-gray-700 flex items-center gap-2">
-            <span>📅</span> 월 상환액 (36개월)
+            <span>📅</span> 월 상환액
           </span>
           <span className="font-bold text-primary-600 text-lg">
             {result.monthlyPayment.toLocaleString()}원
+          </span>
+        </div>
+
+        <div className="flex justify-between items-center py-2">
+          <span className="text-gray-700 flex items-center gap-2">
+            <span>⏱️</span> 변제 기간
+          </span>
+          <span className="font-bold text-primary-600 text-lg">
+            {result.repaymentPeriod}개월
           </span>
         </div>
       </div>
@@ -591,8 +621,27 @@ function ResultPage({
         </div>
       </div>
 
+      {/* Liquidation Value Violation Warning */}
+      {result.liquidationValueViolation && (
+        <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-4 animate-slideIn" style={{animationDelay: '0.2s'}}>
+          <p className="text-sm text-red-800 font-bold">
+            🚨 청산가치보장 원칙 위반
+          </p>
+          <p className="text-sm text-red-700 mt-2 leading-relaxed">
+            60개월 변제로도 청산가치({formData.assetValue.toLocaleString()}만원)를 충족하지 못합니다. 개인회생 신청이 어려울 수 있으니 전문가와 상담하세요.
+          </p>
+        </div>
+      )}
+
+      {/* Leibniz Formula Notice */}
+      <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 animate-slideIn" style={{animationDelay: '0.25s'}}>
+        <p className="text-sm text-blue-800 leading-relaxed">
+          📊 <strong>계산 방식:</strong> 현재가치는 라이프니츠식(법정이율 연 5% 적용)으로 계산되었습니다. 변제기간은 청산가치를 충족하도록 36~60개월 범위에서 자동 조정됩니다.
+        </p>
+      </div>
+
       {/* Warning */}
-      <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 animate-slideIn" style={{animationDelay: '0.2s'}}>
+      <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 animate-slideIn" style={{animationDelay: '0.3s'}}>
         <p className="text-sm text-amber-800 leading-relaxed">
           ⚠️ <strong>안내:</strong> 이 결과는 참고용이며, 실제 탕감률은 법원의 판단과 개인의 상황에 따라 달라질 수 있습니다. 정확한 상담을 위해 전문가와 상의하시기 바랍니다.
         </p>
@@ -602,7 +651,7 @@ function ResultPage({
       <button
         onClick={onRestart}
         className="w-full primary-button animate-slideIn"
-        style={{animationDelay: '0.3s'}}
+        style={{animationDelay: '0.35s'}}
       >
         다시 계산하기
       </button>
