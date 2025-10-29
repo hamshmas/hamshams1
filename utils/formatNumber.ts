@@ -43,3 +43,21 @@ export function handleNumberInput(value: string): string {
   // 천 단위 콤마 추가하여 반환
   return formatNumberWithCommas(numericOnly);
 }
+
+/**
+ * 만원 단위 숫자를 원 단위로 변환
+ * @param manwon - 만원 단위 숫자
+ * @returns 원 단위 숫자
+ */
+export function convertManwonToWon(manwon: number): number {
+  return manwon * 10000;
+}
+
+/**
+ * 원 단위 숫자를 만원 단위로 변환
+ * @param won - 원 단위 숫자
+ * @returns 만원 단위 숫자
+ */
+export function convertWonToManwon(won: number): number {
+  return won / 10000;
+}

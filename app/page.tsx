@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { handleNumberInput, parseNumberFromFormatted } from "@/utils/formatNumber";
+import { handleNumberInput, parseNumberFromFormatted, convertManwonToWon, convertWonToManwon } from "@/utils/formatNumber";
 import minimumLivingCostData from "@/data/minimumLivingCost.json";
 
 interface FormData {
@@ -80,29 +80,29 @@ export default function Home() {
   const result = currentStep === 5 ? calculateReductionRate() : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Progress Bar */}
         {currentStep <= totalSteps && (
-          <div className="mb-8">
-            <div className="flex justify-between mb-2">
+          <div className="mb-8 animate-fadeIn">
+            <div className="flex justify-between mb-3">
               {[1, 2, 3, 4].map((step) => (
                 <div
                   key={step}
-                  className={`w-1/4 h-2 mx-1 rounded-full ${
-                    step <= currentStep ? "bg-blue-600" : "bg-gray-300"
+                  className={`progress-bar-segment ${
+                    step <= currentStep ? "progress-bar-completed" : "progress-bar-incomplete"
                   }`}
                 />
               ))}
             </div>
-            <p className="text-center text-sm text-gray-600">
+            <p className="text-center text-sm font-medium text-gray-600">
               {currentStep} / {totalSteps} 단계
             </p>
           </div>
         )}
 
         {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 animate-scaleIn border border-gray-100">
           {currentStep === 1 && (
             <StepOne
               onNext={(value) => handleNext("totalDebt", value)}
@@ -159,7 +159,8 @@ function StepOne({
   onNext: (value: number) => void;
   initialValue: number;
 }) {
-  const [value, setValue] = useState(initialValue > 0 ? initialValue.toLocaleString() : "");
+  const manwonValue = initialValue > 0 ? convertWonToManwon(initialValue) : 0;
+  const [value, setValue] = useState(manwonValue > 0 ? manwonValue.toLocaleString() : "");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = handleNumberInput(e.target.value);
@@ -167,12 +168,25 @@ function StepOne({
   };
 
   const handleSubmit = () => {
-    const numericValue = parseNumberFromFormatted(value);
-    onNext(numericValue);
+    const numericManwon = parseNumberFromFormatted(value);
+    const wonValue = convertManwonToWon(numericManwon);
+    onNext(wonValue);
+  };
+
+  const handleQuickAdd = (amount: number) => {
+    const currentValue = value ? parseNumberFromFormatted(value) : 0;
+    const newValue = currentValue + amount;
+    setValue(newValue.toLocaleString());
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && value && parseNumberFromFormatted(value) > 0) {
+      handleSubmit();
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slideIn">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           총 부채액은 얼마인가요?
@@ -185,16 +199,27 @@ function StepOne({
           inputMode="numeric"
           value={value}
           onChange={handleChange}
-          className="w-full text-3xl font-bold border-b-2 border-gray-300 focus:border-blue-600 outline-none py-4 text-gray-900"
+          onKeyPress={handleKeyPress}
+          className="w-full text-4xl font-bold bg-gray-50 border-2 border-gray-200 focus:border-primary-500 focus:bg-white rounded-xl outline-none py-4 px-4 text-gray-900 transition-all"
           placeholder="0"
           autoFocus
         />
-        <p className="text-right text-gray-600 mt-2">원</p>
+        <p className="text-right text-primary-600 font-semibold mt-2">만원</p>
       </div>
+
+      {/* Quick Input Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <button onClick={() => handleQuickAdd(100)} className="quick-button">+100</button>
+        <button onClick={() => handleQuickAdd(500)} className="quick-button">+500</button>
+        <button onClick={() => handleQuickAdd(1000)} className="quick-button">+1000</button>
+        <button onClick={() => handleQuickAdd(3000)} className="quick-button">+3000</button>
+        <button onClick={() => handleQuickAdd(5000)} className="quick-button">+5000</button>
+      </div>
+
       <button
         onClick={handleSubmit}
         disabled={!value || parseNumberFromFormatted(value) <= 0}
-        className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        className="w-full primary-button disabled:opacity-50 disabled:cursor-not-allowed"
       >
         다음
       </button>
@@ -211,7 +236,8 @@ function StepTwo({
   onBack: () => void;
   initialValue: number;
 }) {
-  const [value, setValue] = useState(initialValue > 0 ? initialValue.toLocaleString() : "");
+  const manwonValue = initialValue > 0 ? convertWonToManwon(initialValue) : 0;
+  const [value, setValue] = useState(manwonValue > 0 ? manwonValue.toLocaleString() : "");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = handleNumberInput(e.target.value);
@@ -219,12 +245,25 @@ function StepTwo({
   };
 
   const handleSubmit = () => {
-    const numericValue = parseNumberFromFormatted(value);
-    onNext(numericValue);
+    const numericManwon = parseNumberFromFormatted(value);
+    const wonValue = convertManwonToWon(numericManwon);
+    onNext(wonValue);
+  };
+
+  const handleQuickAdd = (amount: number) => {
+    const currentValue = value ? parseNumberFromFormatted(value) : 0;
+    const newValue = currentValue + amount;
+    setValue(newValue.toLocaleString());
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && value && parseNumberFromFormatted(value) >= 0) {
+      handleSubmit();
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slideIn">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           월 소득은 얼마인가요?
@@ -237,23 +276,34 @@ function StepTwo({
           inputMode="numeric"
           value={value}
           onChange={handleChange}
-          className="w-full text-3xl font-bold border-b-2 border-gray-300 focus:border-blue-600 outline-none py-4 text-gray-900"
+          onKeyPress={handleKeyPress}
+          className="w-full text-4xl font-bold bg-gray-50 border-2 border-gray-200 focus:border-primary-500 focus:bg-white rounded-xl outline-none py-4 px-4 text-gray-900 transition-all"
           placeholder="0"
           autoFocus
         />
-        <p className="text-right text-gray-600 mt-2">원</p>
+        <p className="text-right text-primary-600 font-semibold mt-2">만원</p>
       </div>
+
+      {/* Quick Input Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <button onClick={() => handleQuickAdd(100)} className="quick-button">+100</button>
+        <button onClick={() => handleQuickAdd(200)} className="quick-button">+200</button>
+        <button onClick={() => handleQuickAdd(300)} className="quick-button">+300</button>
+        <button onClick={() => handleQuickAdd(500)} className="quick-button">+500</button>
+        <button onClick={() => handleQuickAdd(1000)} className="quick-button">+1000</button>
+      </div>
+
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="w-1/3 bg-gray-200 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+          className="w-1/3 secondary-button"
         >
           이전
         </button>
         <button
           onClick={handleSubmit}
           disabled={!value || parseNumberFromFormatted(value) < 0}
-          className="w-2/3 bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="w-2/3 primary-button disabled:opacity-50 disabled:cursor-not-allowed"
         >
           다음
         </button>
@@ -271,7 +321,8 @@ function StepThree({
   onBack: () => void;
   initialValue: number;
 }) {
-  const [value, setValue] = useState(initialValue > 0 ? initialValue.toLocaleString() : "");
+  const manwonValue = initialValue > 0 ? convertWonToManwon(initialValue) : 0;
+  const [value, setValue] = useState(manwonValue > 0 ? manwonValue.toLocaleString() : "");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = handleNumberInput(e.target.value);
@@ -279,12 +330,25 @@ function StepThree({
   };
 
   const handleSubmit = () => {
-    const numericValue = parseNumberFromFormatted(value);
-    onNext(numericValue);
+    const numericManwon = parseNumberFromFormatted(value);
+    const wonValue = convertManwonToWon(numericManwon);
+    onNext(wonValue);
+  };
+
+  const handleQuickAdd = (amount: number) => {
+    const currentValue = value ? parseNumberFromFormatted(value) : 0;
+    const newValue = currentValue + amount;
+    setValue(newValue.toLocaleString());
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && value && parseNumberFromFormatted(value) >= 0) {
+      handleSubmit();
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slideIn">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           보유 자산 가액은 얼마인가요?
@@ -297,23 +361,34 @@ function StepThree({
           inputMode="numeric"
           value={value}
           onChange={handleChange}
-          className="w-full text-3xl font-bold border-b-2 border-gray-300 focus:border-blue-600 outline-none py-4 text-gray-900"
+          onKeyPress={handleKeyPress}
+          className="w-full text-4xl font-bold bg-gray-50 border-2 border-gray-200 focus:border-primary-500 focus:bg-white rounded-xl outline-none py-4 px-4 text-gray-900 transition-all"
           placeholder="0"
           autoFocus
         />
-        <p className="text-right text-gray-600 mt-2">원</p>
+        <p className="text-right text-primary-600 font-semibold mt-2">만원</p>
       </div>
+
+      {/* Quick Input Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <button onClick={() => handleQuickAdd(100)} className="quick-button">+100</button>
+        <button onClick={() => handleQuickAdd(500)} className="quick-button">+500</button>
+        <button onClick={() => handleQuickAdd(1000)} className="quick-button">+1000</button>
+        <button onClick={() => handleQuickAdd(3000)} className="quick-button">+3000</button>
+        <button onClick={() => handleQuickAdd(5000)} className="quick-button">+5000</button>
+      </div>
+
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="w-1/3 bg-gray-200 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+          className="w-1/3 secondary-button"
         >
           이전
         </button>
         <button
           onClick={handleSubmit}
           disabled={!value || parseNumberFromFormatted(value) < 0}
-          className="w-2/3 bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="w-2/3 primary-button disabled:opacity-50 disabled:cursor-not-allowed"
         >
           다음
         </button>
@@ -337,10 +412,16 @@ function StepFour({
     onNext(Number(value));
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && isValid) {
+      handleSubmit();
+    }
+  };
+
   const isValid = value && Number(value) >= 0 && Number(value) <= 4;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slideIn">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           부양가족은 몇 명인가요?
@@ -353,26 +434,27 @@ function StepFour({
           inputMode="decimal"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          className="w-full text-3xl font-bold border-b-2 border-gray-300 focus:border-blue-600 outline-none py-4 text-gray-900"
+          onKeyPress={handleKeyPress}
+          className="w-full text-4xl font-bold bg-gray-50 border-2 border-gray-200 focus:border-primary-500 focus:bg-white rounded-xl outline-none py-4 px-4 text-gray-900 transition-all"
           placeholder="0"
           autoFocus
           min="0"
           max="4"
           step="0.1"
         />
-        <p className="text-right text-gray-600 mt-2">명</p>
+        <p className="text-right text-primary-600 font-semibold mt-2">명</p>
       </div>
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="w-1/3 bg-gray-200 text-gray-700 py-4 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+          className="w-1/3 secondary-button"
         >
           이전
         </button>
         <button
           onClick={handleSubmit}
           disabled={!isValid}
-          className="w-2/3 bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+          className="w-2/3 primary-button disabled:opacity-50 disabled:cursor-not-allowed"
         >
           결과 확인
         </button>
@@ -395,71 +477,132 @@ function ResultPage({
   formData: FormData;
   onRestart: () => void;
 }) {
+  // 탕감률에 따른 색상 결정
+  const getColorByRate = (rate: number) => {
+    if (rate >= 70) return { text: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', stroke: '#16a34a' };
+    if (rate >= 40) return { text: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200', stroke: '#ca8a04' };
+    return { text: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200', stroke: '#dc2626' };
+  };
+
+  const colors = getColorByRate(result.reductionRate);
+  const circumference = 2 * Math.PI * 54;
+  const strokeDashoffset = circumference - (result.reductionRate / 100) * circumference;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
+      {/* Progress Circle */}
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">예상 탕감률</h2>
-        <div className="text-6xl font-bold text-blue-600 my-6">
-          {result.reductionRate.toFixed(1)}%
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">예상 탕감률</h2>
+        <div className="relative inline-block">
+          <svg className="w-48 h-48 transform -rotate-90" viewBox="0 0 120 120">
+            <circle
+              cx="60"
+              cy="60"
+              r="54"
+              stroke="#e5e7eb"
+              strokeWidth="8"
+              fill="none"
+            />
+            <circle
+              cx="60"
+              cy="60"
+              r="54"
+              stroke={colors.stroke}
+              strokeWidth="8"
+              fill="none"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              className="transition-all duration-1000 ease-out"
+            />
+          </svg>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center">
+              <div className={`text-5xl font-bold ${colors.text}`}>
+                {result.reductionRate.toFixed(1)}%
+              </div>
+            </div>
+          </div>
         </div>
-        <p className="text-gray-600">
-          약 {result.reductionAmount.toLocaleString()}원 탕감 예상
+        <p className="text-gray-600 mt-4 text-lg">
+          약 <span className="font-bold text-gray-900">{result.reductionAmount.toLocaleString()}원</span> 탕감 예상
         </p>
       </div>
 
-      <div className="bg-gray-50 rounded-xl p-6 space-y-4">
-        <h3 className="font-semibold text-gray-900 mb-3">상세 내역</h3>
+      {/* Details Section */}
+      <div className={`${colors.bg} border-2 ${colors.border} rounded-2xl p-6 space-y-3 animate-slideIn`}>
+        <h3 className="font-bold text-gray-900 mb-4 text-lg">💰 상세 내역</h3>
 
-        <div className="flex justify-between">
-          <span className="text-gray-600">총 부채액</span>
-          <span className="font-semibold text-gray-900">
+        <div className="flex justify-between items-center py-2">
+          <span className="text-gray-700 flex items-center gap-2">
+            <span>💸</span> 총 부채액
+          </span>
+          <span className="font-bold text-gray-900 text-lg">
             {formData.totalDebt.toLocaleString()}원
           </span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-600">예상 변제액</span>
-          <span className="font-semibold text-gray-900">
+        <div className="flex justify-between items-center py-2">
+          <span className="text-gray-700 flex items-center gap-2">
+            <span>💵</span> 예상 변제액
+          </span>
+          <span className="font-bold text-gray-900 text-lg">
             {result.repaymentAmount.toLocaleString()}원
           </span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-600">월 상환액 (36개월)</span>
-          <span className="font-semibold text-gray-900">
+        <div className="flex justify-between items-center py-2">
+          <span className="text-gray-700 flex items-center gap-2">
+            <span>📅</span> 월 상환액 (36개월)
+          </span>
+          <span className="font-bold text-primary-600 text-lg">
             {result.monthlyPayment.toLocaleString()}원
           </span>
         </div>
+      </div>
 
-        <div className="border-t pt-4 mt-4">
-          <div className="flex justify-between">
-            <span className="text-gray-600">월 소득</span>
-            <span className="text-gray-900">
-              {formData.monthlyIncome.toLocaleString()}원
-            </span>
-          </div>
-          <div className="flex justify-between mt-2">
-            <span className="text-gray-600">자산 가액</span>
-            <span className="text-gray-900">
-              {formData.assetValue.toLocaleString()}원
-            </span>
-          </div>
-          <div className="flex justify-between mt-2">
-            <span className="text-gray-600">부양가족</span>
-            <span className="text-gray-900">{formData.dependents}명</span>
-          </div>
+      {/* Input Summary */}
+      <div className="bg-gray-50 rounded-2xl p-6 space-y-3 animate-slideIn" style={{animationDelay: '0.1s'}}>
+        <h3 className="font-bold text-gray-900 mb-4">📋 입력 정보</h3>
+
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 flex items-center gap-2">
+            <span>💼</span> 월 소득
+          </span>
+          <span className="text-gray-900 font-semibold">
+            {formData.monthlyIncome.toLocaleString()}원
+          </span>
+        </div>
+
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 flex items-center gap-2">
+            <span>🏠</span> 자산 가액
+          </span>
+          <span className="text-gray-900 font-semibold">
+            {formData.assetValue.toLocaleString()}원
+          </span>
+        </div>
+
+        <div className="flex justify-between items-center">
+          <span className="text-gray-600 flex items-center gap-2">
+            <span>👨‍👩‍👧‍👦</span> 부양가족
+          </span>
+          <span className="text-gray-900 font-semibold">{formData.dependents}명</span>
         </div>
       </div>
 
-      <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-        <p className="text-sm text-yellow-800">
-          ⚠️ 이 결과는 참고용이며, 실제 탕감률은 법원의 판단과 개인의 상황에 따라 달라질 수 있습니다.
+      {/* Warning */}
+      <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 animate-slideIn" style={{animationDelay: '0.2s'}}>
+        <p className="text-sm text-amber-800 leading-relaxed">
+          ⚠️ <strong>안내:</strong> 이 결과는 참고용이며, 실제 탕감률은 법원의 판단과 개인의 상황에 따라 달라질 수 있습니다. 정확한 상담을 위해 전문가와 상의하시기 바랍니다.
         </p>
       </div>
 
+      {/* Restart Button */}
       <button
         onClick={onRestart}
-        className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors"
+        className="w-full primary-button animate-slideIn"
+        style={{animationDelay: '0.3s'}}
       >
         다시 계산하기
       </button>
