@@ -40,13 +40,24 @@ export default function Home() {
   const calculateReductionRate = () => {
     const { totalDebt, monthlyIncome, assetValue, dependents } = formData;
 
-    // 최저생계비 데이터에서 가져오기
-    const dependentsKey = String(Math.min(dependents, 10)) as keyof typeof minimumLivingCostData;
-    const minimumLivingCost = minimumLivingCostData[dependentsKey] || minimumLivingCostData["0"];
+    // 최저생계비 계산 (소수점 지원 - 선형 보간)
+    const clampedDependents = Math.max(0, Math.min(dependents, 4));
+    const floorDependents = Math.floor(clampedDependents);
+    const ceilDependents = Math.ceil(clampedDependents);
+    const fraction = clampedDependents - floorDependents;
 
-    // 변제 가능 금액 = (월 소득 - 최저생계비) × 60개월
+    const floorKey = String(floorDependents) as keyof typeof minimumLivingCostData;
+    const ceilKey = String(ceilDependents) as keyof typeof minimumLivingCostData;
+
+    const floorCost = minimumLivingCostData[floorKey] || 0;
+    const ceilCost = minimumLivingCostData[ceilKey] || floorCost;
+
+    // 선형 보간으로 최저생계비 계산
+    const minimumLivingCost = floorCost * (1 - fraction) + ceilCost * fraction;
+
+    // 변제 가능 금액 = (월 소득 - 최저생계비) × 36개월
     const monthlyRepayment = Math.max(monthlyIncome - minimumLivingCost, 0);
-    const totalRepayment = monthlyRepayment * 60;
+    const totalRepayment = monthlyRepayment * 36;
 
     // 청산가치 (자산 가액)
     const liquidationValue = assetValue;
@@ -62,7 +73,7 @@ export default function Home() {
       reductionRate: Math.max(0, Math.min(100, reductionRate)),
       repaymentAmount: Math.max(0, repaymentAmount),
       reductionAmount: Math.max(0, reductionAmount),
-      monthlyPayment: repaymentAmount > 0 ? repaymentAmount / 60 : 0,
+      monthlyPayment: repaymentAmount > 0 ? repaymentAmount / 36 : 0,
     };
   };
 
@@ -326,25 +337,28 @@ function StepFour({
     onNext(Number(value));
   };
 
+  const isValid = value && Number(value) >= 0 && Number(value) <= 4;
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
           부양가족은 몇 명인가요?
         </h2>
-        <p className="text-gray-600">본인을 제외한 부양가족 수</p>
+        <p className="text-gray-600">본인을 제외한 부양가족 수 (소수점 입력 가능)</p>
       </div>
       <div>
         <input
           type="number"
-          inputMode="numeric"
+          inputMode="decimal"
           value={value}
           onChange={(e) => setValue(e.target.value)}
           className="w-full text-3xl font-bold border-b-2 border-gray-300 focus:border-blue-600 outline-none py-4 text-gray-900"
           placeholder="0"
           autoFocus
           min="0"
-          max="10"
+          max="4"
+          step="0.1"
         />
         <p className="text-right text-gray-600 mt-2">명</p>
       </div>
@@ -357,7 +371,7 @@ function StepFour({
         </button>
         <button
           onClick={handleSubmit}
-          disabled={!value || Number(value) < 0}
+          disabled={!isValid}
           className="w-2/3 bg-blue-600 text-white py-4 rounded-xl font-semibold hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
           결과 확인
@@ -411,7 +425,7 @@ function ResultPage({
         </div>
 
         <div className="flex justify-between">
-          <span className="text-gray-600">월 상환액 (60개월)</span>
+          <span className="text-gray-600">월 상환액 (36개월)</span>
           <span className="font-semibold text-gray-900">
             {result.monthlyPayment.toLocaleString()}원
           </span>
