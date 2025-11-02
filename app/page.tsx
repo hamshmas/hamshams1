@@ -39,6 +39,8 @@ export default function Home() {
   const [kbPrice, setKbPrice] = useState(0);
   const [depositAmount, setDepositAmount] = useState(0);
   const [selectedRegion, setSelectedRegion] = useState<RegionType | null>(null);
+  const [isSpouseHousing, setIsSpouseHousing] = useState<boolean | null>(null);
+  const [isMainCourtJurisdiction, setIsMainCourtJurisdiction] = useState<boolean | null>(null);
 
   const totalSteps = 4;
 
@@ -89,6 +91,8 @@ export default function Home() {
         setKbPrice(0);
         setDepositAmount(0);
         setSelectedRegion(null);
+        setIsSpouseHousing(null);
+        setIsMainCourtJurisdiction(null);
       }
     }
   };
@@ -291,6 +295,83 @@ export default function Home() {
                       type="deposit"
                     />
                   )}
+                  {assetInputMode === 'calculate' && housingType === 'free' && assetSubStep === 1 && (
+                    <SpouseHousingCheck
+                      onSelect={(isSpouse) => {
+                        setIsSpouseHousing(isSpouse);
+                        if (!isSpouse) {
+                          // 배우자 명의가 아니면 자산 0
+                          handleNext("assetValue", 0);
+                        } else {
+                          setAssetSubStep(2);
+                        }
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(0);
+                        setHousingType(null);
+                      }}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'free' && isSpouseHousing === true && assetSubStep === 2 && (
+                    <CourtJurisdictionSelection
+                      onNext={(isMainCourt) => {
+                        setIsMainCourtJurisdiction(isMainCourt);
+                        if (isMainCourt) {
+                          // 주요 법원 관할이면 자산 0
+                          handleNext("assetValue", 0);
+                        } else {
+                          setAssetSubStep(3);
+                        }
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(1);
+                        setIsSpouseHousing(null);
+                      }}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'free' && isMainCourtJurisdiction === false && assetSubStep === 3 && (
+                    <MortgageCheck
+                      onSelect={(has) => {
+                        setHasMortgage(has);
+                        setAssetSubStep(4);
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(2);
+                        setIsMainCourtJurisdiction(null);
+                      }}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'free' && hasMortgage === true && assetSubStep === 4 && (
+                    <MortgageAmountInput
+                      onNext={(value) => {
+                        setMortgageAmount(value);
+                        setAssetSubStep(5);
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(3);
+                        setHasMortgage(null);
+                      }}
+                      initialValue={mortgageAmount}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'free' &&
+                   ((hasMortgage === false && assetSubStep === 4) || (hasMortgage === true && assetSubStep === 5)) && (
+                    <KBPriceInput
+                      onNext={(value) => {
+                        setKbPrice(value);
+                        const finalAsset = value - mortgageAmount;
+                        handleNext("assetValue", Math.max(0, finalAsset));
+                      }}
+                      onBack={() => {
+                        if (hasMortgage) {
+                          setAssetSubStep(4);
+                        } else {
+                          setAssetSubStep(3);
+                        }
+                      }}
+                      initialValue={kbPrice}
+                    />
+                  )}
                 </>
               )}
               {currentStep === 4 && (
@@ -316,6 +397,8 @@ export default function Home() {
                     setKbPrice(0);
                     setDepositAmount(0);
                     setSelectedRegion(null);
+                    setIsSpouseHousing(null);
+                    setIsMainCourtJurisdiction(null);
                   }}
                 />
               )}
