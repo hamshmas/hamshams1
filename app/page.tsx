@@ -183,9 +183,9 @@ export default function Home() {
                     <HousingTypeSelection
                       onSelect={(type) => {
                         setHousingType(type);
-                        if (type === 'monthly' || type === 'free') {
-                          // 월세/무상거주는 자산 0
-                          handleNext("assetValue", 0);
+                        if (type === 'free') {
+                          // 무상거주는 다음 단계로
+                          setAssetSubStep(1);
                         } else {
                           setAssetSubStep(1);
                         }
@@ -253,6 +253,32 @@ export default function Home() {
                     />
                   )}
                   {assetInputMode === 'calculate' && housingType === 'jeonse' && assetSubStep === 2 && (
+                    <AddressSelection
+                      onNext={(region) => {
+                        setSelectedRegion(region);
+                        const assetDeposit = Math.max(0, depositAmount - PRIORITY_REPAYMENT[region]);
+                        handleNext("assetValue", assetDeposit);
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(1);
+                      }}
+                      type="deposit"
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'monthly' && assetSubStep === 1 && (
+                    <MonthlyRentDepositInput
+                      onNext={(value) => {
+                        setDepositAmount(value);
+                        setAssetSubStep(2);
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(0);
+                        setHousingType(null);
+                      }}
+                      initialValue={depositAmount}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'monthly' && assetSubStep === 2 && (
                     <AddressSelection
                       onNext={(region) => {
                         setSelectedRegion(region);
