@@ -212,6 +212,9 @@ export function MonthlyRentDepositInput({
   );
 }
 
+// 배우자 주택 관할법원 정보
+export { SpouseHousingJurisdictionInfo } from "./SpouseHousingJurisdictionInfo";
+
 // 배우자 명의주택 여부 확인
 export function SpouseHousingCheck({
   onSelect,

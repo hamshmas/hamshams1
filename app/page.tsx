@@ -8,22 +8,23 @@
 
 import { useState } from "react";
 import { PRIORITY_REPAYMENT } from "@/app/constants";
-import type { FormData, CalculationResult } from "@/app/types";
+import type { FormData, CalculationResult, CourtCode } from "@/app/types";
 import {
   AssetInputModeSelection,
   HousingTypeSelection,
-  AddressSelection,
-  MonthlyRentDepositInput,
   SpouseHousingCheck,
-  CourtJurisdictionSelection,
+  MonthlyRentDepositInput,
+  SpouseHousingJurisdictionInfo,
 } from "@/app/components/asset";
 import { MortgageCheck, KBPriceInput, MortgageAmountInput, JeonseDepositInput } from "@/app/components/housing";
 import { InputStep } from "@/app/components/steps";
 import { LoadingScreen, ProgressSteps } from "@/app/components/ui";
 import { ResultPage } from "@/app/components/result";
-import { MaritalStatusSelection, ChildrenCountInput, CourtJurisdictionCheck, SpouseIncomeCheck } from "@/app/components/dependent";
+import { AddressInputStep } from "@/app/components/address";
+import { MaritalStatusSelection, ChildrenCountInput, SpouseIncomeCheck } from "@/app/components/dependent";
 import { useAssetCalculation } from "@/app/hooks/useAssetCalculation";
 import { useDependentCalculation } from "@/app/hooks/useDependentCalculation";
+import { getPriorityRepaymentRegion, getCourtName } from "@/utils/courtJurisdiction";
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -33,6 +34,10 @@ export default function Home() {
     monthlyIncome: 0,
     assetValue: 0,
     dependents: 1,
+    homeAddress: "",
+    workAddress: "",
+    courtJurisdiction: "other" as CourtCode,
+    priorityRepaymentRegion: "그밖의지역",
   });
   const [result, setResult] = useState<CalculationResult | null>(null);
 
@@ -77,7 +82,27 @@ export default function Home() {
     resetDependentState,
   } = useDependentCalculation();
 
-  const totalSteps = 4;
+  const totalSteps = 5;
+
+  // 주소 데이터 처리
+  const handleAddressNext = (data: {
+    homeAddress: string;
+    workAddress: string;
+    courtJurisdiction: CourtCode;
+    homeAddressData: import("@/app/types").AddressData;
+  }) => {
+    // 집 주소 기반으로 최우선변제금 지역 자동 계산
+    const priorityRegion = getPriorityRepaymentRegion(data.homeAddressData);
+
+    setFormData({
+      ...formData,
+      homeAddress: data.homeAddress,
+      workAddress: data.workAddress,
+      courtJurisdiction: data.courtJurisdiction,
+      priorityRepaymentRegion: priorityRegion,
+    });
+    setCurrentStep(currentStep + 1);
+  };
 
   const handleNext = async (field: keyof FormData, value: number) => {
     const updatedFormData = { ...formData, [field]: value };
@@ -103,7 +128,7 @@ export default function Home() {
 
         const calculationResult = await response.json();
         setResult(calculationResult);
-        setCurrentStep(5);
+        setCurrentStep(6);
       } catch (error) {
         console.error('계산 오류:', error);
         alert('계산 중 오류가 발생했습니다. 다시 시도해주세요.');
@@ -116,8 +141,8 @@ export default function Home() {
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
-      // 3단계로 돌아갈 때 상태 초기화
-      if (currentStep === 4) {
+      // 4단계로 돌아갈 때 상태 초기화
+      if (currentStep === 5) {
         resetAssetState();
         resetDependentState();
       }
@@ -126,7 +151,16 @@ export default function Home() {
 
   const handleRestart = () => {
     setCurrentStep(1);
-    setFormData({ totalDebt: 0, monthlyIncome: 0, assetValue: 0, dependents: 1 });
+    setFormData({
+      totalDebt: 0,
+      monthlyIncome: 0,
+      assetValue: 0,
+      dependents: 1,
+      homeAddress: "",
+      workAddress: "",
+      courtJurisdiction: "other" as CourtCode,
+      priorityRepaymentRegion: "그밖의지역",
+    });
     setResult(null);
     resetAssetState();
     resetDependentState();
@@ -150,16 +184,24 @@ export default function Home() {
           ) : (
             <>
               {currentStep === 1 && (
+                <AddressInputStep
+                  onNext={handleAddressNext}
+                  initialHomeAddress={formData.homeAddress}
+                  initialWorkAddress={formData.workAddress}
+                />
+              )}
+              {currentStep === 2 && (
                 <InputStep
                   title="총 부채액은 얼마인가요?"
                   subtitle="모든 부채를 합산한 금액"
                   onNext={(value) => handleNext("totalDebt", value)}
+                  onBack={handleBack}
                   initialValue={formData.totalDebt}
                   quickAmounts={[100, 500, 1000, 3000, 5000]}
                   minValue={1}
                 />
               )}
-              {currentStep === 2 && (
+              {currentStep === 3 && (
                 <InputStep
                   title="월 소득은 얼마인가요?"
                   subtitle="실수령액 기준"
@@ -170,7 +212,7 @@ export default function Home() {
                   minValue={0}
                 />
               )}
-              {currentStep === 3 && (
+              {currentStep === 4 && (
                 <>
                   {assetInputMode === null && (
                     <AssetInputModeSelection
@@ -257,26 +299,16 @@ export default function Home() {
                     <JeonseDepositInput
                       onNext={(value) => {
                         setDepositAmount(value);
-                        setAssetSubStep(2);
+                        // formData.priorityRepaymentRegion 사용 (집 주소 기반 자동 계산)
+                        const priorityAmount = PRIORITY_REPAYMENT[formData.priorityRepaymentRegion];
+                        const assetDeposit = Math.max(0, value - priorityAmount);
+                        handleNext("assetValue", assetDeposit);
                       }}
                       onBack={() => {
                         setAssetSubStep(0);
                         setHousingType(null);
                       }}
                       initialValue={depositAmount}
-                    />
-                  )}
-                  {assetInputMode === 'calculate' && housingType === 'jeonse' && assetSubStep === 2 && (
-                    <AddressSelection
-                      onNext={(region) => {
-                        setSelectedRegion(region);
-                        const assetDeposit = Math.max(0, depositAmount - PRIORITY_REPAYMENT[region]);
-                        handleNext("assetValue", assetDeposit);
-                      }}
-                      onBack={() => {
-                        setAssetSubStep(1);
-                      }}
-                      type="deposit"
                     />
                   )}
                   {/* Monthly Rent Flow */}
@@ -284,26 +316,16 @@ export default function Home() {
                     <MonthlyRentDepositInput
                       onNext={(value) => {
                         setDepositAmount(value);
-                        setAssetSubStep(2);
+                        // formData.priorityRepaymentRegion 사용 (집 주소 기반 자동 계산)
+                        const priorityAmount = PRIORITY_REPAYMENT[formData.priorityRepaymentRegion];
+                        const assetDeposit = Math.max(0, value - priorityAmount);
+                        handleNext("assetValue", assetDeposit);
                       }}
                       onBack={() => {
                         setAssetSubStep(0);
                         setHousingType(null);
                       }}
                       initialValue={depositAmount}
-                    />
-                  )}
-                  {assetInputMode === 'calculate' && housingType === 'monthly' && assetSubStep === 2 && (
-                    <AddressSelection
-                      onNext={(region) => {
-                        setSelectedRegion(region);
-                        const assetDeposit = Math.max(0, depositAmount - PRIORITY_REPAYMENT[region]);
-                        handleNext("assetValue", assetDeposit);
-                      }}
-                      onBack={() => {
-                        setAssetSubStep(1);
-                      }}
-                      type="deposit"
                     />
                   )}
                   {/* Free Housing Flow */}
@@ -324,18 +346,19 @@ export default function Home() {
                     />
                   )}
                   {assetInputMode === 'calculate' && housingType === 'free' && isSpouseHousing === true && assetSubStep === 2 && (
-                    <CourtJurisdictionSelection
-                      onNext={(isMainCourt) => {
-                        setIsMainCourtJurisdiction(isMainCourt);
-                        if (isMainCourt) {
-                          handleNext("assetValue", 0);
-                        } else {
-                          setAssetSubStep(3);
-                        }
-                      }}
+                    <SpouseHousingJurisdictionInfo
+                      courtJurisdiction={formData.courtJurisdiction}
                       onBack={() => {
                         setAssetSubStep(1);
                         setIsSpouseHousing(null);
+                      }}
+                      onNext={(isMainCourt) => {
+                        if (isMainCourt) {
+                          handleNext("assetValue", 0);
+                        } else {
+                          setIsMainCourtJurisdiction(false);
+                          setAssetSubStep(3);
+                        }
                       }}
                     />
                   )}
@@ -384,7 +407,7 @@ export default function Home() {
                   )}
                 </>
               )}
-              {currentStep === 4 && (
+              {currentStep === 5 && (
                 <>
                   {/* 혼인 상태 선택 */}
                   {dependentSubStep === 0 && (
@@ -402,9 +425,17 @@ export default function Home() {
                       maritalStatus={maritalStatus}
                       onNext={(count) => {
                         setChildrenCount(count);
-                        // 결혼인 경우 법원 관할 확인으로
+                        // 결혼인 경우: 주요 법원이면 배우자 소득 확인, 아니면 바로 계산
                         if (maritalStatus === 'married') {
-                          setDependentSubStep(2);
+                          // formData.courtJurisdiction에서 자동으로 가져옴
+                          const isMainCourt = ['seoul', 'suwon', 'daejeon', 'busan'].includes(formData.courtJurisdiction);
+                          if (isMainCourt) {
+                            setDependentSubStep(2); // 배우자 소득 확인으로
+                          } else {
+                            // 기타 법원은 바로 계산: (childrenCount / 2) + 1
+                            const dependents = calculateDependents(maritalStatus, count, formData.courtJurisdiction as any, false);
+                            handleNext("dependents", dependents);
+                          }
                         } else {
                           // 미혼/이혼은 바로 계산
                           const dependents = calculateDependents(maritalStatus, count, null, null);
@@ -417,49 +448,39 @@ export default function Home() {
                       }}
                     />
                   )}
-                  {/* 법원 관할 확인 (결혼인 경우만) */}
-                  {dependentSubStep === 2 && maritalStatus === 'married' && (
-                    <CourtJurisdictionCheck
-                      onSelect={(jurisdiction) => {
-                        setCourtJurisdiction(jurisdiction);
-                        // 주요 법원인 경우 배우자 소득 확인
-                        if (['seoul', 'suwon', 'daejeon', 'busan'].includes(jurisdiction)) {
-                          setDependentSubStep(3);
-                        } else {
-                          // 기타 법원은 바로 계산: (childrenCount / 2) + 1
-                          const dependents = calculateDependents(maritalStatus, childrenCount, jurisdiction, false);
-                          handleNext("dependents", dependents);
-                        }
-                      }}
-                      onBack={() => {
-                        setDependentSubStep(1);
-                        setCourtJurisdiction(null);
-                      }}
-                    />
-                  )}
                   {/* 배우자 소득 확인 (주요 법원인 경우만) */}
-                  {dependentSubStep === 3 && maritalStatus === 'married' && (
+                  {dependentSubStep === 2 && maritalStatus === 'married' && (
                     <SpouseIncomeCheck
                       onSelect={(noIncome) => {
                         setHasNoSpouseIncome(noIncome);
                         // noIncome = true: childrenCount + 1
                         // noIncome = false: (childrenCount / 2) + 1
-                        const dependents = calculateDependents(maritalStatus, childrenCount, courtJurisdiction, noIncome);
+                        const dependents = calculateDependents(maritalStatus, childrenCount, formData.courtJurisdiction as any, noIncome);
                         handleNext("dependents", dependents);
                       }}
                       onBack={() => {
-                        setDependentSubStep(2);
+                        setDependentSubStep(1);
                         setHasNoSpouseIncome(null);
                       }}
                     />
                   )}
                 </>
               )}
-              {currentStep === 5 && result && (
+              {currentStep === 6 && result && (
                 <ResultPage
                   result={result}
                   formData={formData}
                   onRestart={handleRestart}
+                  assetInputMode={assetInputMode}
+                  housingType={housingType}
+                  hasMortgage={hasMortgage}
+                  mortgageAmount={mortgageAmount}
+                  kbPrice={kbPrice}
+                  depositAmount={depositAmount}
+                  isSpouseHousing={isSpouseHousing}
+                  maritalStatus={maritalStatus}
+                  childrenCount={childrenCount}
+                  hasNoSpouseIncome={hasNoSpouseIncome}
                 />
               )}
             </>
