@@ -5,6 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { calculatePresentValue, findMinimumRepaymentPeriod } from '@/utils/leibnizCalculation';
 
 // 최저생계비 데이터 (서버에서만 관리)
 const minimumLivingCostData: Record<string, number> = {
@@ -14,88 +15,6 @@ const minimumLivingCostData: Record<string, number> = {
   "3": 3874727,
   "4": 4534031
 };
-
-// 연 이자율 5%
-const ANNUAL_RATE = 0.05;
-
-// 월 이자율 계산: (1 + 연이율)^(1/12) - 1
-const MONTHLY_RATE = Math.pow(1 + ANNUAL_RATE, 1 / 12) - 1;
-
-/**
- * 라이프니츠식: 매월 변제액의 현재가치 합계 계산
- */
-function calculatePresentValue(monthlyPayment: number, months: number): number {
-  if (monthlyPayment <= 0 || months <= 0) return 0;
-
-  let presentValue = 0;
-
-  for (let t = 1; t <= months; t++) {
-    const discountFactor = Math.pow(1 + MONTHLY_RATE, t);
-    presentValue += monthlyPayment / discountFactor;
-  }
-
-  return presentValue;
-}
-
-/**
- * 변제기간 계산
- */
-function findMinimumRepaymentPeriod(
-  monthlyPayment: number,
-  liquidationValue: number,
-  totalDebt: number
-): number | null {
-  if (monthlyPayment <= 0) {
-    return null;
-  }
-
-  if (liquidationValue > totalDebt) {
-    return null;
-  }
-
-  if (liquidationValue <= 0) {
-    for (let months = 1; months < 36; months++) {
-      const pv = calculatePresentValue(monthlyPayment, months);
-      if (pv >= totalDebt) {
-        return months;
-      }
-    }
-    return 36;
-  }
-
-  // 1단계: 36개월 이전에 총 부채액 전액 변제 가능한지 확인 (단축)
-  for (let months = 1; months < 36; months++) {
-    const pv = calculatePresentValue(monthlyPayment, months);
-
-    if (pv >= totalDebt) {
-      if (pv >= liquidationValue) {
-        return months;
-      }
-      return null;
-    }
-  }
-
-  // 2단계: 36개월 시점 확인 (원칙)
-  const pv36 = calculatePresentValue(monthlyPayment, 36);
-
-  if (pv36 >= liquidationValue) {
-    return 36;
-  }
-
-  // 3단계: 36~60개월 범위에서 청산가치 충족하는 최소 기간 찾기 (연장)
-  for (let months = 37; months <= 60; months++) {
-    const pv = calculatePresentValue(monthlyPayment, months);
-
-    if (pv >= liquidationValue) {
-      if (pv <= totalDebt) {
-        return months;
-      }
-      return null;
-    }
-  }
-
-  return null;
-}
 
 export async function POST(request: NextRequest) {
   try {
