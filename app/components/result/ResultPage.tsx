@@ -107,14 +107,24 @@ export function ResultPage({ result, formData, onRestart }: ResultPageProps) {
             </div>
           ))}
 
-          {/* 가구원 */}
-          <div className="flex justify-between items-center py-1.5 px-3 bg-white/60 rounded-lg">
-            <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
-              <span className="text-base">👨‍👩‍👧‍👦</span> 가구원
-            </span>
-            <span className="text-gray-900 font-bold text-sm">
-              {formData.dependents.toLocaleString()}명
-            </span>
+          {/* 부양가족수 - 별도 스타일링 */}
+          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3 mt-1">
+            <div className="flex justify-between items-start">
+              <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
+                <span className="text-base">👨‍👩‍👧‍👦</span> 부양가족수
+              </span>
+              <span className="text-gray-900 font-bold text-sm">
+                {formData.dependents.toLocaleString()}명
+              </span>
+            </div>
+            <div className="mt-2 pt-2 border-t border-blue-200">
+              <p className="text-[11px] text-gray-600 leading-relaxed">
+                <span className="font-semibold text-blue-700">💡 계산 방식:</span><br/>
+                • 기혼 기본: (자녀수 ÷ 2) + 1<br/>
+                • 기혼 + 주요법원 + 배우자 소득無: 자녀수 + 1<br/>
+                • 미혼/이혼: 자녀수 + 1
+              </p>
+            </div>
           </div>
         </div>
       </div>

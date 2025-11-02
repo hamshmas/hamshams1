@@ -21,7 +21,9 @@ import { MortgageCheck, KBPriceInput, MortgageAmountInput, JeonseDepositInput } 
 import { InputStep } from "@/app/components/steps";
 import { LoadingScreen, ProgressSteps } from "@/app/components/ui";
 import { ResultPage } from "@/app/components/result";
+import { MaritalStatusSelection, ChildrenCountInput, CourtJurisdictionCheck, SpouseIncomeCheck } from "@/app/components/dependent";
 import { useAssetCalculation } from "@/app/hooks/useAssetCalculation";
+import { useDependentCalculation } from "@/app/hooks/useDependentCalculation";
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -58,6 +60,22 @@ export default function Home() {
     setIsMainCourtJurisdiction,
     resetAssetState,
   } = useAssetCalculation();
+
+  // 부양가족 계산 관련 상태
+  const {
+    dependentSubStep,
+    setDependentSubStep,
+    maritalStatus,
+    setMaritalStatus,
+    childrenCount,
+    setChildrenCount,
+    courtJurisdiction,
+    setCourtJurisdiction,
+    hasNoSpouseIncome,
+    setHasNoSpouseIncome,
+    calculateDependents,
+    resetDependentState,
+  } = useDependentCalculation();
 
   const totalSteps = 4;
 
@@ -101,6 +119,7 @@ export default function Home() {
       // 3단계로 돌아갈 때 상태 초기화
       if (currentStep === 4) {
         resetAssetState();
+        resetDependentState();
       }
     }
   };
@@ -110,6 +129,7 @@ export default function Home() {
     setFormData({ totalDebt: 0, monthlyIncome: 0, assetValue: 0, dependents: 1 });
     setResult(null);
     resetAssetState();
+    resetDependentState();
   };
 
   return (
@@ -365,15 +385,75 @@ export default function Home() {
                 </>
               )}
               {currentStep === 4 && (
-                <InputStep
-                  title="가구원은 몇 명인가요?"
-                  subtitle="본인 포함"
-                  onNext={(value) => handleNext("dependents", value)}
-                  onBack={handleBack}
-                  initialValue={formData.dependents}
-                  quickAmounts={[1, 2, 3, 4, 5]}
-                  minValue={1}
-                />
+                <>
+                  {/* 혼인 상태 선택 */}
+                  {dependentSubStep === 0 && (
+                    <MaritalStatusSelection
+                      onSelect={(status) => {
+                        setMaritalStatus(status);
+                        setDependentSubStep(1);
+                      }}
+                      onBack={handleBack}
+                    />
+                  )}
+                  {/* 자녀 수 입력 */}
+                  {dependentSubStep === 1 && maritalStatus && (
+                    <ChildrenCountInput
+                      maritalStatus={maritalStatus}
+                      onNext={(count) => {
+                        setChildrenCount(count);
+                        // 결혼인 경우 법원 관할 확인으로
+                        if (maritalStatus === 'married') {
+                          setDependentSubStep(2);
+                        } else {
+                          // 미혼/이혼은 바로 계산
+                          const dependents = calculateDependents(maritalStatus, count, null, null);
+                          handleNext("dependents", dependents);
+                        }
+                      }}
+                      onBack={() => {
+                        setDependentSubStep(0);
+                        setMaritalStatus(null);
+                      }}
+                    />
+                  )}
+                  {/* 법원 관할 확인 (결혼인 경우만) */}
+                  {dependentSubStep === 2 && maritalStatus === 'married' && (
+                    <CourtJurisdictionCheck
+                      onSelect={(jurisdiction) => {
+                        setCourtJurisdiction(jurisdiction);
+                        // 주요 법원인 경우 배우자 소득 확인
+                        if (['seoul', 'suwon', 'daejeon', 'busan'].includes(jurisdiction)) {
+                          setDependentSubStep(3);
+                        } else {
+                          // 기타 법원은 바로 계산: (childrenCount / 2) + 1
+                          const dependents = calculateDependents(maritalStatus, childrenCount, jurisdiction, false);
+                          handleNext("dependents", dependents);
+                        }
+                      }}
+                      onBack={() => {
+                        setDependentSubStep(1);
+                        setCourtJurisdiction(null);
+                      }}
+                    />
+                  )}
+                  {/* 배우자 소득 확인 (주요 법원인 경우만) */}
+                  {dependentSubStep === 3 && maritalStatus === 'married' && (
+                    <SpouseIncomeCheck
+                      onSelect={(noIncome) => {
+                        setHasNoSpouseIncome(noIncome);
+                        // noIncome = true: childrenCount + 1
+                        // noIncome = false: (childrenCount / 2) + 1
+                        const dependents = calculateDependents(maritalStatus, childrenCount, courtJurisdiction, noIncome);
+                        handleNext("dependents", dependents);
+                      }}
+                      onBack={() => {
+                        setDependentSubStep(2);
+                        setHasNoSpouseIncome(null);
+                      }}
+                    />
+                  )}
+                </>
               )}
               {currentStep === 5 && result && (
                 <ResultPage
