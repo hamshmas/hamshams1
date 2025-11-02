@@ -359,8 +359,9 @@ export default function Home() {
                     <KBPriceInput
                       onNext={(value) => {
                         setKbPrice(value);
-                        const finalAsset = value - mortgageAmount;
-                        handleNext("assetValue", Math.max(0, finalAsset));
+                        const assetSpouse = value - mortgageAmount;
+                        // 배우자 명의 주택이므로 청산가치는 asset_spouse / 2
+                        handleNext("assetValue", Math.max(0, assetSpouse / 2));
                       }}
                       onBack={() => {
                         if (hasMortgage) {
