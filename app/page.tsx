@@ -1,660 +1,492 @@
+/**
+ * 개인회생 탕감률 계산기
+ * Copyright (c) 2025. All rights reserved.
+ * 무단 복제 및 재배포를 금지합니다.
+ */
+
 "use client";
 
 import { useState } from "react";
-import { handleNumberInput, parseNumberFromFormatted, convertManwonToWon, convertWonToManwon } from "@/utils/formatNumber";
-import { calculatePresentValue, findMinimumRepaymentPeriod } from "@/utils/leibnizCalculation";
-import minimumLivingCostData from "@/data/minimumLivingCost.json";
-
-interface FormData {
-  totalDebt: number;
-  monthlyIncome: number;
-  assetValue: number;
-  dependents: number;
-}
+import { PRIORITY_REPAYMENT } from "@/app/constants";
+import type { FormData, CalculationResult, CourtCode } from "@/app/types";
+import {
+  AssetInputModeSelection,
+  HousingTypeSelection,
+  SpouseHousingCheck,
+  MonthlyRentDepositInput,
+  SpouseHousingJurisdictionInfo,
+} from "@/app/components/asset";
+import { MortgageCheck, KBPriceInput, MortgageAmountInput, JeonseDepositInput } from "@/app/components/housing";
+import { InputStep } from "@/app/components/steps";
+import { LoadingScreen, ProgressSteps } from "@/app/components/ui";
+import { ResultPage } from "@/app/components/result";
+import { AddressInputStep } from "@/app/components/address";
+import { MaritalStatusSelection, ChildrenCountInput, SpouseIncomeCheck } from "@/app/components/dependent";
+import { useAssetCalculation } from "@/app/hooks/useAssetCalculation";
+import { useDependentCalculation } from "@/app/hooks/useDependentCalculation";
+import { getPriorityRepaymentRegion, getCourtName } from "@/utils/courtJurisdiction";
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     totalDebt: 0,
     monthlyIncome: 0,
     assetValue: 0,
-    dependents: 0,
+    dependents: 1,
+    homeAddress: "",
+    workAddress: "",
+    courtJurisdiction: "other" as CourtCode,
+    priorityRepaymentRegion: "그밖의지역",
   });
+  const [result, setResult] = useState<CalculationResult | null>(null);
 
-  const totalSteps = 4;
+  // 자산 계산 관련 상태
+  const {
+    assetInputMode,
+    setAssetInputMode,
+    assetSubStep,
+    setAssetSubStep,
+    housingType,
+    setHousingType,
+    hasMortgage,
+    setHasMortgage,
+    mortgageAmount,
+    setMortgageAmount,
+    kbPrice,
+    setKbPrice,
+    depositAmount,
+    setDepositAmount,
+    selectedRegion,
+    setSelectedRegion,
+    isSpouseHousing,
+    setIsSpouseHousing,
+    isMainCourtJurisdiction,
+    setIsMainCourtJurisdiction,
+    resetAssetState,
+  } = useAssetCalculation();
 
-  const handleNext = (field: keyof FormData, value: number) => {
-    setFormData({ ...formData, [field]: value });
+  // 부양가족 계산 관련 상태
+  const {
+    dependentSubStep,
+    setDependentSubStep,
+    maritalStatus,
+    setMaritalStatus,
+    childrenCount,
+    setChildrenCount,
+    courtJurisdiction,
+    setCourtJurisdiction,
+    hasNoSpouseIncome,
+    setHasNoSpouseIncome,
+    calculateDependents,
+    resetDependentState,
+  } = useDependentCalculation();
+
+  const totalSteps = 5;
+
+  // 주소 데이터 처리
+  const handleAddressNext = (data: {
+    homeAddress: string;
+    workAddress: string;
+    courtJurisdiction: CourtCode;
+    homeAddressData: import("@/app/types").AddressData;
+  }) => {
+    // 집 주소 기반으로 최우선변제금 지역 자동 계산
+    const priorityRegion = getPriorityRepaymentRegion(data.homeAddressData);
+
+    setFormData({
+      ...formData,
+      homeAddress: data.homeAddress,
+      workAddress: data.workAddress,
+      courtJurisdiction: data.courtJurisdiction,
+      priorityRepaymentRegion: priorityRegion,
+    });
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handleNext = async (field: keyof FormData, value: number) => {
+    const updatedFormData = { ...formData, [field]: value };
+    setFormData(updatedFormData);
+
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
-      setCurrentStep(5); // 결과 페이지
+      setIsLoading(true);
+
+      try {
+        const response = await fetch('/api/calculate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedFormData),
+        });
+
+        if (!response.ok) {
+          throw new Error('계산 중 오류가 발생했습니다.');
+        }
+
+        const calculationResult = await response.json();
+        setResult(calculationResult);
+        setCurrentStep(6);
+      } catch (error) {
+        console.error('계산 오류:', error);
+        alert('계산 중 오류가 발생했습니다. 다시 시도해주세요.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      // 4단계로 돌아갈 때 상태 초기화
+      if (currentStep === 5) {
+        resetAssetState();
+        resetDependentState();
+      }
     }
   };
 
-  const calculateReductionRate = () => {
-    const { totalDebt, monthlyIncome, assetValue, dependents } = formData;
-
-    // 최저생계비 계산 (소수점 지원 - 선형 보간)
-    const clampedDependents = Math.max(0, Math.min(dependents, 4));
-    const floorDependents = Math.floor(clampedDependents);
-    const ceilDependents = Math.ceil(clampedDependents);
-    const fraction = clampedDependents - floorDependents;
-
-    const floorKey = String(floorDependents) as keyof typeof minimumLivingCostData;
-    const ceilKey = String(ceilDependents) as keyof typeof minimumLivingCostData;
-
-    const floorCost = minimumLivingCostData[floorKey] || 0;
-    const ceilCost = minimumLivingCostData[ceilKey] || floorCost;
-
-    // 선형 보간으로 최저생계비 계산
-    const minimumLivingCost = floorCost * (1 - fraction) + ceilCost * fraction;
-
-    // 월 변제 가능 금액
-    const monthlyRepayment = Math.max(monthlyIncome - minimumLivingCost, 0);
-
-    // 청산가치 (자산 가액)
-    const liquidationValue = assetValue;
-
-    // 라이프니츠식으로 최소 변제기간 찾기 (36~60개월)
-    const repaymentPeriod = findMinimumRepaymentPeriod(monthlyRepayment, liquidationValue, 36, 60);
-
-    let totalRepaymentPV: number;
-    let liquidationValueViolation = false;
-
-    if (repaymentPeriod === null) {
-      // 60개월로도 청산가치를 충족하지 못함
-      totalRepaymentPV = calculatePresentValue(monthlyRepayment, 60);
-      liquidationValueViolation = true;
-    } else {
-      // 적절한 변제기간 찾음
-      totalRepaymentPV = calculatePresentValue(monthlyRepayment, repaymentPeriod);
-    }
-
-    // 최종 변제액 (현재가치 기준)
-    const repaymentAmount = Math.max(totalRepaymentPV, liquidationValue);
-
-    // 탕감률 계산
-    const reductionAmount = totalDebt - repaymentAmount;
-    const reductionRate = totalDebt > 0 ? (reductionAmount / totalDebt) * 100 : 0;
-
-    return {
-      reductionRate: Math.max(0, Math.min(100, reductionRate)),
-      repaymentAmount: Math.max(0, repaymentAmount),
-      reductionAmount: Math.max(0, reductionAmount),
-      monthlyPayment: monthlyRepayment,
-      repaymentPeriod: repaymentPeriod || 60,
-      liquidationValueViolation,
-      usedLeibnizFormula: true,
-    };
+  const handleRestart = () => {
+    setCurrentStep(1);
+    setFormData({
+      totalDebt: 0,
+      monthlyIncome: 0,
+      assetValue: 0,
+      dependents: 1,
+      homeAddress: "",
+      workAddress: "",
+      courtJurisdiction: "other" as CourtCode,
+      priorityRepaymentRegion: "그밖의지역",
+    });
+    setResult(null);
+    resetAssetState();
+    resetDependentState();
   };
-
-  const result = currentStep === 5 ? calculateReductionRate() : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-accent-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Progress Bar */}
+    <div className="min-h-screen bg-gradient-to-br from-primary-500/10 via-white to-accent-500/10 flex items-center justify-center p-3 relative overflow-hidden">
+      <div className="absolute top-20 left-10 w-72 h-72 bg-primary-400/20 rounded-full blur-3xl animate-float"></div>
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent-400/20 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
+
+      <div className="w-full max-w-md relative z-10">
+        {/* Progress Steps */}
         {currentStep <= totalSteps && (
-          <div className="mb-8 animate-fadeIn">
-            <div className="flex justify-between mb-3">
-              {[1, 2, 3, 4].map((step) => (
-                <div
-                  key={step}
-                  className={`progress-bar-segment ${
-                    step <= currentStep ? "progress-bar-completed" : "progress-bar-incomplete"
-                  }`}
-                />
-              ))}
-            </div>
-            <p className="text-center text-sm font-medium text-gray-600">
-              {currentStep} / {totalSteps} 단계
-            </p>
-          </div>
+          <ProgressSteps currentStep={currentStep} totalSteps={totalSteps} />
         )}
 
         {/* Main Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 animate-scaleIn border border-gray-100">
-          {currentStep === 1 && (
-            <StepOne
-              onNext={(value) => handleNext("totalDebt", value)}
-              initialValue={formData.totalDebt}
-            />
+        <div className="glass-card p-5 animate-scaleIn shadow-xl">
+          {isLoading ? (
+            <LoadingScreen />
+          ) : (
+            <>
+              {currentStep === 1 && (
+                <AddressInputStep
+                  onNext={handleAddressNext}
+                  initialHomeAddress={formData.homeAddress}
+                  initialWorkAddress={formData.workAddress}
+                />
+              )}
+              {currentStep === 2 && (
+                <InputStep
+                  title="총 부채액은 얼마인가요?"
+                  subtitle="모든 부채를 합산한 금액"
+                  onNext={(value) => handleNext("totalDebt", value)}
+                  onBack={handleBack}
+                  initialValue={formData.totalDebt}
+                  quickAmounts={[100, 500, 1000, 3000, 5000]}
+                  minValue={1}
+                />
+              )}
+              {currentStep === 3 && (
+                <InputStep
+                  title="월 소득은 얼마인가요?"
+                  subtitle="실수령액 기준"
+                  onNext={(value) => handleNext("monthlyIncome", value)}
+                  onBack={handleBack}
+                  initialValue={formData.monthlyIncome}
+                  quickAmounts={[100, 200, 300, 500, 1000]}
+                  minValue={0}
+                />
+              )}
+              {currentStep === 4 && (
+                <>
+                  {assetInputMode === null && (
+                    <AssetInputModeSelection
+                      onSelect={(mode) => {
+                        setAssetInputMode(mode);
+                        if (mode === 'calculate') {
+                          setAssetSubStep(0);
+                        }
+                      }}
+                      onBack={handleBack}
+                    />
+                  )}
+                  {assetInputMode === 'direct' && (
+                    <InputStep
+                      title="보유 자산 가액은 얼마인가요?"
+                      subtitle="부동산, 차량 등 모든 자산의 시장 가치"
+                      onNext={(value) => handleNext("assetValue", value)}
+                      onBack={() => {
+                        setAssetInputMode(null);
+                      }}
+                      initialValue={formData.assetValue}
+                      quickAmounts={[100, 500, 1000, 3000, 5000]}
+                      minValue={0}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && assetSubStep === 0 && (
+                    <HousingTypeSelection
+                      onSelect={(type) => {
+                        setHousingType(type);
+                        setAssetSubStep(1);
+                      }}
+                      onBack={() => {
+                        setAssetInputMode(null);
+                        setAssetSubStep(0);
+                      }}
+                    />
+                  )}
+                  {/* Owned Housing Flow */}
+                  {assetInputMode === 'calculate' && housingType === 'owned' && assetSubStep === 1 && (
+                    <MortgageCheck
+                      onSelect={(has) => {
+                        setHasMortgage(has);
+                        setAssetSubStep(2);
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(0);
+                        setHousingType(null);
+                      }}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'owned' && hasMortgage === true && assetSubStep === 2 && (
+                    <MortgageAmountInput
+                      onNext={(value) => {
+                        setMortgageAmount(value);
+                        setAssetSubStep(3);
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(1);
+                        setHasMortgage(null);
+                      }}
+                      initialValue={mortgageAmount}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'owned' &&
+                   ((hasMortgage === false && assetSubStep === 2) || (hasMortgage === true && assetSubStep === 3)) && (
+                    <KBPriceInput
+                      onNext={(value) => {
+                        setKbPrice(value);
+                        const finalAsset = value - mortgageAmount;
+                        handleNext("assetValue", Math.max(0, finalAsset));
+                      }}
+                      onBack={() => {
+                        if (hasMortgage) {
+                          setAssetSubStep(2);
+                        } else {
+                          setAssetSubStep(1);
+                        }
+                      }}
+                      initialValue={kbPrice}
+                    />
+                  )}
+                  {/* Jeonse Flow */}
+                  {assetInputMode === 'calculate' && housingType === 'jeonse' && assetSubStep === 1 && (
+                    <JeonseDepositInput
+                      onNext={(value) => {
+                        setDepositAmount(value);
+                        // formData.priorityRepaymentRegion 사용 (집 주소 기반 자동 계산)
+                        const priorityAmount = PRIORITY_REPAYMENT[formData.priorityRepaymentRegion];
+                        const assetDeposit = Math.max(0, value - priorityAmount);
+                        handleNext("assetValue", assetDeposit);
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(0);
+                        setHousingType(null);
+                      }}
+                      initialValue={depositAmount}
+                    />
+                  )}
+                  {/* Monthly Rent Flow */}
+                  {assetInputMode === 'calculate' && housingType === 'monthly' && assetSubStep === 1 && (
+                    <MonthlyRentDepositInput
+                      onNext={(value) => {
+                        setDepositAmount(value);
+                        // formData.priorityRepaymentRegion 사용 (집 주소 기반 자동 계산)
+                        const priorityAmount = PRIORITY_REPAYMENT[formData.priorityRepaymentRegion];
+                        const assetDeposit = Math.max(0, value - priorityAmount);
+                        handleNext("assetValue", assetDeposit);
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(0);
+                        setHousingType(null);
+                      }}
+                      initialValue={depositAmount}
+                    />
+                  )}
+                  {/* Free Housing Flow */}
+                  {assetInputMode === 'calculate' && housingType === 'free' && assetSubStep === 1 && (
+                    <SpouseHousingCheck
+                      onSelect={(isSpouse) => {
+                        setIsSpouseHousing(isSpouse);
+                        if (!isSpouse) {
+                          handleNext("assetValue", 0);
+                        } else {
+                          setAssetSubStep(2);
+                        }
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(0);
+                        setHousingType(null);
+                      }}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'free' && isSpouseHousing === true && assetSubStep === 2 && (
+                    <SpouseHousingJurisdictionInfo
+                      courtJurisdiction={formData.courtJurisdiction}
+                      onBack={() => {
+                        setAssetSubStep(1);
+                        setIsSpouseHousing(null);
+                      }}
+                      onNext={(isMainCourt) => {
+                        if (isMainCourt) {
+                          handleNext("assetValue", 0);
+                        } else {
+                          setIsMainCourtJurisdiction(false);
+                          setAssetSubStep(3);
+                        }
+                      }}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'free' && isMainCourtJurisdiction === false && assetSubStep === 3 && (
+                    <MortgageCheck
+                      onSelect={(has) => {
+                        setHasMortgage(has);
+                        setAssetSubStep(4);
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(2);
+                        setIsMainCourtJurisdiction(null);
+                      }}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'free' && hasMortgage === true && assetSubStep === 4 && (
+                    <MortgageAmountInput
+                      onNext={(value) => {
+                        setMortgageAmount(value);
+                        setAssetSubStep(5);
+                      }}
+                      onBack={() => {
+                        setAssetSubStep(3);
+                        setHasMortgage(null);
+                      }}
+                      initialValue={mortgageAmount}
+                    />
+                  )}
+                  {assetInputMode === 'calculate' && housingType === 'free' &&
+                   ((hasMortgage === false && assetSubStep === 4) || (hasMortgage === true && assetSubStep === 5)) && (
+                    <KBPriceInput
+                      onNext={(value) => {
+                        setKbPrice(value);
+                        const assetSpouse = value - mortgageAmount;
+                        handleNext("assetValue", Math.max(0, assetSpouse / 2));
+                      }}
+                      onBack={() => {
+                        if (hasMortgage) {
+                          setAssetSubStep(4);
+                        } else {
+                          setAssetSubStep(3);
+                        }
+                      }}
+                      initialValue={kbPrice}
+                    />
+                  )}
+                </>
+              )}
+              {currentStep === 5 && (
+                <>
+                  {/* 혼인 상태 선택 */}
+                  {dependentSubStep === 0 && (
+                    <MaritalStatusSelection
+                      onSelect={(status) => {
+                        setMaritalStatus(status);
+                        setDependentSubStep(1);
+                      }}
+                      onBack={handleBack}
+                    />
+                  )}
+                  {/* 자녀 수 입력 */}
+                  {dependentSubStep === 1 && maritalStatus && (
+                    <ChildrenCountInput
+                      maritalStatus={maritalStatus}
+                      onNext={(count) => {
+                        setChildrenCount(count);
+                        // 결혼인 경우: 주요 법원이면 배우자 소득 확인, 아니면 바로 계산
+                        if (maritalStatus === 'married') {
+                          // formData.courtJurisdiction에서 자동으로 가져옴
+                          const isMainCourt = ['seoul', 'suwon', 'daejeon', 'busan'].includes(formData.courtJurisdiction);
+                          if (isMainCourt) {
+                            setDependentSubStep(2); // 배우자 소득 확인으로
+                          } else {
+                            // 기타 법원은 바로 계산: (childrenCount / 2) + 1
+                            const dependents = calculateDependents(maritalStatus, count, formData.courtJurisdiction as any, false);
+                            handleNext("dependents", dependents);
+                          }
+                        } else {
+                          // 미혼/이혼은 바로 계산
+                          const dependents = calculateDependents(maritalStatus, count, null, null);
+                          handleNext("dependents", dependents);
+                        }
+                      }}
+                      onBack={() => {
+                        setDependentSubStep(0);
+                        setMaritalStatus(null);
+                      }}
+                    />
+                  )}
+                  {/* 배우자 소득 확인 (주요 법원인 경우만) */}
+                  {dependentSubStep === 2 && maritalStatus === 'married' && (
+                    <SpouseIncomeCheck
+                      onSelect={(noIncome) => {
+                        setHasNoSpouseIncome(noIncome);
+                        // noIncome = true: childrenCount + 1
+                        // noIncome = false: (childrenCount / 2) + 1
+                        const dependents = calculateDependents(maritalStatus, childrenCount, formData.courtJurisdiction as any, noIncome);
+                        handleNext("dependents", dependents);
+                      }}
+                      onBack={() => {
+                        setDependentSubStep(1);
+                        setHasNoSpouseIncome(null);
+                      }}
+                    />
+                  )}
+                </>
+              )}
+              {currentStep === 6 && result && (
+                <ResultPage
+                  result={result}
+                  formData={formData}
+                  onRestart={handleRestart}
+                  assetInputMode={assetInputMode}
+                  housingType={housingType}
+                  hasMortgage={hasMortgage}
+                  mortgageAmount={mortgageAmount}
+                  kbPrice={kbPrice}
+                  depositAmount={depositAmount}
+                  isSpouseHousing={isSpouseHousing}
+                  maritalStatus={maritalStatus}
+                  childrenCount={childrenCount}
+                  hasNoSpouseIncome={hasNoSpouseIncome}
+                />
+              )}
+            </>
           )}
-          {currentStep === 2 && (
-            <StepTwo
-              onNext={(value) => handleNext("monthlyIncome", value)}
-              onBack={handleBack}
-              initialValue={formData.monthlyIncome}
-            />
-          )}
-          {currentStep === 3 && (
-            <StepThree
-              onNext={(value) => handleNext("assetValue", value)}
-              onBack={handleBack}
-              initialValue={formData.assetValue}
-            />
-          )}
-          {currentStep === 4 && (
-            <StepFour
-              onNext={(value) => handleNext("dependents", value)}
-              onBack={handleBack}
-              initialValue={formData.dependents}
-            />
-          )}
-          {currentStep === 5 && result && (
-            <ResultPage
-              result={result}
-              formData={formData}
-              onRestart={() => {
-                setCurrentStep(1);
-                setFormData({
-                  totalDebt: 0,
-                  monthlyIncome: 0,
-                  assetValue: 0,
-                  dependents: 0,
-                });
-              }}
-            />
-          )}
         </div>
       </div>
-    </div>
-  );
-}
-
-// Step Components
-function StepOne({
-  onNext,
-  initialValue,
-}: {
-  onNext: (value: number) => void;
-  initialValue: number;
-}) {
-  const manwonValue = initialValue > 0 ? convertWonToManwon(initialValue) : 0;
-  const [value, setValue] = useState(manwonValue > 0 ? manwonValue.toLocaleString() : "");
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = handleNumberInput(e.target.value);
-    setValue(formatted);
-  };
-
-  const handleSubmit = () => {
-    const numericManwon = parseNumberFromFormatted(value);
-    const wonValue = convertManwonToWon(numericManwon);
-    onNext(wonValue);
-  };
-
-  const handleQuickAdd = (amount: number) => {
-    const currentValue = value ? parseNumberFromFormatted(value) : 0;
-    const newValue = currentValue + amount;
-    setValue(newValue.toLocaleString());
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && value && parseNumberFromFormatted(value) > 0) {
-      handleSubmit();
-    }
-  };
-
-  return (
-    <div className="space-y-6 animate-slideIn">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          총 부채액은 얼마인가요?
-        </h2>
-        <p className="text-gray-600">모든 부채를 합산한 금액을 입력해주세요</p>
-      </div>
-      <div>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={value}
-          onChange={handleChange}
-          onKeyPress={handleKeyPress}
-          className="w-full text-4xl font-bold bg-gray-50 border-2 border-gray-200 focus:border-primary-500 focus:bg-white rounded-xl outline-none py-4 px-4 text-gray-900 transition-all"
-          placeholder="0"
-          autoFocus
-        />
-        <p className="text-right text-primary-600 font-semibold mt-2">만원</p>
-      </div>
-
-      {/* Quick Input Buttons */}
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => handleQuickAdd(100)} className="quick-button">+100</button>
-        <button onClick={() => handleQuickAdd(500)} className="quick-button">+500</button>
-        <button onClick={() => handleQuickAdd(1000)} className="quick-button">+1000</button>
-        <button onClick={() => handleQuickAdd(3000)} className="quick-button">+3000</button>
-        <button onClick={() => handleQuickAdd(5000)} className="quick-button">+5000</button>
-      </div>
-
-      <button
-        onClick={handleSubmit}
-        disabled={!value || parseNumberFromFormatted(value) <= 0}
-        className="w-full primary-button disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        다음
-      </button>
-    </div>
-  );
-}
-
-function StepTwo({
-  onNext,
-  onBack,
-  initialValue,
-}: {
-  onNext: (value: number) => void;
-  onBack: () => void;
-  initialValue: number;
-}) {
-  const manwonValue = initialValue > 0 ? convertWonToManwon(initialValue) : 0;
-  const [value, setValue] = useState(manwonValue > 0 ? manwonValue.toLocaleString() : "");
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = handleNumberInput(e.target.value);
-    setValue(formatted);
-  };
-
-  const handleSubmit = () => {
-    const numericManwon = parseNumberFromFormatted(value);
-    const wonValue = convertManwonToWon(numericManwon);
-    onNext(wonValue);
-  };
-
-  const handleQuickAdd = (amount: number) => {
-    const currentValue = value ? parseNumberFromFormatted(value) : 0;
-    const newValue = currentValue + amount;
-    setValue(newValue.toLocaleString());
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && value && parseNumberFromFormatted(value) >= 0) {
-      handleSubmit();
-    }
-  };
-
-  return (
-    <div className="space-y-6 animate-slideIn">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          월 소득은 얼마인가요?
-        </h2>
-        <p className="text-gray-600">세전 월 평균 소득을 입력해주세요</p>
-      </div>
-      <div>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={value}
-          onChange={handleChange}
-          onKeyPress={handleKeyPress}
-          className="w-full text-4xl font-bold bg-gray-50 border-2 border-gray-200 focus:border-primary-500 focus:bg-white rounded-xl outline-none py-4 px-4 text-gray-900 transition-all"
-          placeholder="0"
-          autoFocus
-        />
-        <p className="text-right text-primary-600 font-semibold mt-2">만원</p>
-      </div>
-
-      {/* Quick Input Buttons */}
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => handleQuickAdd(100)} className="quick-button">+100</button>
-        <button onClick={() => handleQuickAdd(200)} className="quick-button">+200</button>
-        <button onClick={() => handleQuickAdd(300)} className="quick-button">+300</button>
-        <button onClick={() => handleQuickAdd(500)} className="quick-button">+500</button>
-        <button onClick={() => handleQuickAdd(1000)} className="quick-button">+1000</button>
-      </div>
-
-      <div className="flex gap-3">
-        <button
-          onClick={onBack}
-          className="w-1/3 secondary-button"
-        >
-          이전
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={!value || parseNumberFromFormatted(value) < 0}
-          className="w-2/3 primary-button disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          다음
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function StepThree({
-  onNext,
-  onBack,
-  initialValue,
-}: {
-  onNext: (value: number) => void;
-  onBack: () => void;
-  initialValue: number;
-}) {
-  const manwonValue = initialValue > 0 ? convertWonToManwon(initialValue) : 0;
-  const [value, setValue] = useState(manwonValue > 0 ? manwonValue.toLocaleString() : "");
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = handleNumberInput(e.target.value);
-    setValue(formatted);
-  };
-
-  const handleSubmit = () => {
-    const numericManwon = parseNumberFromFormatted(value);
-    const wonValue = convertManwonToWon(numericManwon);
-    onNext(wonValue);
-  };
-
-  const handleQuickAdd = (amount: number) => {
-    const currentValue = value ? parseNumberFromFormatted(value) : 0;
-    const newValue = currentValue + amount;
-    setValue(newValue.toLocaleString());
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && value && parseNumberFromFormatted(value) >= 0) {
-      handleSubmit();
-    }
-  };
-
-  return (
-    <div className="space-y-6 animate-slideIn">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          보유 자산 가액은 얼마인가요?
-        </h2>
-        <p className="text-gray-600">부동산, 차량 등 모든 자산의 시장 가치</p>
-      </div>
-      <div>
-        <input
-          type="text"
-          inputMode="numeric"
-          value={value}
-          onChange={handleChange}
-          onKeyPress={handleKeyPress}
-          className="w-full text-4xl font-bold bg-gray-50 border-2 border-gray-200 focus:border-primary-500 focus:bg-white rounded-xl outline-none py-4 px-4 text-gray-900 transition-all"
-          placeholder="0"
-          autoFocus
-        />
-        <p className="text-right text-primary-600 font-semibold mt-2">만원</p>
-      </div>
-
-      {/* Quick Input Buttons */}
-      <div className="flex flex-wrap gap-2">
-        <button onClick={() => handleQuickAdd(100)} className="quick-button">+100</button>
-        <button onClick={() => handleQuickAdd(500)} className="quick-button">+500</button>
-        <button onClick={() => handleQuickAdd(1000)} className="quick-button">+1000</button>
-        <button onClick={() => handleQuickAdd(3000)} className="quick-button">+3000</button>
-        <button onClick={() => handleQuickAdd(5000)} className="quick-button">+5000</button>
-      </div>
-
-      <div className="flex gap-3">
-        <button
-          onClick={onBack}
-          className="w-1/3 secondary-button"
-        >
-          이전
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={!value || parseNumberFromFormatted(value) < 0}
-          className="w-2/3 primary-button disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          다음
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function StepFour({
-  onNext,
-  onBack,
-  initialValue,
-}: {
-  onNext: (value: number) => void;
-  onBack: () => void;
-  initialValue: number;
-}) {
-  const [value, setValue] = useState(initialValue > 0 ? initialValue.toString() : "");
-
-  const handleSubmit = () => {
-    onNext(Number(value));
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && isValid) {
-      handleSubmit();
-    }
-  };
-
-  const isValid = value && Number(value) >= 0 && Number(value) <= 4;
-
-  return (
-    <div className="space-y-6 animate-slideIn">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          부양가족은 몇 명인가요?
-        </h2>
-        <p className="text-gray-600">본인을 제외한 부양가족 수 (소수점 입력 가능)</p>
-      </div>
-      <div>
-        <input
-          type="number"
-          inputMode="decimal"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyPress={handleKeyPress}
-          className="w-full text-4xl font-bold bg-gray-50 border-2 border-gray-200 focus:border-primary-500 focus:bg-white rounded-xl outline-none py-4 px-4 text-gray-900 transition-all"
-          placeholder="0"
-          autoFocus
-          min="0"
-          max="4"
-          step="0.1"
-        />
-        <p className="text-right text-primary-600 font-semibold mt-2">명</p>
-      </div>
-      <div className="flex gap-3">
-        <button
-          onClick={onBack}
-          className="w-1/3 secondary-button"
-        >
-          이전
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={!isValid}
-          className="w-2/3 primary-button disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          결과 확인
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function ResultPage({
-  result,
-  formData,
-  onRestart,
-}: {
-  result: {
-    reductionRate: number;
-    repaymentAmount: number;
-    reductionAmount: number;
-    monthlyPayment: number;
-    repaymentPeriod: number;
-    liquidationValueViolation: boolean;
-    usedLeibnizFormula: boolean;
-  };
-  formData: FormData;
-  onRestart: () => void;
-}) {
-  // 탕감률에 따른 색상 결정
-  const getColorByRate = (rate: number) => {
-    if (rate >= 70) return { text: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', stroke: '#16a34a' };
-    if (rate >= 40) return { text: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200', stroke: '#ca8a04' };
-    return { text: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200', stroke: '#dc2626' };
-  };
-
-  const colors = getColorByRate(result.reductionRate);
-  const circumference = 2 * Math.PI * 54;
-  const strokeDashoffset = circumference - (result.reductionRate / 100) * circumference;
-
-  return (
-    <div className="space-y-6 animate-fadeIn">
-      {/* Progress Circle */}
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">예상 탕감률</h2>
-        <div className="relative inline-block">
-          <svg className="w-48 h-48 transform -rotate-90" viewBox="0 0 120 120">
-            <circle
-              cx="60"
-              cy="60"
-              r="54"
-              stroke="#e5e7eb"
-              strokeWidth="8"
-              fill="none"
-            />
-            <circle
-              cx="60"
-              cy="60"
-              r="54"
-              stroke={colors.stroke}
-              strokeWidth="8"
-              fill="none"
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              className="transition-all duration-1000 ease-out"
-            />
-          </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <div className={`text-5xl font-bold ${colors.text}`}>
-                {result.reductionRate.toFixed(1)}%
-              </div>
-            </div>
-          </div>
-        </div>
-        <p className="text-gray-600 mt-4 text-lg">
-          약 <span className="font-bold text-gray-900">{result.reductionAmount.toLocaleString()}원</span> 탕감 예상
-        </p>
-      </div>
-
-      {/* Details Section */}
-      <div className={`${colors.bg} border-2 ${colors.border} rounded-2xl p-6 space-y-3 animate-slideIn`}>
-        <h3 className="font-bold text-gray-900 mb-4 text-lg">💰 상세 내역</h3>
-
-        <div className="flex justify-between items-center py-2">
-          <span className="text-gray-700 flex items-center gap-2">
-            <span>💸</span> 총 부채액
-          </span>
-          <span className="font-bold text-gray-900 text-lg">
-            {formData.totalDebt.toLocaleString()}원
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center py-2">
-          <span className="text-gray-700 flex items-center gap-2">
-            <span>💵</span> 예상 변제액
-          </span>
-          <span className="font-bold text-gray-900 text-lg">
-            {result.repaymentAmount.toLocaleString()}원
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center py-2">
-          <span className="text-gray-700 flex items-center gap-2">
-            <span>📅</span> 월 상환액
-          </span>
-          <span className="font-bold text-primary-600 text-lg">
-            {result.monthlyPayment.toLocaleString()}원
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center py-2">
-          <span className="text-gray-700 flex items-center gap-2">
-            <span>⏱️</span> 변제 기간
-          </span>
-          <span className="font-bold text-primary-600 text-lg">
-            {result.repaymentPeriod}개월
-          </span>
-        </div>
-      </div>
-
-      {/* Input Summary */}
-      <div className="bg-gray-50 rounded-2xl p-6 space-y-3 animate-slideIn" style={{animationDelay: '0.1s'}}>
-        <h3 className="font-bold text-gray-900 mb-4">📋 입력 정보</h3>
-
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600 flex items-center gap-2">
-            <span>💼</span> 월 소득
-          </span>
-          <span className="text-gray-900 font-semibold">
-            {formData.monthlyIncome.toLocaleString()}원
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600 flex items-center gap-2">
-            <span>🏠</span> 자산 가액
-          </span>
-          <span className="text-gray-900 font-semibold">
-            {formData.assetValue.toLocaleString()}원
-          </span>
-        </div>
-
-        <div className="flex justify-between items-center">
-          <span className="text-gray-600 flex items-center gap-2">
-            <span>👨‍👩‍👧‍👦</span> 부양가족
-          </span>
-          <span className="text-gray-900 font-semibold">{formData.dependents}명</span>
-        </div>
-      </div>
-
-      {/* Liquidation Value Violation Warning */}
-      {result.liquidationValueViolation && (
-        <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-4 animate-slideIn" style={{animationDelay: '0.2s'}}>
-          <p className="text-sm text-red-800 font-bold">
-            🚨 청산가치보장 원칙 위반
-          </p>
-          <p className="text-sm text-red-700 mt-2 leading-relaxed">
-            60개월 변제로도 청산가치({formData.assetValue.toLocaleString()}만원)를 충족하지 못합니다. 개인회생 신청이 어려울 수 있으니 전문가와 상담하세요.
-          </p>
-        </div>
-      )}
-
-      {/* Leibniz Formula Notice */}
-      <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4 animate-slideIn" style={{animationDelay: '0.25s'}}>
-        <p className="text-sm text-blue-800 leading-relaxed">
-          📊 <strong>계산 방식:</strong> 현재가치는 라이프니츠식(법정이율 연 5% 적용)으로 계산되었습니다. 변제기간은 청산가치를 충족하도록 36~60개월 범위에서 자동 조정됩니다.
-        </p>
-      </div>
-
-      {/* Warning */}
-      <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 animate-slideIn" style={{animationDelay: '0.3s'}}>
-        <p className="text-sm text-amber-800 leading-relaxed">
-          ⚠️ <strong>안내:</strong> 이 결과는 참고용이며, 실제 탕감률은 법원의 판단과 개인의 상황에 따라 달라질 수 있습니다. 정확한 상담을 위해 전문가와 상의하시기 바랍니다.
-        </p>
-      </div>
-
-      {/* Restart Button */}
-      <button
-        onClick={onRestart}
-        className="w-full primary-button animate-slideIn"
-        style={{animationDelay: '0.35s'}}
-      >
-        다시 계산하기
-      </button>
     </div>
   );
 }
