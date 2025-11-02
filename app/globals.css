@@ -28,26 +28,34 @@ body {
 
 @layer components {
   .quick-button {
-    @apply px-4 py-2 bg-primary-100 text-primary-700 rounded-lg font-semibold text-sm hover:bg-primary-200 active:scale-95 transition-all duration-200;
+    @apply px-4 py-2.5 bg-gradient-to-br from-primary-50 to-primary-100 text-primary-700 rounded-xl font-semibold text-sm border border-primary-200/50 hover:from-primary-100 hover:to-primary-200 hover:border-primary-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 transition-all duration-300;
   }
 
   .primary-button {
-    @apply bg-gradient-to-r from-primary-500 to-accent-500 text-white py-5 rounded-xl font-semibold hover:from-primary-600 hover:to-accent-600 active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl;
+    @apply relative overflow-hidden bg-gradient-to-br from-primary-500 via-primary-600 to-accent-600 text-white py-5 rounded-2xl font-bold text-lg hover:from-primary-600 hover:via-accent-500 hover:to-accent-700 active:scale-[0.97] transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-primary-500/50;
   }
 
   .secondary-button {
-    @apply bg-gray-100 text-gray-700 py-5 rounded-xl font-semibold hover:bg-gray-200 active:scale-[0.98] transition-all duration-200;
+    @apply bg-white/80 backdrop-blur-sm text-gray-700 py-5 rounded-2xl font-bold text-lg border-2 border-gray-200 hover:bg-white hover:border-primary-300 hover:text-primary-600 hover:shadow-lg active:scale-[0.97] transition-all duration-300;
   }
 
   .progress-bar-segment {
-    @apply w-1/4 h-2 mx-1 rounded-full transition-all duration-500 ease-out;
+    @apply w-1/4 h-2.5 mx-1 rounded-full transition-all duration-700 ease-out;
   }
 
   .progress-bar-completed {
-    @apply bg-gradient-to-r from-primary-500 to-accent-500;
+    @apply bg-gradient-to-r from-primary-500 via-accent-500 to-accent-600 shadow-lg shadow-primary-500/30;
   }
 
   .progress-bar-incomplete {
-    @apply bg-gray-200;
+    @apply bg-gray-200/60 backdrop-blur-sm;
+  }
+
+  .glass-card {
+    @apply bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20;
+  }
+
+  .input-modern {
+    @apply w-full text-4xl font-bold bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 focus:border-primary-400 focus:bg-white focus:shadow-xl rounded-2xl outline-none py-6 px-6 text-gray-900 transition-all duration-300;
   }
 }
