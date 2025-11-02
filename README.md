@@ -141,11 +141,13 @@ hamshams1/
 `.env.local` 파일에 다음 환경 변수를 설정하세요:
 
 ```bash
-# Kakao JavaScript Key
-NEXT_PUBLIC_KAKAO_JS_KEY=your_kakao_javascript_key
+# Kakao JavaScript Key (현재 사용 중인 키)
+NEXT_PUBLIC_KAKAO_JS_KEY=d6dae6629fbc3d4b9ae79e086995c0f5
 ```
 
-**카카오 API Key 발급**: [KAKAO_SETUP.md](./KAKAO_SETUP.md) 참조
+**현재 사용 중인 키**: `d6dae6629fbc3d4b9ae79e086995c0f5`
+
+**새 카카오 API Key 발급**: [KAKAO_SETUP.md](./KAKAO_SETUP.md) 참조
 
 ## 📚 추가 문서
 

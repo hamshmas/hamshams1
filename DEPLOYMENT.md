@@ -8,10 +8,15 @@
 배포 플랫폼에 다음 환경 변수를 설정해야 합니다:
 
 ```bash
-NEXT_PUBLIC_KAKAO_JS_KEY=your_kakao_javascript_key
+# 현재 프로젝트에서 사용 중인 카카오 JavaScript Key
+NEXT_PUBLIC_KAKAO_JS_KEY=d6dae6629fbc3d4b9ae79e086995c0f5
 ```
 
-**카카오 JavaScript Key 발급 방법:**
+**현재 사용 중인 카카오 앱:**
+- JavaScript Key: `d6dae6629fbc3d4b9ae79e086995c0f5`
+- 이미 설정된 키이므로 위 값을 그대로 사용하면 됩니다
+
+**새로운 카카오 JavaScript Key 발급 방법:**
 1. [Kakao Developers](https://developers.kakao.com/) 접속
 2. 애플리케이션 추가하기
 3. 내 애플리케이션 > 앱 설정 > 요약 정보에서 JavaScript 키 복사
@@ -36,7 +41,8 @@ npm run build
 2. GitHub 계정 연동
 3. 저장소 선택: `hamshmas/hamshams1`
 4. 환경 변수 설정:
-   - `NEXT_PUBLIC_KAKAO_JS_KEY` 입력
+   - Key: `NEXT_PUBLIC_KAKAO_JS_KEY`
+   - Value: `d6dae6629fbc3d4b9ae79e086995c0f5`
 5. Deploy 버튼 클릭
 
 ### CLI를 통한 배포
@@ -113,7 +119,7 @@ docker build -t hamshams1 .
 
 # 실행
 docker run -p 3000:3000 \
-  -e NEXT_PUBLIC_KAKAO_JS_KEY=your_key \
+  -e NEXT_PUBLIC_KAKAO_JS_KEY=d6dae6629fbc3d4b9ae79e086995c0f5 \
   hamshams1
 ```
 

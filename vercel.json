@@ -25,8 +25,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "NEXT_PUBLIC_KAKAO_JS_KEY": "@kakao_js_key"
-  }
+  ]
 }
