@@ -1,12 +1,93 @@
-import type { FormData, CalculationResult } from "@/app/types";
+"use client";
+
+import { useState } from "react";
+import type { FormData, CalculationResult, HousingType, MaritalStatus } from "@/app/types";
+import { getCourtName } from "@/utils/courtJurisdiction";
+import { generateConsultationMessage } from "@/utils/generateConsultationMessage";
+import { ConsultationModal, CopySuccessNotification } from "@/app/components/consultation";
+import { KAKAO_CONSULTATION_URL, COPY_SUCCESS_NOTIFICATION_DURATION } from "@/app/config/consultation";
 
 interface ResultPageProps {
   result: CalculationResult;
   formData: FormData;
   onRestart: () => void;
+  // 자산 상세 정보
+  assetInputMode?: 'direct' | 'calculate' | null;
+  housingType?: HousingType | null;
+  hasMortgage?: boolean | null;
+  mortgageAmount?: number;
+  kbPrice?: number;
+  depositAmount?: number;
+  isSpouseHousing?: boolean | null;
+  // 부양가족 상세 정보
+  maritalStatus?: MaritalStatus | null;
+  childrenCount?: number;
+  hasNoSpouseIncome?: boolean | null;
 }
 
-export function ResultPage({ result, formData, onRestart }: ResultPageProps) {
+export function ResultPage({
+  result,
+  formData,
+  onRestart,
+  assetInputMode,
+  housingType,
+  hasMortgage,
+  mortgageAmount,
+  kbPrice,
+  depositAmount,
+  isSpouseHousing,
+  maritalStatus,
+  childrenCount,
+  hasNoSpouseIncome,
+}: ResultPageProps) {
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+
+  const handleConsultationClick = () => {
+    setShowContactModal(true);
+  };
+
+  const handleContactSubmit = async () => {
+    if (!name.trim() || !phone.trim()) {
+      alert("이름과 연락처를 모두 입력해주세요.");
+      return;
+    }
+
+    setShowContactModal(false);
+    await sendConsultationMessage();
+  };
+
+  const sendConsultationMessage = async () => {
+    // 메시지 생성
+    const message = generateConsultationMessage({
+      formData,
+      result,
+      name,
+      phone,
+      housingType,
+      kbPrice,
+      mortgageAmount,
+      depositAmount,
+      hasMortgage,
+      isSpouseHousing,
+      maritalStatus,
+      childrenCount,
+      hasNoSpouseIncome,
+    });
+
+    // 클립보드에 복사하고 카카오톡 채널 열기
+    try {
+      await navigator.clipboard.writeText(message);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), COPY_SUCCESS_NOTIFICATION_DURATION);
+
+      window.open(KAKAO_CONSULTATION_URL, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      alert("클립보드 복사에 실패했습니다. 브라우저 설정을 확인해주세요.");
+    }
+  };
   const getColorByRate = (rate: number) => {
     if (rate >= 70) return { text: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', stroke: '#16a34a' };
     if (rate >= 40) return { text: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-200', stroke: '#ca8a04' };
@@ -17,9 +98,26 @@ export function ResultPage({ result, formData, onRestart }: ResultPageProps) {
   const circumference = 2 * Math.PI * 54;
   const strokeDashoffset = circumference - (result.reductionRate / 100) * circumference;
 
+  // 가용소득 체크
+  const hasNoIncome = result.monthlyPayment <= 0;
+
   return (
     <div className="space-y-4 animate-fadeIn">
-      {result.liquidationValueViolation ? (
+      {hasNoIncome ? (
+        <div className="text-center mb-4">
+          <div className="relative inline-block animate-scaleIn mb-3">
+            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center shadow-xl">
+              <span className="text-6xl">💸</span>
+            </div>
+          </div>
+          <h2 className="text-2xl font-extrabold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-2">
+            개인회생 신청 불가
+          </h2>
+          <p className="text-gray-700 text-sm max-w-sm mx-auto">
+            가용소득이 없어 개인회생을 진행할 수 없습니다
+          </p>
+        </div>
+      ) : result.liquidationValueViolation ? (
         <div className="text-center mb-4">
           <div className="relative inline-block animate-scaleIn mb-3">
             <div className="w-40 h-40 rounded-full bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center shadow-xl">
@@ -61,7 +159,7 @@ export function ResultPage({ result, formData, onRestart }: ResultPageProps) {
         </div>
       )}
 
-      {!result.liquidationValueViolation && (
+      {!hasNoIncome && !result.liquidationValueViolation && (
         <div className={`${colors.bg} border-2 ${colors.border} rounded-2xl p-4 space-y-2`}>
           <div className="flex items-center gap-1.5 mb-1">
             <span className="text-lg">💰</span>
@@ -107,6 +205,27 @@ export function ResultPage({ result, formData, onRestart }: ResultPageProps) {
             </div>
           ))}
 
+          {/* 관할법원 정보 */}
+          <div className="flex justify-between items-center py-1.5 px-3 bg-gradient-to-r from-primary-50 to-accent-50 border border-primary-200 rounded-lg">
+            <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
+              <span className="text-base">⚖️</span> 관할법원
+            </span>
+            <span className="text-primary-700 font-bold text-sm">
+              {getCourtName(formData.courtJurisdiction)}
+            </span>
+          </div>
+
+          {/* 집 주소 */}
+          {formData.homeAddress && (
+            <div className="py-1.5 px-3 bg-white/60 rounded-lg">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-base">📍</span>
+                <span className="text-gray-700 font-semibold text-sm">집 주소</span>
+              </div>
+              <p className="text-xs text-gray-600 pl-6">{formData.homeAddress}</p>
+            </div>
+          )}
+
           {/* 부양가족수 - 별도 스타일링 */}
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3 mt-1">
             <div className="flex justify-between items-start">
@@ -129,7 +248,22 @@ export function ResultPage({ result, formData, onRestart }: ResultPageProps) {
         </div>
       </div>
 
-      {result.liquidationValueViolation ? (
+      {hasNoIncome ? (
+        <div className="bg-orange-50 border-2 border-orange-300 rounded-2xl p-4">
+          <p className="text-sm font-bold text-orange-900 mb-2">상세 정보</p>
+          <div className="space-y-1.5 text-xs text-orange-800">
+            <p>• 월 소득: {Math.round(formData.monthlyIncome).toLocaleString()}원</p>
+            <p>• 최저생계비: 소득에서 최저생계비를 차감한 금액</p>
+            <p>• 월 변제 가능액: {Math.round(result.monthlyPayment).toLocaleString()}원</p>
+            <p className="pt-1.5 border-t border-orange-200 font-semibold">
+              💡 개인회생을 진행하려면 월 소득에서 최저생계비를 제외한 가용소득이 있어야 합니다. 현재 조건으로는 변제 가능한 소득이 없습니다.
+            </p>
+            <p className="font-semibold text-orange-900">
+              ⚠️ 변호사와 상담하여 다른 해결방안을 모색하시기 바랍니다.
+            </p>
+          </div>
+        </div>
+      ) : result.liquidationValueViolation ? (
         <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-4">
           <p className="text-sm font-bold text-red-900 mb-2">상세 정보</p>
           <div className="space-y-1.5 text-xs text-red-800">
@@ -140,7 +274,7 @@ export function ResultPage({ result, formData, onRestart }: ResultPageProps) {
               💡 개인회생을 진행하려면 청산가치 이상을 변제하되 총 부채액을 초과할 수 없습니다. 현재 조건으로는 이를 충족하는 변제계획 수립이 어렵습니다.
             </p>
             <p className="font-semibold text-red-900">
-              ⚠️ 전문가(변호사/법무사)와 상담하여 다른 해결방안을 모색하시기 바랍니다.
+              ⚠️ 변호사와 상담하여 다른 해결방안을 모색하시기 바랍니다.
             </p>
           </div>
         </div>
@@ -161,9 +295,29 @@ export function ResultPage({ result, formData, onRestart }: ResultPageProps) {
         </>
       )}
 
-      <button onClick={onRestart} className="w-full primary-button text-sm py-2.5">
-        다시 계산하기
-      </button>
+      <div className="space-y-2">
+        <button
+          onClick={handleConsultationClick}
+          className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-center text-sm"
+        >
+          💬 지금 상담신청하기
+        </button>
+        <button onClick={onRestart} className="w-full secondary-button text-sm py-2.5">
+          다시 계산하기
+        </button>
+      </div>
+
+      <CopySuccessNotification isVisible={copySuccess} />
+
+      <ConsultationModal
+        isOpen={showContactModal}
+        name={name}
+        phone={phone}
+        onNameChange={setName}
+        onPhoneChange={setPhone}
+        onCancel={() => setShowContactModal(false)}
+        onSubmit={handleContactSubmit}
+      />
     </div>
   );
 }

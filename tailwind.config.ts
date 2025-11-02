@@ -42,6 +42,7 @@ const config: Config = {
         'fadeIn': 'fadeIn 0.6s ease-out',
         'slideIn': 'slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
         'slideUp': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+        'slideDown': 'slideDown 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
         'scaleIn': 'scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
         'shimmer': 'shimmer 2s linear infinite',
         'float': 'float 3s ease-in-out infinite',
@@ -58,6 +59,10 @@ const config: Config = {
         },
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        slideDown: {
+          '0%': { transform: 'translateY(-20px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
         scaleIn: {
