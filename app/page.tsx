@@ -471,6 +471,7 @@ export default function Home() {
                   result={result}
                   formData={formData}
                   onRestart={handleRestart}
+                  onBack={() => setCurrentStep(5)}
                   assetInputMode={assetInputMode}
                   housingType={housingType}
                   hasMortgage={hasMortgage}

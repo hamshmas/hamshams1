@@ -4,14 +4,8 @@ interface ConsultationModalProps {
   isOpen: boolean;
   name: string;
   phone: string;
-  email: string;
-  preferredContactTime: string;
-  privacyConsent: boolean;
   onNameChange: (name: string) => void;
   onPhoneChange: (phone: string) => void;
-  onEmailChange: (email: string) => void;
-  onPreferredContactTimeChange: (time: string) => void;
-  onPrivacyConsentChange: (consent: boolean) => void;
   onCancel: () => void;
   onSubmit: () => void;
 }
@@ -20,14 +14,8 @@ export function ConsultationModal({
   isOpen,
   name,
   phone,
-  email,
-  preferredContactTime,
-  privacyConsent,
   onNameChange,
   onPhoneChange,
-  onEmailChange,
-  onPreferredContactTimeChange,
-  onPrivacyConsentChange,
   onCancel,
   onSubmit,
 }: ConsultationModalProps) {
@@ -75,7 +63,7 @@ export function ConsultationModal({
               type="text"
               value={name}
               onChange={(e) => onNameChange(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:outline-none text-sm"
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:outline-none text-sm text-gray-900 font-medium placeholder:text-gray-400"
               placeholder="홍길동"
               autoFocus
             />
@@ -89,56 +77,10 @@ export function ConsultationModal({
               type="tel"
               value={phone}
               onChange={(e) => onPhoneChange(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:outline-none text-sm"
+              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:outline-none text-sm text-gray-900 font-medium placeholder:text-gray-400"
               placeholder="010-1234-5678"
+              onKeyPress={(e) => e.key === 'Enter' && onSubmit()}
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-              이메일 (선택)
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => onEmailChange(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:outline-none text-sm"
-              placeholder="example@email.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
-              선호 상담 시간 (선택)
-            </label>
-            <select
-              value={preferredContactTime}
-              onChange={(e) => onPreferredContactTimeChange(e.target.value)}
-              className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:outline-none text-sm"
-            >
-              <option value="">선택하세요</option>
-              <option value="평일 오전">평일 오전</option>
-              <option value="평일 오후">평일 오후</option>
-              <option value="평일 저녁">평일 저녁</option>
-              <option value="주말">주말</option>
-              <option value="언제나 가능">언제나 가능</option>
-            </select>
-          </div>
-
-          <div className="bg-gray-50 border-2 border-gray-200 rounded-xl p-3">
-            <label className="flex items-start gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={privacyConsent}
-                onChange={(e) => onPrivacyConsentChange(e.target.checked)}
-                className="mt-1 w-4 h-4 text-primary-500 border-gray-300 rounded focus:ring-primary-500"
-              />
-              <span className="text-xs text-gray-700 leading-relaxed flex-1">
-                <strong className="text-gray-900">개인정보 수집 및 이용 동의 (필수)</strong>
-                <br />
-                상담 신청을 위해 필요한 최소한의 개인정보(이름, 연락처)를 수집하며, 상담 완료 후 즉시 파기됩니다.
-              </span>
-            </label>
           </div>
         </div>
 

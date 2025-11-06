@@ -11,6 +11,7 @@ interface ResultPageProps {
   result: CalculationResult;
   formData: FormData;
   onRestart: () => void;
+  onBack: () => void;
   // 자산 상세 정보
   assetInputMode?: 'direct' | 'calculate' | null;
   housingType?: HousingType | null;
@@ -29,6 +30,7 @@ export function ResultPage({
   result,
   formData,
   onRestart,
+  onBack,
   assetInputMode,
   housingType,
   hasMortgage,
@@ -44,106 +46,90 @@ export function ResultPage({
   const [showContactModal, setShowContactModal] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [preferredContactTime, setPreferredContactTime] = useState("");
-  const [privacyConsent, setPrivacyConsent] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleConsultationClick = () => {
     setShowContactModal(true);
   };
 
   const handleContactSubmit = async () => {
-    // 필수 필드 검증
     if (!name.trim() || !phone.trim()) {
       alert("이름과 연락처를 모두 입력해주세요.");
       return;
     }
 
-    // 개인정보 동의 확인
-    if (!privacyConsent) {
-      alert("개인정보 수집 및 이용에 동의해주세요.");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // 1. Firebase에 데이터 저장
-      const response = await fetch('/api/consultation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          applicant: {
-            name,
-            phone,
-            email: email || undefined,
-            preferredContactTime: preferredContactTime || undefined,
-            privacyConsent,
-          },
-          formData,
-          result,
-          housingType,
-          kbPrice,
-          mortgageAmount,
-          depositAmount,
-          hasMortgage,
-          isSpouseHousing,
-          maritalStatus,
-          childrenCount,
-          hasNoSpouseIncome,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || '상담 신청 중 오류가 발생했습니다.');
-      }
-
-      console.log('[Consultation] Successfully saved:', data.consultationId);
-
-      // 2. 기존 카카오톡 전송 로직 실행
-      setShowContactModal(false);
-      await sendConsultationMessage();
-    } catch (error) {
-      console.error('[Consultation] Error:', error);
-      alert(error instanceof Error ? error.message : '상담 신청 중 오류가 발생했습니다. 다시 시도해주세요.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    setShowContactModal(false);
+    await sendConsultationMessage();
   };
 
   const sendConsultationMessage = async () => {
-    // 메시지 생성
-    const message = generateConsultationMessage({
-      formData,
-      result,
-      name,
-      phone,
-      housingType,
-      kbPrice,
-      mortgageAmount,
-      depositAmount,
-      hasMortgage,
-      isSpouseHousing,
-      maritalStatus,
-      childrenCount,
-      hasNoSpouseIncome,
-    });
+    // 메시지 생성 (먼저 생성)
+    let message = '';
+    try {
+      message = generateConsultationMessage({
+        formData,
+        result,
+        name,
+        phone,
+        housingType,
+        kbPrice,
+        mortgageAmount,
+        depositAmount,
+        hasMortgage,
+        isSpouseHousing,
+        maritalStatus,
+        childrenCount,
+        hasNoSpouseIncome,
+      });
+    } catch (err) {
+      console.error('메시지 생성 실패:', err);
+      message = `상담 신청\n이름: ${name}\n연락처: ${phone}\n\n개인회생 탕감률 계산 결과를 상담받고 싶습니다.`;
+    }
 
-    // 클립보드에 복사하고 카카오톡 채널 열기
+    // 클립보드 복사 (사용자 인터랙션 컨텍스트가 유지되는 동안 실행)
+    let clipboardSuccess = false;
     try {
       await navigator.clipboard.writeText(message);
+      clipboardSuccess = true;
+    } catch (err) {
+      console.error('클립보드 API 실패, fallback 사용:', err);
+      // Fallback: textarea 방식
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = message;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        clipboardSuccess = true;
+      } catch (fallbackErr) {
+        console.error('Fallback 복사도 실패:', fallbackErr);
+      }
+    }
+
+    // 복사 성공 표시
+    if (clipboardSuccess) {
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), COPY_SUCCESS_NOTIFICATION_DURATION);
-
-      window.open(KAKAO_CONSULTATION_URL, "_blank", "noopener,noreferrer");
-    } catch (err) {
-      alert("클립보드 복사에 실패했습니다. 브라우저 설정을 확인해주세요.");
     }
+
+    // Supabase에 상담 신청 정보 저장 (비동기로 백그라운드 실행)
+    fetch('/api/consultation/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        phone,
+        formData,
+        calculationResult: result,
+      }),
+    }).catch(err => {
+      console.error('상담 신청 저장 실패:', err);
+    });
+
+    // 카카오톡 채널 열기
+    window.open(KAKAO_CONSULTATION_URL, "_blank", "noopener,noreferrer");
   };
   const getColorByRate = (rate: number) => {
     if (rate >= 70) return { text: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', stroke: '#16a34a' };
@@ -402,9 +388,14 @@ export function ResultPage({
             💬 지금 상담신청하기
           </button>
         )}
-        <button onClick={onRestart} className="w-full secondary-button text-sm py-2.5">
-          다시 계산하기
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button onClick={onBack} className="secondary-button text-sm py-2.5">
+            ← 이전 단계
+          </button>
+          <button onClick={onRestart} className="secondary-button text-sm py-2.5">
+            다시 계산하기
+          </button>
+        </div>
       </div>
 
       <CopySuccessNotification isVisible={copySuccess} />
@@ -413,14 +404,8 @@ export function ResultPage({
         isOpen={showContactModal}
         name={name}
         phone={phone}
-        email={email}
-        preferredContactTime={preferredContactTime}
-        privacyConsent={privacyConsent}
         onNameChange={setName}
         onPhoneChange={setPhone}
-        onEmailChange={setEmail}
-        onPreferredContactTimeChange={setPreferredContactTime}
-        onPrivacyConsentChange={setPrivacyConsent}
         onCancel={() => setShowContactModal(false)}
         onSubmit={handleContactSubmit}
       />
