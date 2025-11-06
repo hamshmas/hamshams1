@@ -14,6 +14,8 @@ export function useAssetCalculation() {
   const [selectedRegion, setSelectedRegion] = useState<RegionType | null>(null);
   const [isSpouseHousing, setIsSpouseHousing] = useState<boolean | null>(null);
   const [isMainCourtJurisdiction, setIsMainCourtJurisdiction] = useState<boolean | null>(null);
+  const [housingAsset, setHousingAsset] = useState(0); // 주거 자산
+  const [otherAsset, setOtherAsset] = useState(0); // 기타 자산 (예금, 주식, 자동차 등)
 
   const resetAssetState = () => {
     setAssetInputMode(null);
@@ -26,6 +28,8 @@ export function useAssetCalculation() {
     setSelectedRegion(null);
     setIsSpouseHousing(null);
     setIsMainCourtJurisdiction(null);
+    setHousingAsset(0);
+    setOtherAsset(0);
   };
 
   return {
@@ -49,6 +53,10 @@ export function useAssetCalculation() {
     setIsSpouseHousing,
     isMainCourtJurisdiction,
     setIsMainCourtJurisdiction,
+    housingAsset,
+    setHousingAsset,
+    otherAsset,
+    setOtherAsset,
     resetAssetState,
   };
 }

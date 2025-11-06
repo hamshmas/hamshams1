@@ -268,7 +268,7 @@ export function ResultPage({
         <div className="grid gap-1.5">
           {[
             { icon: '💼', label: '월 소득', value: formData.monthlyIncome },
-            { icon: '🏠', label: '자산 가액', value: formData.assetValue },
+            { icon: '🏠', label: '청산가치', value: formData.assetValue },
           ].map((item, i) => (
             <div key={i} className="flex justify-between items-center py-1.5 px-3 bg-white/60 rounded-lg">
               <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">

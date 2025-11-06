@@ -63,6 +63,10 @@ export default function Home() {
     setIsSpouseHousing,
     isMainCourtJurisdiction,
     setIsMainCourtJurisdiction,
+    housingAsset,
+    setHousingAsset,
+    otherAsset,
+    setOtherAsset,
     resetAssetState,
   } = useAssetCalculation();
 
@@ -282,7 +286,8 @@ export default function Home() {
                       onNext={(value) => {
                         setKbPrice(value);
                         const finalAsset = value - mortgageAmount;
-                        handleNext("assetValue", Math.max(0, finalAsset));
+                        setHousingAsset(Math.max(0, finalAsset));
+                        setAssetSubStep(999); // 기타자산 입력 단계로
                       }}
                       onBack={() => {
                         if (hasMortgage) {
@@ -302,7 +307,8 @@ export default function Home() {
                         // formData.priorityRepaymentRegion 사용 (집 주소 기반 자동 계산)
                         const priorityAmount = PRIORITY_REPAYMENT[formData.priorityRepaymentRegion];
                         const assetDeposit = Math.max(0, value - priorityAmount);
-                        handleNext("assetValue", assetDeposit);
+                        setHousingAsset(assetDeposit);
+                        setAssetSubStep(999); // 기타자산 입력 단계로
                       }}
                       onBack={() => {
                         setAssetSubStep(0);
@@ -319,7 +325,8 @@ export default function Home() {
                         // formData.priorityRepaymentRegion 사용 (집 주소 기반 자동 계산)
                         const priorityAmount = PRIORITY_REPAYMENT[formData.priorityRepaymentRegion];
                         const assetDeposit = Math.max(0, value - priorityAmount);
-                        handleNext("assetValue", assetDeposit);
+                        setHousingAsset(assetDeposit);
+                        setAssetSubStep(999); // 기타자산 입력 단계로
                       }}
                       onBack={() => {
                         setAssetSubStep(0);
@@ -334,7 +341,8 @@ export default function Home() {
                       onSelect={(isSpouse) => {
                         setIsSpouseHousing(isSpouse);
                         if (!isSpouse) {
-                          handleNext("assetValue", 0);
+                          setHousingAsset(0);
+                          setAssetSubStep(999); // 기타자산 입력 단계로
                         } else {
                           setAssetSubStep(2);
                         }
@@ -354,7 +362,8 @@ export default function Home() {
                       }}
                       onNext={(isMainCourt) => {
                         if (isMainCourt) {
-                          handleNext("assetValue", 0);
+                          setHousingAsset(0);
+                          setAssetSubStep(999); // 기타자산 입력 단계로
                         } else {
                           setIsMainCourtJurisdiction(false);
                           setAssetSubStep(3);
@@ -393,7 +402,8 @@ export default function Home() {
                       onNext={(value) => {
                         setKbPrice(value);
                         const assetSpouse = value - mortgageAmount;
-                        handleNext("assetValue", Math.max(0, assetSpouse / 2));
+                        setHousingAsset(Math.max(0, assetSpouse / 2));
+                        setAssetSubStep(999); // 기타자산 입력 단계로
                       }}
                       onBack={() => {
                         if (hasMortgage) {
@@ -403,6 +413,37 @@ export default function Home() {
                         }
                       }}
                       initialValue={kbPrice}
+                    />
+                  )}
+                  {/* 기타자산 입력 단계 (주거형태 계산 완료 후) */}
+                  {assetInputMode === 'calculate' && assetSubStep === 999 && (
+                    <InputStep
+                      title="그 외 보유 자산은 얼마인가요?"
+                      subtitle="예금, 주식, 자동차 등의 총액"
+                      onNext={(value) => {
+                        setOtherAsset(value);
+                        const totalAsset = housingAsset + value;
+                        handleNext("assetValue", totalAsset);
+                      }}
+                      onBack={() => {
+                        // 각 주거형태의 마지막 단계로 돌아가기
+                        if (housingType === 'owned') {
+                          setAssetSubStep(hasMortgage ? 3 : 2);
+                        } else if (housingType === 'jeonse' || housingType === 'monthly') {
+                          setAssetSubStep(1);
+                        } else if (housingType === 'free') {
+                          if (isSpouseHousing === false) {
+                            setAssetSubStep(1);
+                          } else if (isMainCourtJurisdiction === true) {
+                            setAssetSubStep(2);
+                          } else {
+                            setAssetSubStep(hasMortgage ? 5 : 4);
+                          }
+                        }
+                      }}
+                      initialValue={otherAsset}
+                      quickAmounts={[100, 500, 1000, 3000, 5000]}
+                      minValue={0}
                     />
                   )}
                 </>
