@@ -90,7 +90,7 @@ export const COURT_DETAILS: Record<string, { name: string; type: 'rehabilitation
   'changwon': { name: '창원지방법원', type: 'district' },
   'jeonju': { name: '전주지방법원', type: 'district' },
   'jeju': { name: '제주지방법원', type: 'district' },
-  'other': { name: '기타 법원', type: 'district' },
+  'other': { name: '관할 지방법원', type: 'district' },
 };
 
 // 지역 정보

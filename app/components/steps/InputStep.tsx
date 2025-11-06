@@ -11,6 +11,7 @@ interface InputStepProps {
   initialValue: number;
   quickAmounts: number[];
   minValue: number;
+  unitType?: 'manwon' | 'count'; // 만원 단위 또는 일반 숫자
 }
 
 export function InputStep({
@@ -21,13 +22,17 @@ export function InputStep({
   initialValue,
   quickAmounts,
   minValue,
+  unitType = 'manwon', // 기본값은 만원 단위
 }: InputStepProps) {
-  const manwonValue = initialValue > 0 ? convertWonToManwon(initialValue) : 0;
-  const [value, setValue] = useState(manwonValue > 0 ? manwonValue.toLocaleString() : "");
+  const displayValue = unitType === 'count'
+    ? initialValue
+    : (initialValue > 0 ? convertWonToManwon(initialValue) : 0);
+  const [value, setValue] = useState(displayValue > 0 ? displayValue.toLocaleString() : "");
 
   const handleSubmit = () => {
-    const numericManwon = parseNumberFromFormatted(value);
-    onNext(convertManwonToWon(numericManwon));
+    const numericValue = parseNumberFromFormatted(value);
+    const finalValue = unitType === 'count' ? numericValue : convertManwonToWon(numericValue);
+    onNext(finalValue);
   };
 
   const handleQuickAdd = (amount: number) => {
@@ -56,7 +61,9 @@ export function InputStep({
           placeholder="0"
           autoFocus
         />
-        <p className="text-right text-primary-600 font-bold mt-2 text-sm">만원</p>
+        <p className="text-right text-primary-600 font-bold mt-2 text-sm">
+          {unitType === 'count' ? '명' : '만원'}
+        </p>
       </div>
 
       <div className="flex flex-wrap gap-1.5">

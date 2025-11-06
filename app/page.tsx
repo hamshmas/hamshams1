@@ -21,10 +21,12 @@ import { InputStep } from "@/app/components/steps";
 import { LoadingScreen, ProgressSteps } from "@/app/components/ui";
 import { ResultPage } from "@/app/components/result";
 import { AddressInputStep } from "@/app/components/address";
-import { MaritalStatusSelection, ChildrenCountInput, SpouseIncomeCheck } from "@/app/components/dependent";
+import { DependentInputModeSelection, MaritalStatusSelection, ChildrenCountInput, SpouseIncomeCheck } from "@/app/components/dependent";
+import { IncomeTypeSelection } from "@/app/components/income";
 import { useAssetCalculation } from "@/app/hooks/useAssetCalculation";
 import { useDependentCalculation } from "@/app/hooks/useDependentCalculation";
 import { getPriorityRepaymentRegion, getCourtName } from "@/utils/courtJurisdiction";
+import type { IncomeType } from "@/app/types";
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -40,6 +42,10 @@ export default function Home() {
     priorityRepaymentRegion: "그밖의지역",
   });
   const [result, setResult] = useState<CalculationResult | null>(null);
+
+  // 소득 관련 상태
+  const [incomeType, setIncomeType] = useState<IncomeType | null>(null);
+  const [incomeSubStep, setIncomeSubStep] = useState(0);
 
   // 자산 계산 관련 상태
   const {
@@ -72,6 +78,8 @@ export default function Home() {
 
   // 부양가족 계산 관련 상태
   const {
+    dependentInputMode,
+    setDependentInputMode,
     dependentSubStep,
     setDependentSubStep,
     maritalStatus,
@@ -145,6 +153,11 @@ export default function Home() {
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      // 3단계에서 돌아갈 때 소득 관련 상태 초기화
+      if (currentStep === 4) {
+        setIncomeType(null);
+        setIncomeSubStep(0);
+      }
       // 4단계로 돌아갈 때 상태 초기화
       if (currentStep === 5) {
         resetAssetState();
@@ -166,6 +179,8 @@ export default function Home() {
       priorityRepaymentRegion: "그밖의지역",
     });
     setResult(null);
+    setIncomeType(null);
+    setIncomeSubStep(0);
     resetAssetState();
     resetDependentState();
   };
@@ -176,6 +191,32 @@ export default function Home() {
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent-400/20 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
 
       <div className="w-full max-w-md relative z-10">
+        {/* 메인 타이틀 - 첫 화면에만 표시 */}
+        {currentStep === 1 && (
+          <div className="text-center mb-4 animate-fadeIn">
+            <h1 className="text-3xl font-black bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent mb-2">
+              개인회생 탕감률 계산기
+            </h1>
+            <p className="text-sm text-gray-700 font-semibold mb-3">
+              3분이면 예상 탕감률을 확인할 수 있습니다
+            </p>
+            <div className="flex justify-center gap-4 text-xs text-gray-600">
+              <div className="flex items-center gap-1">
+                <span className="text-green-600">✓</span>
+                <span>무료 계산</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-green-600">✓</span>
+                <span>개인정보 보호</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-green-600">✓</span>
+                <span>전문 변호사 연결</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Progress Steps */}
         {currentStep <= totalSteps && (
           <ProgressSteps currentStep={currentStep} totalSteps={totalSteps} />
@@ -197,7 +238,7 @@ export default function Home() {
               {currentStep === 2 && (
                 <InputStep
                   title="총 부채액은 얼마인가요?"
-                  subtitle="모든 부채를 합산한 금액"
+                  subtitle="신용카드, 대출, 미수금 등 모든 부채 포함 (정확한 탕감률 계산을 위해 필요합니다)"
                   onNext={(value) => handleNext("totalDebt", value)}
                   onBack={handleBack}
                   initialValue={formData.totalDebt}
@@ -206,15 +247,32 @@ export default function Home() {
                 />
               )}
               {currentStep === 3 && (
-                <InputStep
-                  title="월 소득은 얼마인가요?"
-                  subtitle="실수령액 기준"
-                  onNext={(value) => handleNext("monthlyIncome", value)}
-                  onBack={handleBack}
-                  initialValue={formData.monthlyIncome}
-                  quickAmounts={[100, 200, 300, 500, 1000]}
-                  minValue={0}
-                />
+                <>
+                  {incomeSubStep === 0 && (
+                    <IncomeTypeSelection
+                      onNext={(type) => {
+                        setIncomeType(type);
+                        setIncomeSubStep(1);
+                      }}
+                      onBack={handleBack}
+                      initialValue={incomeType}
+                    />
+                  )}
+                  {incomeSubStep === 1 && (
+                    <InputStep
+                      title="월 소득은 얼마인가요?"
+                      subtitle="실수령액 기준 (세금 제외 후 받는 금액 · 월 변제 가능액 계산에 사용됩니다)"
+                      onNext={(value) => handleNext("monthlyIncome", value)}
+                      onBack={() => {
+                        setIncomeSubStep(0);
+                        setIncomeType(null);
+                      }}
+                      initialValue={formData.monthlyIncome}
+                      quickAmounts={[100, 200, 300]}
+                      minValue={0}
+                    />
+                  )}
+                </>
               )}
               {currentStep === 4 && (
                 <>
@@ -232,7 +290,7 @@ export default function Home() {
                   {assetInputMode === 'direct' && (
                     <InputStep
                       title="보유 자산 가액은 얼마인가요?"
-                      subtitle="부동산, 차량 등 모든 자산의 시장 가치"
+                      subtitle="부동산, 차량, 예금, 주식 등 총 자산 가치 (청산가치 산정에 필수적입니다)"
                       onNext={(value) => handleNext("assetValue", value)}
                       onBack={() => {
                         setAssetInputMode(null);
@@ -419,7 +477,7 @@ export default function Home() {
                   {assetInputMode === 'calculate' && assetSubStep === 999 && (
                     <InputStep
                       title="그 외 보유 자산은 얼마인가요?"
-                      subtitle="예금, 주식, 자동차 등의 총액"
+                      subtitle="예금, 주식, 자동차 등의 총액 (거의 다 끝났습니다! 마지막 단계만 남았어요)"
                       onNext={(value) => {
                         setOtherAsset(value);
                         const totalAsset = housingAsset + value;
@@ -450,18 +508,47 @@ export default function Home() {
               )}
               {currentStep === 5 && (
                 <>
-                  {/* 혼인 상태 선택 */}
-                  {dependentSubStep === 0 && (
+                  {/* 입력 모드 선택 */}
+                  {dependentInputMode === null && (
+                    <DependentInputModeSelection
+                      onSelect={(mode) => {
+                        setDependentInputMode(mode);
+                        if (mode === 'calculate') {
+                          setDependentSubStep(0);
+                        }
+                      }}
+                      onBack={handleBack}
+                    />
+                  )}
+                  {/* 직접 입력 모드 */}
+                  {dependentInputMode === 'direct' && (
+                    <InputStep
+                      title="부양가족 수는 몇 명인가요?"
+                      subtitle="본인 포함 인원 (가족 수에 따라 최소 생계비가 달라집니다)"
+                      onNext={(value) => handleNext("dependents", value)}
+                      onBack={() => {
+                        setDependentInputMode(null);
+                      }}
+                      initialValue={formData.dependents}
+                      quickAmounts={[1, 2, 3, 4, 5]}
+                      minValue={1}
+                      unitType="count"
+                    />
+                  )}
+                  {/* 계산 모드 - 혼인 상태 선택 */}
+                  {dependentInputMode === 'calculate' && dependentSubStep === 0 && (
                     <MaritalStatusSelection
                       onSelect={(status) => {
                         setMaritalStatus(status);
                         setDependentSubStep(1);
                       }}
-                      onBack={handleBack}
+                      onBack={() => {
+                        setDependentInputMode(null);
+                      }}
                     />
                   )}
-                  {/* 자녀 수 입력 */}
-                  {dependentSubStep === 1 && maritalStatus && (
+                  {/* 계산 모드 - 자녀 수 입력 */}
+                  {dependentInputMode === 'calculate' && dependentSubStep === 1 && maritalStatus && (
                     <ChildrenCountInput
                       maritalStatus={maritalStatus}
                       onNext={(count) => {
@@ -489,8 +576,8 @@ export default function Home() {
                       }}
                     />
                   )}
-                  {/* 배우자 소득 확인 (주요 법원인 경우만) */}
-                  {dependentSubStep === 2 && maritalStatus === 'married' && (
+                  {/* 계산 모드 - 배우자 소득 확인 (주요 법원인 경우만) */}
+                  {dependentInputMode === 'calculate' && dependentSubStep === 2 && maritalStatus === 'married' && (
                     <SpouseIncomeCheck
                       onSelect={(noIncome) => {
                         setHasNoSpouseIncome(noIncome);
@@ -520,6 +607,8 @@ export default function Home() {
                   kbPrice={kbPrice}
                   depositAmount={depositAmount}
                   isSpouseHousing={isSpouseHousing}
+                  housingAsset={housingAsset}
+                  otherAsset={otherAsset}
                   maritalStatus={maritalStatus}
                   childrenCount={childrenCount}
                   hasNoSpouseIncome={hasNoSpouseIncome}

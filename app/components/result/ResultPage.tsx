@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { FormData, CalculationResult, HousingType, MaritalStatus } from "@/app/types";
 import { getCourtName } from "@/utils/courtJurisdiction";
 import { generateConsultationMessage } from "@/utils/generateConsultationMessage";
@@ -20,6 +20,8 @@ interface ResultPageProps {
   kbPrice?: number;
   depositAmount?: number;
   isSpouseHousing?: boolean | null;
+  housingAsset?: number;
+  otherAsset?: number;
   // 부양가족 상세 정보
   maritalStatus?: MaritalStatus | null;
   childrenCount?: number;
@@ -38,6 +40,8 @@ export function ResultPage({
   kbPrice,
   depositAmount,
   isSpouseHousing,
+  housingAsset,
+  otherAsset,
   maritalStatus,
   childrenCount,
   hasNoSpouseIncome,
@@ -46,6 +50,34 @@ export function ResultPage({
   const [showContactModal, setShowContactModal] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [animatedRate, setAnimatedRate] = useState(0);
+  const [animatedAmount, setAnimatedAmount] = useState(0);
+
+  // 탕감률 & 탕감액 카운트업 애니메이션
+  useEffect(() => {
+    const targetRate = Math.round(result.reductionRate);
+    const targetAmount = Math.round(result.reductionAmount);
+    const duration = 2000; // 2초
+    const steps = 60;
+    const rateIncrement = targetRate / steps;
+    const amountIncrement = targetAmount / steps;
+    const stepDuration = duration / steps;
+
+    let currentStep = 0;
+    const timer = setInterval(() => {
+      currentStep++;
+      if (currentStep >= steps) {
+        setAnimatedRate(targetRate);
+        setAnimatedAmount(targetAmount);
+        clearInterval(timer);
+      } else {
+        setAnimatedRate(Math.round(rateIncrement * currentStep));
+        setAnimatedAmount(Math.round(amountIncrement * currentStep));
+      }
+    }, stepDuration);
+
+    return () => clearInterval(timer);
+  }, [result.reductionRate, result.reductionAmount]);
 
   const handleConsultationClick = () => {
     setShowContactModal(true);
@@ -139,98 +171,96 @@ export function ResultPage({
 
   const colors = getColorByRate(result.reductionRate);
   const circumference = 2 * Math.PI * 54;
-  const strokeDashoffset = circumference - (result.reductionRate / 100) * circumference;
+  const strokeDashoffset = circumference - (animatedRate / 100) * circumference;
 
-  // 가용소득 체크
-  const hasNoIncome = result.monthlyPayment <= 0;
+  // 채무액과 재산 비교
+  const hasMoreAssetThanDebt = formData.assetValue >= formData.totalDebt;
+  // 가용소득 체크 (채무액이 재산보다 많은 경우만)
+  const hasNoIncome = !hasMoreAssetThanDebt && result.monthlyPayment <= 0;
 
   return (
     <div className="space-y-4 animate-fadeIn">
-      {hasNoIncome ? (
-        // 빨간불: 가용소득 부족
-        <div className="text-center mb-4">
-          <div className="relative inline-block animate-scaleIn mb-3">
-            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center shadow-xl">
-              <span className="text-6xl">🔴</span>
-            </div>
-          </div>
-          <h2 className="text-2xl font-extrabold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-2">
+      {hasMoreAssetThanDebt ? (
+        // 노란불: 채무액보다 재산이 많은 경우
+        <div className="text-center mb-4 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 rounded-3xl p-8 shadow-2xl border-2 border-yellow-300">
+          <h2 className="text-2xl font-extrabold text-amber-800 mb-2 drop-shadow-sm">
             개인회생 신청 불가
           </h2>
-          <p className="text-gray-700 text-sm max-w-sm mx-auto">
+          <p className="text-amber-800 text-sm max-w-sm mx-auto mb-3">
+            채무액보다 재산이 많아 개인회생 신청이 불가능합니다
+          </p>
+          <div className="bg-white/90 backdrop-blur-sm border-2 border-amber-300 rounded-xl p-3 max-w-sm mx-auto shadow-md">
+            <p className="text-sm text-amber-900 font-semibold">
+              💡 재산으로 채무 상환이 가능한 상태입니다
+            </p>
+          </div>
+        </div>
+      ) : hasNoIncome ? (
+        // 노란불: 가용소득 부족 (개인파산 안내)
+        <div className="text-center mb-4 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 rounded-3xl p-8 shadow-2xl border-2 border-yellow-300">
+          <h2 className="text-2xl font-extrabold text-amber-800 mb-2 drop-shadow-sm">
+            개인회생 신청 불가
+          </h2>
+          <p className="text-amber-800 text-sm max-w-sm mx-auto mb-3">
             가용소득이 없어 개인회생을 진행할 수 없습니다
           </p>
-        </div>
-      ) : result.needsConsultation ? (
-        // 노란불: 전문가 상담 필요
-        <div className="text-center mb-4">
-          <div className="relative inline-block animate-scaleIn mb-3">
-            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center shadow-xl">
-              <span className="text-6xl">🟡</span>
-            </div>
+          <div className="bg-white/90 backdrop-blur-sm border-2 border-blue-300 rounded-xl p-3 max-w-sm mx-auto shadow-md">
+            <p className="text-sm text-blue-900 font-semibold">
+              💡 개인파산을 고려해보실 수 있습니다
+            </p>
           </div>
-          <h2 className="text-2xl font-extrabold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mb-2">
-            전문가 상담 필요
-          </h2>
-          <p className="text-gray-700 text-sm max-w-sm mx-auto mb-3">
-            조정을 통해 개인회생이 가능할 수 있습니다
-          </p>
-          {result.consultationReason && (
-            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-3 max-w-sm mx-auto">
-              <p className="text-sm text-yellow-900 font-semibold">
-                💡 {result.consultationReason}
-              </p>
-            </div>
-          )}
         </div>
       ) : result.liquidationValueViolation ? (
-        // 빨간불: 청산가치 위반
-        <div className="text-center mb-4">
-          <div className="relative inline-block animate-scaleIn mb-3">
-            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center shadow-xl">
-              <span className="text-6xl">🔴</span>
-            </div>
-          </div>
-          <h2 className="text-2xl font-extrabold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-2">
+        // 노란불: 청산가치 위반
+        <div className="text-center mb-4 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 rounded-3xl p-8 shadow-2xl border-2 border-yellow-300">
+          <h2 className="text-2xl font-extrabold text-amber-800 mb-2 drop-shadow-sm">
             개인회생 신청 불가
           </h2>
-          <p className="text-gray-700 text-sm max-w-sm mx-auto">
+          <p className="text-amber-800 text-sm max-w-sm mx-auto">
             청산가치를 충족하면서 총 부채액을 초과하지 않는 변제계획을 수립할 수 없습니다
           </p>
         </div>
       ) : (
-        // 녹색불: 개인회생 가능
-        <div className="text-center mb-4">
-          <div className="flex justify-center mb-3">
-            <div className="relative inline-block">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
-                <span className="text-3xl">🟢</span>
-              </div>
-            </div>
-          </div>
-          <h2 className="text-2xl font-extrabold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent mb-3">
-            예상 탕감률
+        // 초록불: 개인회생 가능
+        <div className="text-center mb-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-3xl p-8 shadow-2xl border-2 border-green-200">
+          <h2 className="text-3xl font-black text-green-700 mb-4 animate-fadeIn drop-shadow-sm">
+            개인회생이 가능합니다!
           </h2>
+          <p className="text-green-700 font-semibold text-base mb-4">예상 탕감률</p>
           <div className="relative inline-block animate-scaleIn">
             <svg className="w-40 h-40 transform -rotate-90 drop-shadow-xl" viewBox="0 0 120 120">
+              <defs>
+                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style={{ stopColor: '#FFD700', stopOpacity: 1 }} />
+                  <stop offset="50%" style={{ stopColor: '#FFA500', stopOpacity: 1 }} />
+                  <stop offset="100%" style={{ stopColor: '#FF8C00', stopOpacity: 1 }} />
+                </linearGradient>
+              </defs>
               <circle cx="60" cy="60" r="54" stroke="#e5e7eb" strokeWidth="8" fill="none" />
               <circle
-                cx="60" cy="60" r="54" stroke={colors.stroke} strokeWidth="8" fill="none"
+                cx="60" cy="60" r="54" stroke="url(#goldGradient)" strokeWidth="8" fill="none"
                 strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round"
                 className="transition-all duration-1000"
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className={`text-4xl font-black ${colors.text}`}>
-                {Math.round(result.reductionRate)}%
+              <div className="text-5xl font-black bg-gradient-to-br from-yellow-500 via-amber-500 to-orange-600 bg-clip-text text-transparent">
+                {animatedRate}%
               </div>
             </div>
           </div>
-          <div className="mt-3 bg-gradient-to-r from-primary-500/10 to-accent-500/10 rounded-xl p-3">
-            <p className="text-gray-700 text-sm">
-              약 <span className="font-black text-lg text-transparent bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text">{Math.round(result.reductionAmount).toLocaleString()}원</span> 탕감 예상
+          <div className="mt-3 bg-white/80 backdrop-blur-sm border-2 border-amber-300 rounded-xl p-3 shadow-lg">
+            <p className="text-gray-700 text-sm font-semibold">
+              약 <span className="font-black text-lg bg-gradient-to-r from-yellow-600 via-amber-600 to-orange-600 bg-clip-text text-transparent">{animatedAmount.toLocaleString()}원</span> 탕감 예상
             </p>
           </div>
+          {result.consultationReason && (
+            <div className="bg-white/90 backdrop-blur-sm border-2 border-emerald-300 rounded-xl p-3 max-w-sm mx-auto mt-3 shadow-md">
+              <p className="text-sm text-emerald-900 font-semibold">
+                💡 {result.consultationReason}
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -241,21 +271,61 @@ export function ResultPage({
             <h3 className="font-black text-gray-900 text-base">상세 내역</h3>
           </div>
           <div className="grid gap-2">
-            {[
-              { icon: '💸', label: '총 부채액', value: formData.totalDebt },
-              { icon: '💵', label: '예상 변제액', value: result.repaymentAmount },
-              { icon: '📅', label: '월 상환액', value: result.monthlyPayment, highlight: true },
-              { icon: '⏱️', label: '변제 기간', value: result.repaymentPeriod, unit: '개월', highlight: true },
-            ].map((item, i) => (
-              <div key={i} className={`flex justify-between items-center py-2 px-3 rounded-lg ${item.highlight ? 'bg-gradient-to-br from-primary-50 to-accent-50 border border-primary-200' : 'bg-white/60'}`}>
-                <span className={`${item.highlight ? 'text-primary-700 font-bold' : 'text-gray-700 font-semibold'} flex items-center gap-1.5 text-sm`}>
-                  <span className="text-base">{item.icon}</span> {item.label}
+            {/* 총 부채액 */}
+            <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-white/60">
+              <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
+                <span className="text-base">💸</span> 총 부채액
+              </span>
+              <span className="font-black text-base text-gray-900">
+                {Math.round(formData.totalDebt).toLocaleString()}원
+              </span>
+            </div>
+
+            {/* 예상 변제액 (확장형) */}
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
+                  <span className="text-base">💵</span> 예상 변제액
                 </span>
-                <span className={`font-black text-base ${item.highlight ? 'text-primary-600' : 'text-gray-900'}`}>
-                  {typeof item.value === 'number' ? Math.round(item.value).toLocaleString() : item.value}{item.unit || '원'}
+                <span className="font-black text-base text-gray-900">
+                  {Math.round(result.repaymentAmount).toLocaleString()}원
                 </span>
               </div>
-            ))}
+              <div className="space-y-1 pt-2 border-t border-blue-200">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-600">• 실제 납부 총액</span>
+                  <span className="text-gray-700 font-semibold">
+                    {Math.round(result.monthlyPayment * result.repaymentPeriod).toLocaleString()}원
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-600">• 현재가치 (라이프니츠식)</span>
+                  <span className="text-gray-700 font-semibold">
+                    {Math.round(result.repaymentAmount).toLocaleString()}원
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* 월 상환액 */}
+            <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-gradient-to-br from-primary-50 to-accent-50 border border-primary-200">
+              <span className="text-primary-700 font-bold flex items-center gap-1.5 text-sm">
+                <span className="text-base">📅</span> 월 상환액
+              </span>
+              <span className="font-black text-base text-primary-600">
+                {Math.round(result.monthlyPayment).toLocaleString()}원
+              </span>
+            </div>
+
+            {/* 변제 기간 */}
+            <div className="flex justify-between items-center py-2 px-3 rounded-lg bg-gradient-to-br from-primary-50 to-accent-50 border border-primary-200">
+              <span className="text-primary-700 font-bold flex items-center gap-1.5 text-sm">
+                <span className="text-base">⏱️</span> 변제 기간
+              </span>
+              <span className="font-black text-base text-primary-600">
+                {result.repaymentPeriod}개월
+              </span>
+            </div>
           </div>
         </div>
       )}
@@ -266,19 +336,134 @@ export function ResultPage({
           <h3 className="font-black text-gray-900 text-base">입력 정보</h3>
         </div>
         <div className="grid gap-1.5">
-          {[
-            { icon: '💼', label: '월 소득', value: formData.monthlyIncome },
-            { icon: '🏠', label: '청산가치', value: formData.assetValue },
-          ].map((item, i) => (
-            <div key={i} className="flex justify-between items-center py-1.5 px-3 bg-white/60 rounded-lg">
+          {/* 월 소득 */}
+          <div className="flex justify-between items-center py-1.5 px-3 bg-white/60 rounded-lg">
+            <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
+              <span className="text-base">💼</span> 월 소득
+            </span>
+            <span className="text-gray-900 font-bold text-sm">
+              {Math.round(formData.monthlyIncome).toLocaleString()}원
+            </span>
+          </div>
+
+          {/* 총 채무액 */}
+          <div className="flex justify-between items-center py-1.5 px-3 bg-white/60 rounded-lg">
+            <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
+              <span className="text-base">💸</span> 총 채무액
+            </span>
+            <span className="text-gray-900 font-bold text-sm">
+              {Math.round(formData.totalDebt).toLocaleString()}원
+            </span>
+          </div>
+
+          {/* 월 변제 가능액 */}
+          <div className="flex justify-between items-center py-1.5 px-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+            <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
+              <span className="text-base">💵</span> 월 변제 가능액
+            </span>
+            <span className="text-blue-700 font-bold text-sm">
+              {Math.round(result.monthlyPayment).toLocaleString()}원
+            </span>
+          </div>
+
+          {/* 청산가치 */}
+          {assetInputMode === 'calculate' && (housingAsset !== undefined || otherAsset !== undefined) ? (
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-lg p-3">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
+                  <span className="text-base">🏠</span> 청산가치
+                </span>
+                <span className="text-gray-900 font-bold text-sm">
+                  {Math.round(formData.assetValue).toLocaleString()}원
+                </span>
+              </div>
+              <div className="space-y-1 pt-2 border-t border-green-200">
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-gray-600">• 주거 자산</span>
+                    <span className="text-gray-700 font-semibold">
+                      {Math.round(housingAsset || 0).toLocaleString()}원
+                    </span>
+                  </div>
+
+                  {/* 자가 주택의 경우 */}
+                  {housingType === 'owned' && kbPrice && kbPrice > 0 && (
+                    <div className="ml-3 space-y-1">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-500">  - KB 시세</span>
+                        <span className="text-gray-600">
+                          {Math.round(kbPrice).toLocaleString()}원
+                        </span>
+                      </div>
+                      {hasMortgage && mortgageAmount && mortgageAmount > 0 && (
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-gray-500">  - 근저당권 공제</span>
+                          <span className="text-gray-600">
+                            -{Math.round(mortgageAmount).toLocaleString()}원
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* 전세/월세의 경우 최우선변제액 표시 */}
+                  {(housingType === 'jeonse' || housingType === 'monthly') && depositAmount && depositAmount > 0 && (
+                    <div className="ml-3 space-y-1">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-500">  - 보증금</span>
+                        <span className="text-gray-600">
+                          {Math.round(depositAmount).toLocaleString()}원
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-500">  - 최우선변제액 공제</span>
+                        <span className="text-gray-600">
+                          -{Math.round(depositAmount - (housingAsset || 0)).toLocaleString()}원
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 무상거주 - 배우자 명의의 경우 */}
+                  {housingType === 'free' && isSpouseHousing && (
+                    <div className="ml-3">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-500">  - 배우자 명의 주택</span>
+                        <span className="text-gray-600">
+                          {kbPrice && kbPrice > 0 ? (
+                            <>
+                              {Math.round(kbPrice).toLocaleString()}원
+                              {hasMortgage && mortgageAmount && mortgageAmount > 0 && (
+                                <span className="ml-1 text-[10px]">
+                                  (근저당: {Math.round(mortgageAmount).toLocaleString()}원)
+                                </span>
+                              )}
+                            </>
+                          ) : '0원'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-600">• 기타 자산</span>
+                  <span className="text-gray-700 font-semibold">
+                    {Math.round(otherAsset || 0).toLocaleString()}원
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-between items-center py-1.5 px-3 bg-white/60 rounded-lg">
               <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
-                <span className="text-base">{item.icon}</span> {item.label}
+                <span className="text-base">🏠</span> 청산가치
               </span>
               <span className="text-gray-900 font-bold text-sm">
-                {typeof item.value === 'number' ? Math.round(item.value).toLocaleString() : item.value}원
+                {Math.round(formData.assetValue).toLocaleString()}원
               </span>
             </div>
-          ))}
+          )}
 
           {/* 관할법원 정보 */}
           <div className="flex justify-between items-center py-1.5 px-3 bg-gradient-to-r from-primary-50 to-accent-50 border border-primary-200 rounded-lg">
@@ -290,110 +475,122 @@ export function ResultPage({
             </span>
           </div>
 
-          {/* 집 주소 */}
-          {formData.homeAddress && (
-            <div className="py-1.5 px-3 bg-white/60 rounded-lg">
-              <div className="flex items-center gap-1.5 mb-1">
-                <span className="text-base">📍</span>
-                <span className="text-gray-700 font-semibold text-sm">집 주소</span>
-              </div>
-              <p className="text-xs text-gray-600 pl-6">{formData.homeAddress}</p>
-            </div>
-          )}
-
-          {/* 부양가족수 - 별도 스타일링 */}
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3 mt-1">
-            <div className="flex justify-between items-start">
-              <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
-                <span className="text-base">👨‍👩‍👧‍👦</span> 부양가족수
-              </span>
-              <span className="text-gray-900 font-bold text-sm">
-                {formData.dependents.toLocaleString()}명
-              </span>
-            </div>
-            <div className="mt-2 pt-2 border-t border-blue-200">
-              <p className="text-[11px] text-gray-600 leading-relaxed">
-                <span className="font-semibold text-blue-700">💡 계산 방식:</span><br/>
-                • 기혼 기본: (자녀수 ÷ 2) + 1<br/>
-                • 기혼 + 주요법원 + 배우자 소득無: 자녀수 + 1<br/>
-                • 미혼/이혼: 자녀수 + 1
-              </p>
-            </div>
+          {/* 부양가족수 */}
+          <div className="flex justify-between items-center py-1.5 px-3 bg-white/60 rounded-lg">
+            <span className="text-gray-700 font-semibold flex items-center gap-1.5 text-sm">
+              <span className="text-base">👨‍👩‍👧‍👦</span> 부양가족수
+            </span>
+            <span className="text-gray-900 font-bold text-sm">
+              {formData.dependents}명
+            </span>
           </div>
         </div>
       </div>
 
-      {hasNoIncome ? (
-        <div className="bg-orange-50 border-2 border-orange-300 rounded-2xl p-4">
-          <p className="text-sm font-bold text-orange-900 mb-2">상세 정보</p>
-          <div className="space-y-1.5 text-xs text-orange-800">
-            <p>• 월 소득: {Math.round(formData.monthlyIncome).toLocaleString()}원</p>
-            <p>• 최저생계비: 소득에서 최저생계비를 차감한 금액</p>
-            <p>• 월 변제 가능액: {Math.round(result.monthlyPayment).toLocaleString()}원</p>
-            <p className="pt-1.5 border-t border-orange-200 font-semibold">
-              💡 개인회생을 진행하려면 월 소득에서 최저생계비를 제외한 가용소득이 있어야 합니다. 현재 조건으로는 변제 가능한 소득이 없습니다.
+
+      {/* 탕감률 20% 이하 - 상담 권유 */}
+      {!hasNoIncome && !result.liquidationValueViolation && !result.needsConsultation && result.reductionRate <= 20 && (
+        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-300 rounded-2xl p-4 space-y-3 animate-pulse">
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg">💡</span>
+            <p className="text-sm font-bold text-purple-900">더 나은 방안이 있을 수 있습니다</p>
+          </div>
+
+          <div className="bg-white/80 rounded-lg p-3">
+            <p className="text-xs text-gray-800 leading-relaxed">
+              탕감률이 <span className="font-bold text-purple-700">{Math.round(result.reductionRate)}%</span>로 낮은 편입니다.
+              개인회생 외에도 <span className="font-semibold">채무조정, 워크아웃</span> 등
+              더 유리한 해결 방안이 있을 수 있습니다.
             </p>
-            <p className="font-semibold text-orange-900">
-              ⚠️ 변호사와 상담하여 다른 해결방안을 모색하시기 바랍니다.
+          </div>
+
+          <div className="bg-purple-600 rounded-lg p-2.5">
+            <p className="text-xs text-white font-semibold text-center">
+              전문가 상담을 통해 최적의 해결방안을 찾아보세요!
             </p>
           </div>
         </div>
-      ) : result.liquidationValueViolation ? (
-        <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-4">
-          <p className="text-sm font-bold text-red-900 mb-2">상세 정보</p>
-          <div className="space-y-1.5 text-xs text-red-800">
-            <p>• 총 부채액: {Math.round(formData.totalDebt).toLocaleString()}원</p>
-            <p>• 청산가치: {Math.round(formData.assetValue).toLocaleString()}원</p>
-            <p>• 월 변제 가능액: {Math.round(result.monthlyPayment).toLocaleString()}원</p>
-            <p className="pt-1.5 border-t border-red-200 font-semibold">
-              💡 개인회생을 진행하려면 청산가치 이상을 변제하되 총 부채액을 초과할 수 없습니다. 현재 조건으로는 이를 충족하는 변제계획 수립이 어렵습니다.
-            </p>
-            <p className="font-semibold text-red-900">
-              ⚠️ 변호사와 상담하여 다른 해결방안을 모색하시기 바랍니다.
-            </p>
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-3">
-            <p className="font-bold text-blue-900 text-xs mb-1">📊 계산 방식</p>
-            <p className="text-[11px] text-blue-800">
-              라이프니츠식(법정이율 연 5%)으로 계산. 기본 변제기간은 36개월이며, 전액 변제 시 단축되거나 청산가치 충족을 위해 최대 60개월까지 연장될 수 있습니다.
-            </p>
-          </div>
-          <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-3">
-            <p className="font-bold text-amber-900 text-xs mb-1">⚠️ 안내사항</p>
-            <p className="text-[11px] text-amber-800">
-              이 결과는 참고용이며, 실제 탕감률은 법원 판단과 개인 상황에 따라 달라질 수 있습니다.
-            </p>
-          </div>
-        </>
       )}
 
-      <div className="space-y-2">
+      {/* 상담 혜택 안내 - 모든 경우에 표시 */}
+      {!hasNoIncome && !result.liquidationValueViolation && (
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-4 space-y-3">
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg">✨</span>
+            <p className="text-sm font-bold text-green-900">전문 변호사 상담의 이점</p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-start gap-2">
+              <span className="text-green-600 font-bold">✓</span>
+              <p className="text-xs text-gray-800 flex-1">
+                <span className="font-semibold">무료 상담</span>으로 정확한 법률 검토
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-green-600 font-bold">✓</span>
+              <p className="text-xs text-gray-800 flex-1">
+                개인 상황에 맞는 <span className="font-semibold">최적의 해결책</span> 제시
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-green-600 font-bold">✓</span>
+              <p className="text-xs text-gray-800 flex-1">
+                서류 작성부터 법원 제출까지 <span className="font-semibold">전 과정 지원</span>
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="text-green-600 font-bold">✓</span>
+              <p className="text-xs text-gray-800 flex-1">
+                승인율을 높이는 <span className="font-semibold">전문적인 변제계획</span> 수립
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleConsultationClick}
+            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg p-3 text-center transition-all shadow-md hover:shadow-lg cursor-pointer"
+          >
+            <p className="text-white font-bold text-sm mb-1">지금 바로 상담받고</p>
+            <p className="text-white text-xs">빠르게 문제를 해결하세요!</p>
+          </button>
+        </div>
+      )}
+
+      <div className="space-y-3">
         {result.needsConsultation ? (
           // 노란불: 전문가 상담 필요 - 강조된 버튼
-          <button
-            onClick={handleConsultationClick}
-            className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-extrabold py-4 px-4 rounded-xl transition-all shadow-xl hover:shadow-2xl text-center text-base animate-pulse"
-          >
-            🚀 전문가 상담 바로가기
-          </button>
+          <div className="space-y-2">
+            <button
+              onClick={handleConsultationClick}
+              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-extrabold py-4 px-4 rounded-xl transition-all shadow-xl hover:shadow-2xl text-center text-base animate-pulse"
+            >
+              🚀 무료 변호사 상담 신청하기
+            </button>
+            <p className="text-center text-xs text-gray-600">
+              💬 카카오톡으로 간편하게 상담 가능
+            </p>
+          </div>
         ) : (
           // 일반 상담 버튼
-          <button
-            onClick={handleConsultationClick}
-            className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-center text-sm"
-          >
-            💬 지금 상담신청하기
-          </button>
+          <div className="space-y-2">
+            <button
+              onClick={handleConsultationClick}
+              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-center text-base hover:scale-105 transform"
+            >
+              💬 무료 변호사 상담 신청하기
+            </button>
+            <p className="text-center text-xs text-gray-600">
+              📱 간단한 정보 입력 후 카카오톡으로 바로 연결
+            </p>
+          </div>
         )}
         <div className="grid grid-cols-2 gap-2">
           <button onClick={onBack} className="secondary-button text-sm py-2.5">
-            ← 이전 단계
+            ← 이전
           </button>
           <button onClick={onRestart} className="secondary-button text-sm py-2.5">
-            다시 계산하기
+            처음부터 →
           </button>
         </div>
       </div>

@@ -29,6 +29,7 @@ export type HousingType = 'owned' | 'jeonse' | 'monthly' | 'free';
 export type AssetInputMode = 'direct' | 'calculate';
 export type RegionType = '서울특별시' | '수도권과밀억제권역' | '광역시' | '그밖의지역';
 export type MaritalStatus = 'married' | 'single' | 'divorced';
+export type IncomeType = 'salary' | 'business';
 
 // 관할법원 코드 (확장됨)
 export type CourtCode =

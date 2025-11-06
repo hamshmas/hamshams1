@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { MaritalStatus, CourtJurisdiction } from "@/app/types";
 
 export function useDependentCalculation() {
+  const [dependentInputMode, setDependentInputMode] = useState<'direct' | 'calculate' | null>(null);
   const [dependentSubStep, setDependentSubStep] = useState(0);
   const [maritalStatus, setMaritalStatus] = useState<MaritalStatus | null>(null);
   const [childrenCount, setChildrenCount] = useState(0);
@@ -47,6 +48,7 @@ export function useDependentCalculation() {
   };
 
   const resetDependentState = () => {
+    setDependentInputMode(null);
     setDependentSubStep(0);
     setMaritalStatus(null);
     setChildrenCount(0);
@@ -55,6 +57,8 @@ export function useDependentCalculation() {
   };
 
   return {
+    dependentInputMode,
+    setDependentInputMode,
     dependentSubStep,
     setDependentSubStep,
     maritalStatus,
