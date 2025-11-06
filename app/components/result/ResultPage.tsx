@@ -44,19 +44,76 @@ export function ResultPage({
   const [showContactModal, setShowContactModal] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [preferredContactTime, setPreferredContactTime] = useState("");
+  const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleConsultationClick = () => {
     setShowContactModal(true);
   };
 
   const handleContactSubmit = async () => {
+    // 필수 필드 검증
     if (!name.trim() || !phone.trim()) {
       alert("이름과 연락처를 모두 입력해주세요.");
       return;
     }
 
-    setShowContactModal(false);
-    await sendConsultationMessage();
+    // 개인정보 동의 확인
+    if (!privacyConsent) {
+      alert("개인정보 수집 및 이용에 동의해주세요.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // 1. Firebase에 데이터 저장
+      const response = await fetch('/api/consultation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          applicant: {
+            name,
+            phone,
+            email: email || undefined,
+            preferredContactTime: preferredContactTime || undefined,
+            privacyConsent,
+          },
+          formData,
+          result,
+          housingType,
+          kbPrice,
+          mortgageAmount,
+          depositAmount,
+          hasMortgage,
+          isSpouseHousing,
+          maritalStatus,
+          childrenCount,
+          hasNoSpouseIncome,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || '상담 신청 중 오류가 발생했습니다.');
+      }
+
+      console.log('[Consultation] Successfully saved:', data.consultationId);
+
+      // 2. 기존 카카오톡 전송 로직 실행
+      setShowContactModal(false);
+      await sendConsultationMessage();
+    } catch (error) {
+      console.error('[Consultation] Error:', error);
+      alert(error instanceof Error ? error.message : '상담 신청 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const sendConsultationMessage = async () => {
@@ -356,8 +413,14 @@ export function ResultPage({
         isOpen={showContactModal}
         name={name}
         phone={phone}
+        email={email}
+        preferredContactTime={preferredContactTime}
+        privacyConsent={privacyConsent}
         onNameChange={setName}
         onPhoneChange={setPhone}
+        onEmailChange={setEmail}
+        onPreferredContactTimeChange={setPreferredContactTime}
+        onPrivacyConsentChange={setPrivacyConsent}
         onCancel={() => setShowContactModal(false)}
         onSubmit={handleContactSubmit}
       />
