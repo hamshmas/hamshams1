@@ -19,7 +19,9 @@ if (!getApps().length) {
   }
 
   try {
-    const serviceAccountKey = JSON.parse(serviceAccount);
+    // 환경 변수에서 \n이 실제 줄바꿈으로 변환되도록 처리
+    const serviceAccountParsed = serviceAccount.replace(/\\n/g, '\n');
+    const serviceAccountKey = JSON.parse(serviceAccountParsed);
 
     app = initializeApp({
       credential: cert(serviceAccountKey),
