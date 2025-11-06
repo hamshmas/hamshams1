@@ -46,6 +46,32 @@ export async function POST(request: NextRequest) {
     const repaymentPeriod = findMinimumRepaymentPeriod(monthlyRepayment, liquidationValue, totalDebt);
 
     if (repaymentPeriod === null) {
+      // 청산가치 위반 - 조정 가능성 체크
+      const pv60 = calculatePresentValue(monthlyRepayment, 60);
+      const pvGap = liquidationValue - pv60;
+      const pvRatio = pv60 / liquidationValue;
+
+      let needsConsultation = false;
+      let consultationReason = '';
+
+      // 1. 60개월 PV가 청산가치의 85% 이상인 경우 (생계비 조정으로 가능)
+      if (pvRatio >= 0.85 && pvRatio < 1.0) {
+        needsConsultation = true;
+        const requiredIncrease = Math.ceil(pvGap / 60); // 월 필요 증가액
+        consultationReason = `월 생계비를 약 ${requiredIncrease.toLocaleString()}원 줄이면 개인회생이 가능할 수 있습니다.`;
+      }
+      // 2. 청산가치가 60개월 PV의 115% 이하인 경우 (자산 조정으로 가능)
+      else if (liquidationValue <= pv60 * 1.15 && pv60 > 0) {
+        needsConsultation = true;
+        const requiredDecrease = Math.ceil(pvGap);
+        consultationReason = `자산 가액을 약 ${requiredDecrease.toLocaleString()}원 줄이면 개인회생이 가능할 수 있습니다.`;
+      }
+      // 3. 가용소득이 없는 경우
+      else if (monthlyRepayment <= 0) {
+        needsConsultation = false;
+        consultationReason = '';
+      }
+
       return NextResponse.json({
         reductionRate: 0,
         repaymentAmount: 0,
@@ -53,6 +79,8 @@ export async function POST(request: NextRequest) {
         monthlyPayment: monthlyRepayment,
         repaymentPeriod: 60,
         liquidationValueViolation: true,
+        needsConsultation,
+        consultationReason: consultationReason || undefined,
       });
     }
 
@@ -68,6 +96,7 @@ export async function POST(request: NextRequest) {
       monthlyPayment: monthlyRepayment,
       repaymentPeriod,
       liquidationValueViolation: false,
+      needsConsultation: false,
     });
   } catch (error) {
     console.error('계산 오류:', error);

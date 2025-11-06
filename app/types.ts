@@ -21,6 +21,8 @@ export interface CalculationResult {
   monthlyPayment: number;
   repaymentPeriod: number;
   liquidationValueViolation: boolean;
+  needsConsultation: boolean; // 전문가 상담 필요 여부
+  consultationReason?: string; // 상담 필요 사유
 }
 
 export type HousingType = 'owned' | 'jeonse' | 'monthly' | 'free';

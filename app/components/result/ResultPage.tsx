@@ -104,24 +104,48 @@ export function ResultPage({
   return (
     <div className="space-y-4 animate-fadeIn">
       {hasNoIncome ? (
+        // 빨간불: 가용소득 부족
         <div className="text-center mb-4">
           <div className="relative inline-block animate-scaleIn mb-3">
-            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-orange-100 to-orange-200 flex items-center justify-center shadow-xl">
-              <span className="text-6xl">💸</span>
+            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center shadow-xl">
+              <span className="text-6xl">🔴</span>
             </div>
           </div>
-          <h2 className="text-2xl font-extrabold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-2">
+          <h2 className="text-2xl font-extrabold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-2">
             개인회생 신청 불가
           </h2>
           <p className="text-gray-700 text-sm max-w-sm mx-auto">
             가용소득이 없어 개인회생을 진행할 수 없습니다
           </p>
         </div>
+      ) : result.needsConsultation ? (
+        // 노란불: 전문가 상담 필요
+        <div className="text-center mb-4">
+          <div className="relative inline-block animate-scaleIn mb-3">
+            <div className="w-40 h-40 rounded-full bg-gradient-to-br from-yellow-100 to-yellow-200 flex items-center justify-center shadow-xl">
+              <span className="text-6xl">🟡</span>
+            </div>
+          </div>
+          <h2 className="text-2xl font-extrabold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mb-2">
+            전문가 상담 필요
+          </h2>
+          <p className="text-gray-700 text-sm max-w-sm mx-auto mb-3">
+            조정을 통해 개인회생이 가능할 수 있습니다
+          </p>
+          {result.consultationReason && (
+            <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-3 max-w-sm mx-auto">
+              <p className="text-sm text-yellow-900 font-semibold">
+                💡 {result.consultationReason}
+              </p>
+            </div>
+          )}
+        </div>
       ) : result.liquidationValueViolation ? (
+        // 빨간불: 청산가치 위반
         <div className="text-center mb-4">
           <div className="relative inline-block animate-scaleIn mb-3">
             <div className="w-40 h-40 rounded-full bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center shadow-xl">
-              <span className="text-6xl">🚨</span>
+              <span className="text-6xl">🔴</span>
             </div>
           </div>
           <h2 className="text-2xl font-extrabold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent mb-2">
@@ -132,7 +156,15 @@ export function ResultPage({
           </p>
         </div>
       ) : (
+        // 녹색불: 개인회생 가능
         <div className="text-center mb-4">
+          <div className="flex justify-center mb-3">
+            <div className="relative inline-block">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
+                <span className="text-3xl">🟢</span>
+              </div>
+            </div>
+          </div>
           <h2 className="text-2xl font-extrabold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent mb-3">
             예상 탕감률
           </h2>
@@ -296,12 +328,23 @@ export function ResultPage({
       )}
 
       <div className="space-y-2">
-        <button
-          onClick={handleConsultationClick}
-          className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-center text-sm"
-        >
-          💬 지금 상담신청하기
-        </button>
+        {result.needsConsultation ? (
+          // 노란불: 전문가 상담 필요 - 강조된 버튼
+          <button
+            onClick={handleConsultationClick}
+            className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-extrabold py-4 px-4 rounded-xl transition-all shadow-xl hover:shadow-2xl text-center text-base animate-pulse"
+          >
+            🚀 전문가 상담 바로가기
+          </button>
+        ) : (
+          // 일반 상담 버튼
+          <button
+            onClick={handleConsultationClick}
+            className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-center text-sm"
+          >
+            💬 지금 상담신청하기
+          </button>
+        )}
         <button onClick={onRestart} className="w-full secondary-button text-sm py-2.5">
           다시 계산하기
         </button>
