@@ -244,52 +244,105 @@ export function ResultPage({
   return (
     <div className="space-y-4 animate-fadeIn">
       {hasMoreAssetThanDebt ? (
-        // 노란불: 채무액보다 재산이 많은 경우
-        <div className="text-center mb-4 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 rounded-3xl p-8 shadow-2xl border-2 border-yellow-300">
-          <h2 className="text-2xl font-extrabold text-amber-800 mb-2 drop-shadow-sm">
-            개인회생 신청 불가
+        // 토스 스타일: 희망 제시 메시지
+        <div className="text-center mb-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl p-8 shadow-2xl border-2 border-blue-200">
+          <div className="mb-4">
+            <div className="inline-block p-3 bg-blue-100 rounded-full mb-3">
+              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <h2 className="text-3xl font-black text-gray-900 mb-3 leading-tight">
+            다른 방법을<br />찾아볼게요
           </h2>
-          <p className="text-amber-800 text-sm max-w-sm mx-auto mb-3">
-            채무액보다 재산이 많아 개인회생 신청이 불가능합니다
+          <p className="text-base text-gray-700 mb-4 leading-relaxed">
+            재산으로 빚을 갚을 수 있는 상황이에요
           </p>
-          <div className="bg-white/90 backdrop-blur-sm border-2 border-amber-300 rounded-xl p-3 max-w-sm mx-auto shadow-md">
-            <p className="text-sm text-amber-900 font-semibold">
-              💡 재산으로 채무 상환이 가능한 상태입니다
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 max-w-sm mx-auto shadow-md">
+            <p className="text-sm text-gray-800 font-medium mb-3">
+              💡 이런 방법도 있어요
             </p>
+            <div className="text-left space-y-2 text-sm text-gray-700">
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600">•</span>
+                <span>재산 매각 후 채무 상환</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600">•</span>
+                <span>개인 채무조정</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="text-blue-600">•</span>
+                <span>전문가와 상담하여 맞춤 해결책 찾기</span>
+              </div>
+            </div>
           </div>
         </div>
       ) : hasNoIncome ? (
-        // 노란불: 가용소득 부족 (개인파산 안내)
-        <div className="text-center mb-4 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 rounded-3xl p-8 shadow-2xl border-2 border-yellow-300">
-          <h2 className="text-2xl font-extrabold text-amber-800 mb-2 drop-shadow-sm">
-            개인회생 신청 불가
+        // 토스 스타일: 개인파산 안내 (희망적)
+        <div className="text-center mb-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl p-8 shadow-2xl border-2 border-blue-200">
+          <div className="mb-4">
+            <div className="inline-block p-3 bg-blue-100 rounded-full mb-3">
+              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <h2 className="text-3xl font-black text-gray-900 mb-3 leading-tight">
+            더 나은 방법이<br />있어요
           </h2>
-          <p className="text-amber-800 text-sm max-w-sm mx-auto mb-3">
-            가용소득이 없어 개인회생을 진행할 수 없습니다
+          <p className="text-base text-gray-700 mb-4 leading-relaxed">
+            지금 수입이 적어도 괜찮아요
           </p>
-          <div className="bg-white/90 backdrop-blur-sm border-2 border-blue-300 rounded-xl p-3 max-w-sm mx-auto shadow-md">
-            <p className="text-sm text-blue-900 font-semibold">
-              💡 개인파산을 고려해보실 수 있습니다
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 max-w-sm mx-auto shadow-md">
+            <p className="text-sm text-blue-900 font-semibold mb-2">
+              💡 개인파산을 고려해보세요
+            </p>
+            <p className="text-xs text-gray-700 leading-relaxed">
+              수입이 없거나 적을 때는 개인파산이 더 좋은 선택일 수 있어요. 전문가와 상담하면 정확한 답을 찾을 수 있습니다.
             </p>
           </div>
         </div>
       ) : result.liquidationValueViolation ? (
-        // 노란불: 청산가치 위반
-        <div className="text-center mb-4 bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 rounded-3xl p-8 shadow-2xl border-2 border-yellow-300">
-          <h2 className="text-2xl font-extrabold text-amber-800 mb-2 drop-shadow-sm">
-            개인회생 신청 불가
+        // 토스 스타일: 청산가치 위반
+        <div className="text-center mb-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl p-8 shadow-2xl border-2 border-blue-200">
+          <div className="mb-4">
+            <div className="inline-block p-3 bg-blue-100 rounded-full mb-3">
+              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <h2 className="text-3xl font-black text-gray-900 mb-3 leading-tight">
+            조금 더<br />살펴볼게요
           </h2>
-          <p className="text-amber-800 text-sm max-w-sm mx-auto">
-            청산가치를 충족하면서 총 부채액을 초과하지 않는 변제계획을 수립할 수 없습니다
+          <p className="text-base text-gray-700 mb-4 leading-relaxed">
+            지금 상황에선 계획을 세우기 어려워요
           </p>
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 max-w-sm mx-auto shadow-md">
+            <p className="text-sm text-gray-800 font-medium mb-2">
+              💡 전문가와 상담이 필요해요
+            </p>
+            <p className="text-xs text-gray-700 leading-relaxed">
+              복잡한 상황이라 정확한 판단을 위해선 변호사와 상담이 필요합니다. 무료 상담으로 해결책을 찾아보세요.
+            </p>
+          </div>
         </div>
       ) : (
-        // 초록불: 개인회생 가능
-        <div className="text-center mb-4 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-3xl p-8 shadow-2xl border-2 border-green-200">
-          <h2 className="text-3xl font-black text-green-700 mb-4 animate-fadeIn drop-shadow-sm">
-            개인회생이 가능합니다!
+        // 토스 스타일: 개인회생 가능 (희망적이고 간결하게)
+        <div className="text-center mb-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-blue-100 rounded-3xl p-8 shadow-2xl border-2 border-blue-300">
+          <div className="mb-4">
+            <div className="inline-block p-4 bg-blue-100 rounded-full mb-3 animate-pulse-slow">
+              <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <h2 className="text-4xl font-black text-gray-900 mb-3 animate-fadeIn leading-tight">
+            정리할 수 있어요
           </h2>
-          <p className="text-green-700 font-semibold text-base mb-4">예상 탕감률</p>
+          <p className="text-base text-gray-600 font-medium mb-6">이만큼 줄어들어요</p>
           <div className="relative inline-block animate-scaleIn">
             <svg className="w-40 h-40 transform -rotate-90 drop-shadow-xl" viewBox="0 0 120 120">
               <defs>
@@ -612,39 +665,39 @@ export function ResultPage({
 
           <button
             onClick={handleConsultationClick}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg p-3 text-center transition-all shadow-md hover:shadow-lg cursor-pointer"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-xl p-4 text-center transition-all shadow-lg hover:shadow-xl cursor-pointer hover:scale-105 transform"
           >
-            <p className="text-white font-bold text-sm mb-1">지금 바로 상담받고</p>
-            <p className="text-white text-xs">빠르게 문제를 해결하세요!</p>
+            <p className="text-white font-bold text-base mb-1">무료로 상담받기</p>
+            <p className="text-white/90 text-sm">3분이면 끝나요</p>
           </button>
         </div>
       )}
 
       <div className="space-y-3">
         {result.needsConsultation ? (
-          // 노란불: 전문가 상담 필요 - 강조된 버튼
+          // 전문가 상담 필요 - 토스 스타일 버튼
           <div className="space-y-2">
             <button
               onClick={handleConsultationClick}
-              className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-extrabold py-4 px-4 rounded-xl transition-all shadow-xl hover:shadow-2xl text-center text-base animate-pulse"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-center text-base hover:scale-105 transform"
             >
-              🚀 무료 변호사 상담 신청하기
+              전문가와 상담하기
             </button>
-            <p className="text-center text-xs text-gray-600">
-              💬 카카오톡으로 간편하게 상담 가능
+            <p className="text-center text-xs text-gray-500">
+              카카오톡으로 간편하게 · 3분 소요
             </p>
           </div>
         ) : (
-          // 일반 상담 버튼
+          // 일반 상담 버튼 - 토스 스타일
           <div className="space-y-2">
             <button
               onClick={handleConsultationClick}
-              className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-center text-base hover:scale-105 transform"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-center text-base hover:scale-105 transform"
             >
-              💬 무료 변호사 상담 신청하기
+              무료 상담 신청하기
             </button>
-            <p className="text-center text-xs text-gray-600">
-              📱 간단한 정보 입력 후 카카오톡으로 바로 연결
+            <p className="text-center text-xs text-gray-500">
+              카카오톡으로 바로 연결돼요
             </p>
           </div>
         )}

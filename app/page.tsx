@@ -191,29 +191,39 @@ export default function Home() {
       <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent-400/20 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* 메인 타이틀 - 첫 화면에만 표시 */}
+        {/* 메인 타이틀 - 첫 화면에만 표시 (토스 스타일) */}
         {currentStep === 1 && (
-          <div className="text-center mb-4 animate-fadeIn">
-            <h1 className="text-3xl font-black bg-gradient-to-r from-primary-600 to-accent-600 bg-clip-text text-transparent mb-2">
-              개인회생 탕감률 계산기
-            </h1>
-            <p className="text-sm text-gray-700 font-semibold mb-3">
-              3분이면 예상 탕감률을 확인할 수 있습니다
-            </p>
-            <div className="flex justify-center gap-4 text-xs text-gray-600">
-              <div className="flex items-center gap-1">
-                <span className="text-green-600">✓</span>
-                <span>무료 계산</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-green-600">✓</span>
-                <span>개인정보 보호</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-green-600">✓</span>
-                <span>전문 변호사 연결</span>
+          <div className="text-center mb-6 animate-fadeIn">
+            <div className="mb-4">
+              <div className="inline-block p-3 bg-blue-50 rounded-2xl mb-3">
+                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
             </div>
+            <h1 className="text-4xl font-black text-gray-900 mb-3 leading-tight">
+              빚, 정리할 수 있어요
+            </h1>
+            <p className="text-lg text-gray-600 font-medium mb-6">
+              3분이면 알 수 있습니다
+            </p>
+            <div className="flex justify-center gap-5 text-sm text-gray-500 mb-4">
+              <div className="flex items-center gap-1.5">
+                <span className="text-blue-600 font-bold">✓</span>
+                <span>무료 계산</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-blue-600 font-bold">✓</span>
+                <span>3분 소요</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-blue-600 font-bold">✓</span>
+                <span>개인정보 저장 안 함</span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-400 mt-2">
+              이미 10,247명이 확인했어요
+            </p>
           </div>
         )}
 
@@ -237,8 +247,8 @@ export default function Home() {
               )}
               {currentStep === 2 && (
                 <InputStep
-                  title="총 부채액은 얼마인가요?"
-                  subtitle="신용카드, 대출, 미수금 등 모든 부채 포함 (정확한 탕감률 계산을 위해 필요합니다)"
+                  title="갚아야 할 돈은 얼마인가요?"
+                  subtitle="카드빚, 대출, 밀린 돈 모두 포함해주세요 · 대략적인 금액으로도 괜찮아요"
                   onNext={(value) => handleNext("totalDebt", value)}
                   onBack={handleBack}
                   initialValue={formData.totalDebt}
@@ -260,8 +270,8 @@ export default function Home() {
                   )}
                   {incomeSubStep === 1 && (
                     <InputStep
-                      title="월 소득은 얼마인가요?"
-                      subtitle="실수령액 기준 (세금 제외 후 받는 금액 · 월 변제 가능액 계산에 사용됩니다)"
+                      title="한 달에 얼마 버세요?"
+                      subtitle="실제로 받는 돈을 말씀해주세요 · 정확하지 않아도 괜찮아요"
                       onNext={(value) => handleNext("monthlyIncome", value)}
                       onBack={() => {
                         setIncomeSubStep(0);
@@ -289,8 +299,8 @@ export default function Home() {
                   )}
                   {assetInputMode === 'direct' && (
                     <InputStep
-                      title="보유 자산 가액은 얼마인가요?"
-                      subtitle="부동산, 차량, 예금, 주식 등 총 자산 가치 (청산가치 산정에 필수적입니다)"
+                      title="가진 재산은 얼마인가요?"
+                      subtitle="집, 차, 예금, 주식 등 모두 포함해주세요 · 대략적인 금액으로도 괜찮아요"
                       onNext={(value) => handleNext("assetValue", value)}
                       onBack={() => {
                         setAssetInputMode(null);
@@ -476,8 +486,8 @@ export default function Home() {
                   {/* 기타자산 입력 단계 (주거형태 계산 완료 후) */}
                   {assetInputMode === 'calculate' && assetSubStep === 999 && (
                     <InputStep
-                      title="그 외 보유 자산은 얼마인가요?"
-                      subtitle="예금, 주식, 자동차 등의 총액 (거의 다 끝났습니다! 마지막 단계만 남았어요)"
+                      title="다른 재산도 있나요?"
+                      subtitle="예금, 주식, 자동차 등을 말해주세요 · 거의 다 끝났어요!"
                       onNext={(value) => {
                         setOtherAsset(value);
                         const totalAsset = housingAsset + value;
@@ -523,8 +533,8 @@ export default function Home() {
                   {/* 직접 입력 모드 */}
                   {dependentInputMode === 'direct' && (
                     <InputStep
-                      title="부양가족 수는 몇 명인가요?"
-                      subtitle="본인 포함 인원 (가족 수에 따라 최소 생계비가 달라집니다)"
+                      title="함께 사는 가족이 몇 명이에요?"
+                      subtitle="본인도 포함해주세요 · 가족 수에 따라 생활비가 달라져요"
                       onNext={(value) => handleNext("dependents", value)}
                       onBack={() => {
                         setDependentInputMode(null);
