@@ -45,6 +45,17 @@ function removeUndefined(obj: any): any {
 
 export async function POST(request: NextRequest) {
   try {
+    // Firebase Admin이 초기화되지 않은 경우 처리
+    if (!adminDb) {
+      return NextResponse.json(
+        {
+          error: 'Database service not available',
+          message: 'Firebase Admin is not initialized. Please configure Firebase credentials.'
+        },
+        { status: 503 }
+      );
+    }
+
     const body: CreateConsultationRequest = await request.json();
 
     // 필수 필드 검증

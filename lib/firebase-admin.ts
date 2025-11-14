@@ -7,12 +7,14 @@ import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getFirestore, Firestore } from 'firebase-admin/firestore';
 import { getAuth, Auth } from 'firebase-admin/auth';
 
-let app: App;
+let app: App | undefined;
+let adminDb: Firestore | undefined;
+let adminAuth: Auth | undefined;
 
 // Firebase Admin 초기화 (중복 초기화 방지)
 if (!getApps().length) {
   try {
-    // 방법 1: 개별 환경 변수 사용 (권장)
+    // 방법 1: 개별 환경 변수 사용 (권장 - Vercel에서 사용)
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
     const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
     const privateKey = process.env.FIREBASE_PRIVATE_KEY;
@@ -29,33 +31,30 @@ if (!getApps().length) {
         }),
         projectId,
       });
-    }
-    // 방법 2: JSON 문자열 사용 (백업)
-    else {
-      const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 
-      if (!serviceAccount) {
-        throw new Error('Firebase Admin credentials not set. Please set either individual variables (FIREBASE_CLIENT_EMAIL, FIREBASE_PRIVATE_KEY) or FIREBASE_SERVICE_ACCOUNT_KEY');
-      }
+      adminDb = getFirestore(app);
+      adminAuth = getAuth(app);
 
-      const serviceAccountParsed = serviceAccount.replace(/\\n/g, '\n');
-      const serviceAccountKey = JSON.parse(serviceAccountParsed);
-
-      app = initializeApp({
-        credential: cert(serviceAccountKey),
-        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-      });
+      console.log('Firebase Admin initialized with individual credentials');
+    } else {
+      console.warn('Firebase Admin credentials not configured. Some features may not work.');
+      console.warn('Please set FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY environment variables.');
     }
   } catch (error) {
     console.error('Failed to initialize Firebase Admin:', error);
-    throw error;
+    // 개발 환경에서는 에러를 던지지 않고 경고만 표시
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
   }
 } else {
   app = getApps()[0];
+  if (app) {
+    adminDb = getFirestore(app);
+    adminAuth = getAuth(app);
+  }
 }
 
-// Firestore 및 Auth 인스턴스 (Admin)
-export const adminDb: Firestore = getFirestore(app);
-export const adminAuth: Auth = getAuth(app);
-
+// Safe exports - undefined일 수 있음을 명시
+export { adminDb, adminAuth };
 export default app;
