@@ -4,10 +4,25 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import type {
-  CreateConsultationRequest,
-  CreateConsultationResponse,
-} from '@/app/types/consultation';
+
+// Consultation types
+interface CreateConsultationRequest {
+  applicant: {
+    name: string;
+    phone: string;
+    email?: string;
+    privacyConsent: boolean;
+  };
+  formData: any;
+  result: any;
+}
+
+interface CreateConsultationResponse {
+  success: boolean;
+  consultationId?: string;
+  message?: string;
+  error?: string;
+}
 
 export async function POST(request: NextRequest) {
   try {
