@@ -14,43 +14,67 @@ export function AssetInputModeSelection({
   onBack: () => void;
 }) {
   return (
-    <div className="space-y-4 animate-slideIn">
-      <div className="space-y-1">
-        <h2 className="text-2xl font-extrabold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
-          보유 자산 가액은 얼마인가요?
+    <div className="space-y-6 animate-fadeInUp">
+      <div className="text-center space-y-3">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl shadow-lg shadow-indigo-500/30 mb-2">
+          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+          보유 자산 가액은?
         </h2>
-        <p className="text-gray-600 text-sm">부동산, 차량 등 모든 자산의 시장 가치</p>
+        <p className="text-base text-gray-600 leading-relaxed">
+          부동산, 차량 등<br />모든 자산의 시장 가치
+        </p>
       </div>
 
       <div className="space-y-3">
         <button
           onClick={() => onSelect('direct')}
-          className="w-full bg-white border-2 border-primary-300 hover:border-primary-500 rounded-xl p-4 text-left transition-all hover:shadow-lg"
+          className="group w-full bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-indigo-400 rounded-2xl p-6 text-left transition-all duration-300 hover:shadow-lg"
         >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">✍️</span>
-            <div>
-              <p className="font-bold text-gray-900">직접 입력</p>
-              <p className="text-xs text-gray-600">자산 가액을 알고 있어요</p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-indigo-100 group-hover:to-indigo-200 rounded-2xl flex items-center justify-center transition-all">
+              <svg className="w-6 h-6 text-gray-600 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
             </div>
+            <div className="flex-1">
+              <p className="font-bold text-gray-900 text-lg">직접 입력</p>
+              <p className="text-sm text-gray-600">자산 가액을 알고 있어요</p>
+            </div>
+            <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </div>
         </button>
 
         <button
           onClick={() => onSelect('calculate')}
-          className="w-full bg-gradient-to-br from-primary-50 to-accent-50 border-2 border-primary-200 hover:border-primary-400 rounded-xl p-4 text-left transition-all hover:shadow-lg"
+          className="group w-full bg-gradient-to-br from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 border-2 border-indigo-200 hover:border-indigo-400 rounded-2xl p-6 text-left transition-all duration-300 hover:shadow-lg"
         >
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🧮</span>
-            <div>
-              <p className="font-bold text-gray-900">계산하기</p>
-              <p className="text-xs text-gray-600">주거 형태로 자동 계산할게요</p>
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
             </div>
+            <div className="flex-1">
+              <p className="font-bold text-gray-900 text-lg">계산하기 <span className="text-indigo-600">추천</span></p>
+              <p className="text-sm text-gray-600">주거 형태로 자동 계산할게요</p>
+            </div>
+            <svg className="w-5 h-5 text-indigo-500 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </div>
         </button>
       </div>
 
-      <button onClick={onBack} className="w-full secondary-button text-sm py-2.5">
+      <button
+        onClick={onBack}
+        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-semibold transition-all duration-300 active:scale-95"
+      >
         이전
       </button>
     </div>
@@ -66,40 +90,99 @@ export function HousingTypeSelection({
   onBack: () => void;
 }) {
   const options = [
-    { type: 'owned' as const, icon: '🏠', label: '본인 명의 자가', desc: '주택을 소유하고 있어요' },
-    { type: 'jeonse' as const, icon: '🔑', label: '전세', desc: '전세로 거주하고 있어요' },
-    { type: 'monthly' as const, icon: '📅', label: '월세', desc: '월세로 거주하고 있어요' },
-    { type: 'free' as const, icon: '🏡', label: '무상거주', desc: '무상으로 거주하고 있어요' },
+    {
+      type: 'owned' as const,
+      label: '본인 명의 자가',
+      desc: '주택을 소유하고 있어요',
+      gradient: 'from-blue-500 to-blue-600',
+      shadow: 'shadow-blue-500/30',
+      icon: (
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+      )
+    },
+    {
+      type: 'jeonse' as const,
+      label: '전세',
+      desc: '전세로 거주하고 있어요',
+      gradient: 'from-green-500 to-emerald-600',
+      shadow: 'shadow-green-500/30',
+      icon: (
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+        </svg>
+      )
+    },
+    {
+      type: 'monthly' as const,
+      label: '월세',
+      desc: '월세로 거주하고 있어요',
+      gradient: 'from-purple-500 to-purple-600',
+      shadow: 'shadow-purple-500/30',
+      icon: (
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      )
+    },
+    {
+      type: 'free' as const,
+      label: '무상거주',
+      desc: '무상으로 거주하고 있어요',
+      gradient: 'from-amber-500 to-orange-600',
+      shadow: 'shadow-amber-500/30',
+      icon: (
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      )
+    },
   ];
 
   return (
-    <div className="space-y-4 animate-slideIn">
-      <div className="space-y-1">
-        <h2 className="text-2xl font-extrabold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
+    <div className="space-y-6 animate-fadeInUp">
+      <div className="text-center space-y-3">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-3xl shadow-lg shadow-teal-500/30 mb-2">
+          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+        </div>
+        <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
           현재 주거 형태는?
         </h2>
-        <p className="text-gray-600 text-sm">해당하는 항목을 선택해주세요</p>
+        <p className="text-base text-gray-600 leading-relaxed">
+          해당하는 항목을 선택해주세요
+        </p>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         {options.map((option) => (
           <button
             key={option.type}
             onClick={() => onSelect(option.type)}
-            className="w-full bg-white border-2 border-gray-200 hover:border-primary-400 rounded-xl p-3.5 text-left transition-all hover:shadow-lg"
+            className="group w-full bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-primary-400 rounded-2xl p-5 text-left transition-all duration-300 hover:shadow-lg active:scale-95"
           >
-            <div className="flex items-center gap-3">
-              <span className="text-2xl">{option.icon}</span>
-              <div>
-                <p className="font-bold text-gray-900 text-sm">{option.label}</p>
-                <p className="text-xs text-gray-600">{option.desc}</p>
+            <div className="flex items-center gap-4">
+              <div className={`w-12 h-12 bg-gradient-to-br ${option.gradient} rounded-2xl flex items-center justify-center shadow-lg ${option.shadow}`}>
+                {option.icon}
               </div>
+              <div className="flex-1">
+                <p className="font-bold text-gray-900 text-base">{option.label}</p>
+                <p className="text-sm text-gray-600 mt-0.5">{option.desc}</p>
+              </div>
+              <svg className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
             </div>
           </button>
         ))}
       </div>
 
-      <button onClick={onBack} className="w-full secondary-button text-sm py-2.5">
+      <button
+        onClick={onBack}
+        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-semibold transition-all duration-300 active:scale-95"
+      >
         이전
       </button>
     </div>

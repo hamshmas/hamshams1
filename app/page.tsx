@@ -22,11 +22,13 @@ import { LoadingScreen, ProgressSteps } from "@/app/components/ui";
 import { ResultPage } from "@/app/components/result";
 import { AddressInputStep } from "@/app/components/address";
 import { MaritalStatusSelection, ChildrenCountInput, SpouseIncomeCheck } from "@/app/components/dependent";
+import { WelcomeScreen } from "@/app/components/welcome";
 import { useAssetCalculation } from "@/app/hooks/useAssetCalculation";
 import { useDependentCalculation } from "@/app/hooks/useDependentCalculation";
 import { getPriorityRepaymentRegion, getCourtName } from "@/utils/courtJurisdiction";
 
 export default function Home() {
+  const [showWelcome, setShowWelcome] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -165,6 +167,15 @@ export default function Home() {
     resetAssetState();
     resetDependentState();
   };
+
+  // Show Welcome Screen
+  if (showWelcome) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
+        <WelcomeScreen onStart={() => setShowWelcome(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-500/10 via-white to-accent-500/10 flex items-center justify-center p-3 relative overflow-hidden">
