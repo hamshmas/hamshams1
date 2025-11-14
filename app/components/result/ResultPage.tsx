@@ -146,18 +146,14 @@ export function ResultPage({
       setTimeout(() => setCopySuccess(false), COPY_SUCCESS_NOTIFICATION_DURATION);
     }
 
-    // Supabase에 상담 신청 정보 저장 (비동기로 백그라운드 실행)
-    fetch('/api/consultation/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        phone,
-        formData,
-        calculationResult: result,
-      }),
-    }).catch(err => {
-      console.error('상담 신청 저장 실패:', err);
+    // 상담 신청 정보 콘솔 로그
+    console.log('[Consultation] 상담 신청:', {
+      name,
+      phone,
+      totalDebt: formData.totalDebt,
+      monthlyIncome: formData.monthlyIncome,
+      reductionRate: result.reductionRate,
+      timestamp: new Date().toISOString(),
     });
 
     // 카카오톡 채널 열기
