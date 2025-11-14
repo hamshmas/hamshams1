@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { FormData, CalculationResult, HousingType, MaritalStatus } from "@/app/types";
 import { getCourtName } from "@/utils/courtJurisdiction";
 import { generateConsultationMessage } from "@/utils/generateConsultationMessage";
@@ -53,6 +53,7 @@ export function ResultPage({
   const [phone, setPhone] = useState("");
   const [animatedRate, setAnimatedRate] = useState(0);
   const [animatedAmount, setAnimatedAmount] = useState(0);
+  const hasSaved = useRef(false);
 
   // 탕감률 & 탕감액 카운트업 애니메이션
   useEffect(() => {
@@ -80,9 +81,25 @@ export function ResultPage({
     return () => clearInterval(timer);
   }, [result.reductionRate, result.reductionAmount]);
 
-  // 결과 페이지 도달 시 Supabase에 데이터 저장
+  // 결과 페이지 도달 시 Supabase에 데이터 저장 (환경 변수가 설정된 경우에만)
   useEffect(() => {
     const saveResultData = async () => {
+      // 이미 저장했으면 건너뛰기 (중복 저장 방지)
+      if (hasSaved.current) {
+        console.log('[Supabase] 이미 저장되어 건너뜁니다.');
+        return;
+      }
+
+      // Supabase가 설정되지 않은 경우 건너뛰기
+      if (!supabase) {
+        console.log('[Supabase] 환경 변수가 설정되지 않아 데이터 저장을 건너뜁니다.');
+        return;
+      }
+
+      // 저장 시작 표시 (중복 방지 - 비동기 작업 시작 전에 설정)
+      hasSaved.current = true;
+      console.log('[Supabase] 데이터 저장을 시작합니다...');
+
       try {
         // IP 주소 가져오기
         const ipResponse = await fetch('https://api.ipify.org?format=json');
@@ -128,13 +145,18 @@ export function ResultPage({
           created_at: new Date().toISOString(),
         };
 
+        console.log('[Supabase] 저장할 데이터:', resultData);
+
         // Supabase에 저장
         const { data, error } = await supabase
           .from('calculation_results')
           .insert([resultData]);
 
         if (error) {
-          console.error('[Supabase] 데이터 저장 실패:', error);
+          console.error('[Supabase] 데이터 저장 실패:');
+          console.error('Error object:', error);
+          console.error('Error keys:', Object.keys(error));
+          console.error('Error JSON:', JSON.stringify(error, null, 2));
         } else {
           console.log('[Supabase] 데이터 저장 성공:', data);
         }
