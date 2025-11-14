@@ -6,6 +6,7 @@ import { getCourtName } from "@/utils/courtJurisdiction";
 import { generateConsultationMessage } from "@/utils/generateConsultationMessage";
 import { ConsultationModal, CopySuccessNotification } from "@/app/components/consultation";
 import { KAKAO_CONSULTATION_URL, COPY_SUCCESS_NOTIFICATION_DURATION } from "@/app/config/consultation";
+import { supabase } from "@/lib/supabase";
 
 interface ResultPageProps {
   result: CalculationResult;
@@ -78,6 +79,72 @@ export function ResultPage({
 
     return () => clearInterval(timer);
   }, [result.reductionRate, result.reductionAmount]);
+
+  // 결과 페이지 도달 시 Supabase에 데이터 저장
+  useEffect(() => {
+    const saveResultData = async () => {
+      try {
+        // IP 주소 가져오기
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        const userIp = ipData.ip;
+
+        // Supabase에 저장할 데이터 구성
+        const resultData = {
+          ip_address: userIp,
+          // 입력 정보
+          total_debt: formData.totalDebt,
+          monthly_income: formData.monthlyIncome,
+          asset_value: formData.assetValue,
+          dependents: formData.dependents,
+          home_address: formData.homeAddress,
+          work_address: formData.workAddress,
+          court_jurisdiction: formData.courtJurisdiction,
+          priority_repayment_region: formData.priorityRepaymentRegion,
+          // 결과값
+          reduction_rate: result.reductionRate,
+          reduction_amount: result.reductionAmount,
+          repayment_amount: result.repaymentAmount,
+          monthly_payment: result.monthlyPayment,
+          repayment_period: result.repaymentPeriod,
+          needs_consultation: result.needsConsultation || false,
+          liquidation_value_violation: result.liquidationValueViolation || false,
+          consultation_reason: result.consultationReason || null,
+          // 자산 상세 정보
+          asset_input_mode: assetInputMode || null,
+          housing_type: housingType || null,
+          has_mortgage: hasMortgage ?? null,
+          mortgage_amount: mortgageAmount || null,
+          kb_price: kbPrice || null,
+          deposit_amount: depositAmount || null,
+          is_spouse_housing: isSpouseHousing ?? null,
+          housing_asset: housingAsset || null,
+          other_asset: otherAsset || null,
+          // 부양가족 상세 정보
+          marital_status: maritalStatus || null,
+          children_count: childrenCount || null,
+          has_no_spouse_income: hasNoSpouseIncome ?? null,
+          // 타임스탬프
+          created_at: new Date().toISOString(),
+        };
+
+        // Supabase에 저장
+        const { data, error } = await supabase
+          .from('calculation_results')
+          .insert([resultData]);
+
+        if (error) {
+          console.error('[Supabase] 데이터 저장 실패:', error);
+        } else {
+          console.log('[Supabase] 데이터 저장 성공:', data);
+        }
+      } catch (error) {
+        console.error('[Supabase] 저장 중 오류:', error);
+      }
+    };
+
+    saveResultData();
+  }, []);
 
   const handleConsultationClick = () => {
     setShowContactModal(true);
