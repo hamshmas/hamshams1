@@ -223,7 +223,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-dvh bg-white flex flex-col">
       {/* Toss 스타일 헤더 - 웰컴 화면(step 0)과 결과 화면(step 6)에서는 숨김 */}
       {currentStep >= 1 && currentStep <= totalSteps && (
         <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
