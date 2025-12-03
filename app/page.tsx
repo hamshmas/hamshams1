@@ -321,7 +321,7 @@ export default function Home() {
 
           {/* 입력 단계 컨테이너 */}
           {currentStep >= 1 && (
-          <div className="flex-1 flex flex-col px-5 py-6">
+          <div className="flex-1 flex flex-col px-5 pt-6 pb-safe">
           {isLoading ? (
             <LoadingScreen />
           ) : (
@@ -833,7 +833,7 @@ export default function Home() {
 
       {/* 하단 고정 CTA 버튼 - 웰컴 화면(step 0)에서만 표시 */}
       {currentStep === 0 && (
-        <div className="sticky bottom-0 bg-white border-t border-gray-100 px-5 py-4 safe-area-bottom">
+        <div className="sticky bottom-0 bg-white border-t border-gray-100 px-5 pt-4 pb-safe">
           <div className="max-w-lg mx-auto">
             <button
               onClick={() => setCurrentStep(1)}

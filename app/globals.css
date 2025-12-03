@@ -24,6 +24,15 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+
+  /* iOS Safe Area 지원 */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  }
 }
 
 @layer components {

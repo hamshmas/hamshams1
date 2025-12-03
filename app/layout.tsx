@@ -14,6 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </head>
       <body className="antialiased">
         <Script
           src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
