@@ -261,7 +261,7 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <span className="text-sm font-semibold text-gray-900">탕감율 계산기</span>
+              <span className="text-sm font-semibold text-gray-900">회생의 기적</span>
             </div>
             <span className="text-xs text-gray-500">{currentStep}/{totalSteps}</span>
           </div>
@@ -284,6 +284,11 @@ export default function Home() {
               {/* 히어로 섹션 */}
               <div className="flex-1">
                 <div className="mb-8">
+                  {/* 브랜드 뱃지 */}
+                  <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold mb-4">
+                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                    회생의 기적
+                  </div>
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
                     <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -337,8 +342,10 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                {/* 버전 표시 */}
-                <p className="text-center text-xs text-gray-400">v{APP_VERSION}</p>
+                {/* 법률사무소 정보 */}
+                <p className="text-center text-xs text-gray-400">
+                  <span className="font-medium text-gray-500">블랙스톤 법률사무소</span> · v{APP_VERSION}
+                </p>
               </div>
             </div>
           )}

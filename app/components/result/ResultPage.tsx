@@ -696,34 +696,41 @@ export function ResultPage({
         </div>
       )}
 
-      <div className="space-y-3">
+      {/* 블랙스톤 법률사무소 상담 영역 */}
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-md">
+            <svg className="w-6 h-6 text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-white font-bold text-base">블랙스톤 법률사무소</p>
+            <p className="text-slate-400 text-xs">회생의 기적 · 무료 상담</p>
+          </div>
+        </div>
+
         {result.needsConsultation ? (
-          // 전문가 상담 필요 - 토스 스타일 버튼
-          <div className="space-y-2">
-            <button
-              onClick={handleConsultationClick}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-center text-base hover:scale-105 transform"
-            >
-              전문가와 상담하기
-            </button>
-            <p className="text-center text-xs text-gray-500">
-              카카오톡으로 간편하게 · 3분 소요
-            </p>
-          </div>
+          <button
+            onClick={handleConsultationClick}
+            className="w-full bg-white hover:bg-gray-100 text-slate-900 font-bold py-4 px-4 rounded-xl transition-all shadow-lg text-center text-base"
+          >
+            전문 변호사 상담받기
+          </button>
         ) : (
-          // 일반 상담 버튼 - 토스 스타일
-          <div className="space-y-2">
-            <button
-              onClick={handleConsultationClick}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-center text-base hover:scale-105 transform"
-            >
-              무료 상담 신청하기
-            </button>
-            <p className="text-center text-xs text-gray-500">
-              카카오톡으로 바로 연결돼요
-            </p>
-          </div>
+          <button
+            onClick={handleConsultationClick}
+            className="w-full bg-white hover:bg-gray-100 text-slate-900 font-bold py-4 px-4 rounded-xl transition-all shadow-lg text-center text-base"
+          >
+            무료 상담 신청하기
+          </button>
         )}
+        <p className="text-center text-xs text-slate-400">
+          카카오톡으로 간편하게 · 3분 소요
+        </p>
+      </div>
+
+      <div className="space-y-3">
         <div className="grid grid-cols-2 gap-2">
           <button onClick={onBack} className="secondary-button text-sm py-2.5">
             ← 이전
