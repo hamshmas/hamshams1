@@ -77,18 +77,18 @@ export default function Home() {
     if (currentStep !== 0) return; // 웰컴 화면에서만 애니메이션
 
     const duration = 1500; // 1.5초
-    const steps = 40;
-    const increment = userCount / steps;
-    const stepDuration = duration / steps;
+    const totalSteps = 40;
+    const increment = userCount / totalSteps;
+    const stepDuration = duration / totalSteps;
 
-    let currentStep = 0;
+    let animationStep = 0;
     const timer = setInterval(() => {
-      currentStep++;
-      if (currentStep >= steps) {
+      animationStep++;
+      if (animationStep >= totalSteps) {
         setAnimatedUserCount(userCount);
         clearInterval(timer);
       } else {
-        setAnimatedUserCount(Math.round(increment * currentStep));
+        setAnimatedUserCount(Math.round(increment * animationStep));
       }
     }, stepDuration);
 
