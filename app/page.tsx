@@ -48,7 +48,8 @@ export default function Home() {
     priorityRepaymentRegion: "그밖의지역",
   });
   const [result, setResult] = useState<CalculationResult | null>(null);
-  const [userCount, setUserCount] = useState(1300); // 기본값
+  const [userCount, setUserCount] = useState(1300); // 목표값
+  const [animatedUserCount, setAnimatedUserCount] = useState(0); // 애니메이션용
 
   // 사용자 수 조회
   useEffect(() => {
@@ -70,6 +71,29 @@ export default function Home() {
 
     fetchUserCount();
   }, []);
+
+  // 이용자 수 카운트업 애니메이션
+  useEffect(() => {
+    if (currentStep !== 0) return; // 웰컴 화면에서만 애니메이션
+
+    const duration = 1500; // 1.5초
+    const steps = 40;
+    const increment = userCount / steps;
+    const stepDuration = duration / steps;
+
+    let currentStep = 0;
+    const timer = setInterval(() => {
+      currentStep++;
+      if (currentStep >= steps) {
+        setAnimatedUserCount(userCount);
+        clearInterval(timer);
+      } else {
+        setAnimatedUserCount(Math.round(increment * currentStep));
+      }
+    }, stepDuration);
+
+    return () => clearInterval(timer);
+  }, [userCount, currentStep]);
 
   // 소득 관련 상태
   const [incomeType, setIncomeType] = useState<IncomeType | null>(null);
@@ -308,7 +332,7 @@ export default function Home() {
                   <div className="flex items-center justify-center">
                     <div className="text-center">
                       <p className="text-xs text-gray-500 mb-0.5">지금까지</p>
-                      <p className="text-xl font-bold text-blue-600">{userCount.toLocaleString()}명</p>
+                      <p className="text-xl font-bold text-blue-600">{animatedUserCount.toLocaleString()}명</p>
                       <p className="text-xs text-gray-400 mt-0.5">이 이용했어요</p>
                     </div>
                   </div>
