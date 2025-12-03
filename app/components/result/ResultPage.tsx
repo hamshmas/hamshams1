@@ -27,6 +27,11 @@ interface ResultPageProps {
   maritalStatus?: MaritalStatus | null;
   childrenCount?: number;
   hasNoSpouseIncome?: boolean | null;
+  // 배우자 재산 정보
+  isMarriedForAsset?: boolean | null;
+  hasSpouseAsset?: boolean | null;
+  spouseAsset?: number;
+  isMainCourt?: boolean;
 }
 
 export function ResultPage({
@@ -46,6 +51,10 @@ export function ResultPage({
   maritalStatus,
   childrenCount,
   hasNoSpouseIncome,
+  isMarriedForAsset,
+  hasSpouseAsset,
+  spouseAsset,
+  isMainCourt,
 }: ResultPageProps) {
   const [copySuccess, setCopySuccess] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
@@ -684,14 +693,6 @@ export function ResultPage({
               </p>
             </div>
           </div>
-
-          <button
-            onClick={handleConsultationClick}
-            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-xl p-4 text-center transition-all shadow-lg hover:shadow-xl cursor-pointer hover:scale-105 transform"
-          >
-            <p className="text-white font-bold text-base mb-1">무료로 상담받기</p>
-            <p className="text-white/90 text-sm">3분이면 끝나요</p>
-          </button>
         </div>
       )}
 

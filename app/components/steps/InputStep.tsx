@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { handleNumberInput, parseNumberFromFormatted, convertManwonToWon, convertWonToManwon } from "@/utils/formatNumber";
+import { useState, useEffect, useRef } from "react";
+import { handleNumberInput, parseNumberFromFormatted, formatKoreanCurrency } from "@/utils/formatNumber";
 
 interface InputStepProps {
   title: string;
@@ -9,9 +9,8 @@ interface InputStepProps {
   onNext: (value: number) => void;
   onBack?: () => void;
   initialValue: number;
-  quickAmounts: number[];
   minValue: number;
-  unitType?: 'manwon' | 'count'; // 만원 단위 또는 일반 숫자
+  unitType?: 'won' | 'count';
 }
 
 export function InputStep({
@@ -20,70 +19,74 @@ export function InputStep({
   onNext,
   onBack,
   initialValue,
-  quickAmounts,
   minValue,
-  unitType = 'manwon', // 기본값은 만원 단위
+  unitType = 'won',
 }: InputStepProps) {
-  const displayValue = unitType === 'count'
-    ? initialValue
-    : (initialValue > 0 ? convertWonToManwon(initialValue) : 0);
+  const displayValue = initialValue > 0 ? initialValue : 0;
   const [value, setValue] = useState(displayValue > 0 ? displayValue.toLocaleString() : "");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // 자동 포커스
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
 
   const handleSubmit = () => {
     const numericValue = parseNumberFromFormatted(value);
-    const finalValue = unitType === 'count' ? numericValue : convertManwonToWon(numericValue);
-    onNext(finalValue);
-  };
-
-  const handleQuickAdd = (amount: number) => {
-    const currentValue = value ? parseNumberFromFormatted(value) : 0;
-    setValue((currentValue + amount).toLocaleString());
+    onNext(numericValue);
   };
 
   const isValid = value && parseNumberFromFormatted(value) >= minValue;
 
   return (
-    <div className="space-y-4 animate-slideIn">
-      <div className="space-y-1">
-        <h2 className="text-2xl font-extrabold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
+    <div className="flex-1 flex flex-col animate-fadeIn">
+      {/* 질문 영역 */}
+      <div className="mb-8">
+        <h2 className="text-[26px] font-bold text-gray-900 leading-tight mb-2">
           {title}
         </h2>
-        <p className="text-gray-600 text-sm">{subtitle}</p>
-      </div>
-      <div className="relative">
-        <input
-          type="text"
-          inputMode="numeric"
-          value={value}
-          onChange={(e) => setValue(handleNumberInput(e.target.value))}
-          onKeyPress={(e) => e.key === 'Enter' && isValid && handleSubmit()}
-          className="input-modern"
-          placeholder="0"
-          autoFocus
-        />
-        <p className="text-right text-primary-600 font-bold mt-2 text-sm">
-          {unitType === 'count' ? '명' : '만원'}
-        </p>
+        <p className="text-[15px] text-gray-500 leading-relaxed">{subtitle}</p>
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
-        {quickAmounts.map((amount) => (
-          <button key={amount} onClick={() => handleQuickAdd(amount)} className="quick-button text-xs py-1.5 px-3">
-            +{amount}
-          </button>
-        ))}
+      {/* 입력 영역 */}
+      <div className="flex-1">
+        <div className="relative mb-6">
+          <div className="flex items-baseline border-b-2 border-gray-200 focus-within:border-blue-500 transition-colors pb-2">
+            <input
+              ref={inputRef}
+              type="text"
+              inputMode="numeric"
+              value={value}
+              onChange={(e) => setValue(handleNumberInput(e.target.value))}
+              onKeyPress={(e) => e.key === 'Enter' && isValid && handleSubmit()}
+              className="flex-1 text-[32px] font-bold text-gray-900 outline-none bg-transparent placeholder:text-gray-300"
+              placeholder="0"
+            />
+            <span className="text-[20px] font-medium text-gray-400 ml-2">
+              {unitType === 'count' ? '명' : '원'}
+            </span>
+          </div>
+          {/* 한글 금액 표시 */}
+          {unitType === 'won' && value && parseNumberFromFormatted(value) > 0 && (
+            <p className="text-[15px] text-blue-500 mt-2">
+              {formatKoreanCurrency(parseNumberFromFormatted(value))}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="flex gap-2">
-        {onBack && (
-          <button onClick={onBack} className="w-1/3 secondary-button text-sm py-2.5">
-            이전
-          </button>
-        )}
+      {/* 하단 버튼 */}
+      <div className="mt-auto pt-6">
         <button
           onClick={handleSubmit}
           disabled={!isValid}
-          className={`${onBack ? 'w-2/3' : 'w-full'} primary-button disabled:opacity-50 disabled:cursor-not-allowed text-sm py-2.5`}
+          className={`w-full py-4 rounded-xl text-[17px] font-semibold transition-all ${
+            isValid
+              ? 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          }`}
         >
           다음
         </button>

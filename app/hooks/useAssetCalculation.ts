@@ -17,6 +17,11 @@ export function useAssetCalculation() {
   const [housingAsset, setHousingAsset] = useState(0); // 주거 자산
   const [otherAsset, setOtherAsset] = useState(0); // 기타 자산 (예금, 주식, 자동차 등)
 
+  // 배우자 재산 관련 상태
+  const [isMarriedForAsset, setIsMarriedForAsset] = useState<boolean | null>(null); // 결혼 여부
+  const [hasSpouseAsset, setHasSpouseAsset] = useState<boolean | null>(null); // 배우자 재산 유무
+  const [spouseAsset, setSpouseAsset] = useState(0); // 배우자 재산 금액
+
   const resetAssetState = () => {
     setAssetInputMode(null);
     setAssetSubStep(0);
@@ -30,6 +35,9 @@ export function useAssetCalculation() {
     setIsMainCourtJurisdiction(null);
     setHousingAsset(0);
     setOtherAsset(0);
+    setIsMarriedForAsset(null);
+    setHasSpouseAsset(null);
+    setSpouseAsset(0);
   };
 
   return {
@@ -57,6 +65,12 @@ export function useAssetCalculation() {
     setHousingAsset,
     otherAsset,
     setOtherAsset,
+    isMarriedForAsset,
+    setIsMarriedForAsset,
+    hasSpouseAsset,
+    setHasSpouseAsset,
+    spouseAsset,
+    setSpouseAsset,
     resetAssetState,
   };
 }
