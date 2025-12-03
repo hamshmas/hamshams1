@@ -256,7 +256,7 @@ export default function Home() {
         <div className="max-w-lg mx-auto w-full flex-1 flex flex-col">
           {/* 웰컴 화면 (step 0) */}
           {currentStep === 0 && (
-            <div className="flex-1 flex flex-col px-5 pt-12 pb-8 animate-fadeIn">
+            <div className="flex-1 flex flex-col px-5 pt-12 pb-24 animate-fadeIn">
               {/* 히어로 섹션 */}
               <div className="flex-1">
                 <div className="mb-8">
