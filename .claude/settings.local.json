@@ -16,7 +16,11 @@
       "Bash(gh api:*)",
       "Bash(git checkout:*)",
       "Bash(git pull:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm install:*)",
+      "Bash(npm audit fix:*)"
     ],
     "deny": [],
     "ask": []
