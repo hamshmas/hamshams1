@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PRIORITY_REPAYMENT } from "@/app/constants";
 import { supabase } from "@/lib/supabase";
 import type { FormData, CalculationResult, CourtCode } from "@/app/types";
@@ -48,52 +48,54 @@ export default function Home() {
     priorityRepaymentRegion: "그밖의지역",
   });
   const [result, setResult] = useState<CalculationResult | null>(null);
-  const [userCount, setUserCount] = useState(1300); // 목표값
-  const [animatedUserCount, setAnimatedUserCount] = useState(0); // 애니메이션용
+  const [userCount, setUserCount] = useState<number | null>(null); // 실제 이용자 수 (로딩 전: null)
+  const [displayCount, setDisplayCount] = useState(0); // 화면에 표시되는 숫자
+  const hasAnimatedRef = useRef(false); // 애니메이션 완료 여부
 
-  // 사용자 수 조회
+  // 사용자 수 조회 및 애니메이션
   useEffect(() => {
-    const fetchUserCount = async () => {
-      if (!supabase) return;
+    const fetchAndAnimate = async () => {
+      // 이미 애니메이션 완료했으면 스킵
+      if (hasAnimatedRef.current) return;
 
-      try {
-        const { count, error } = await supabase
-          .from('calculation_results')
-          .select('*', { count: 'exact', head: true });
+      let targetCount = 1300; // 기본값
 
-        if (!error && count !== null) {
-          setUserCount(count + 1300); // 실제 이용자 수 + 기본값
+      // Supabase에서 실제 카운트 조회
+      if (supabase) {
+        try {
+          const { count, error } = await supabase
+            .from('calculation_results')
+            .select('*', { count: 'exact', head: true });
+
+          if (!error && count !== null) {
+            targetCount = count + 1300;
+          }
+        } catch {
+          // DB 연결 실패 시 기본값 사용
         }
-      } catch {
-        // DB 연결 실패 시 기본값 유지
+      }
+
+      setUserCount(targetCount);
+      hasAnimatedRef.current = true;
+
+      // 카운트업 애니메이션 실행
+      const duration = 1200;
+      const steps = 30;
+      const stepDuration = duration / steps;
+
+      for (let i = 1; i <= steps; i++) {
+        await new Promise(resolve => setTimeout(resolve, stepDuration));
+        const progress = i / steps;
+        // easeOutQuad 효과
+        const eased = 1 - (1 - progress) * (1 - progress);
+        setDisplayCount(Math.round(targetCount * eased));
       }
     };
 
-    fetchUserCount();
-  }, []);
-
-  // 이용자 수 카운트업 애니메이션
-  useEffect(() => {
-    if (currentStep !== 0) return; // 웰컴 화면에서만 애니메이션
-
-    const duration = 1500; // 1.5초
-    const totalSteps = 40;
-    const increment = userCount / totalSteps;
-    const stepDuration = duration / totalSteps;
-
-    let animationStep = 0;
-    const timer = setInterval(() => {
-      animationStep++;
-      if (animationStep >= totalSteps) {
-        setAnimatedUserCount(userCount);
-        clearInterval(timer);
-      } else {
-        setAnimatedUserCount(Math.round(increment * animationStep));
-      }
-    }, stepDuration);
-
-    return () => clearInterval(timer);
-  }, [userCount, currentStep]);
+    if (currentStep === 0) {
+      fetchAndAnimate();
+    }
+  }, [currentStep]);
 
   // 소득 관련 상태
   const [incomeType, setIncomeType] = useState<IncomeType | null>(null);
@@ -337,7 +339,7 @@ export default function Home() {
                   <div className="flex items-center justify-center">
                     <div className="text-center">
                       <p className="text-xs text-gray-500 mb-0.5">지금까지</p>
-                      <p className="text-xl font-bold text-blue-600">{animatedUserCount.toLocaleString()}명</p>
+                      <p className="text-xl font-bold text-blue-600">{displayCount.toLocaleString()}명</p>
                       <p className="text-xs text-gray-400 mt-0.5">이 이용했어요</p>
                     </div>
                   </div>
