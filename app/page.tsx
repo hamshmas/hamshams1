@@ -283,21 +283,16 @@ export default function Home() {
         <div className="max-w-lg mx-auto w-full flex-1 flex flex-col">
           {/* 웰컴 화면 (step 0) */}
           {currentStep === 0 && (
-            <div className="flex-1 flex flex-col px-5 pt-12 pb-24 animate-fadeIn">
-              {/* 히어로 섹션 */}
-              <div className="flex-1">
-                <div className="mb-8">
+            <div className="flex-1 flex flex-col px-6 py-8 animate-fadeIn">
+              {/* 히어로 섹션 - 상단 중심 배치 */}
+              <div className="flex-1 flex flex-col justify-center -mt-8">
+                <div className="mb-10">
                   {/* 브랜드 뱃지 */}
-                  <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold mb-4">
-                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                  <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-semibold mb-5">
+                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
                     회생의 기적
                   </div>
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <h1 className="text-[32px] font-bold text-gray-900 leading-tight mb-3">
+                  <h1 className="text-[34px] font-bold text-gray-900 leading-tight mb-4">
                     빚, 얼마나<br/>줄일 수 있을까요?
                   </h1>
                   <p className="text-lg text-gray-500">
@@ -306,7 +301,7 @@ export default function Home() {
                 </div>
 
                 {/* 신뢰 지표 */}
-                <div className="space-y-3 mb-8">
+                <div className="space-y-3.5">
                   <div className="flex items-center gap-3 text-gray-600">
                     <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                       <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -334,20 +329,18 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* 하단 고정 영역 */}
-              <div className="mt-auto">
-                <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+              {/* 하단 통계 영역 */}
+              <div className="pt-6">
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 mb-4 shadow-sm">
                   <div className="flex items-center justify-around">
                     <div className="text-center">
-                      <p className="text-xs text-gray-500 mb-0.5">지금까지</p>
-                      <p className="text-xl font-bold text-blue-600">{displayCount.toLocaleString()}명</p>
-                      <p className="text-xs text-gray-400 mt-0.5">이 이용했어요</p>
+                      <p className="text-xs text-gray-500 mb-1">누적 이용자</p>
+                      <p className="text-2xl font-bold text-blue-600">{displayCount.toLocaleString()}<span className="text-lg">명</span></p>
                     </div>
-                    <div className="w-px h-12 bg-gray-200"></div>
+                    <div className="w-px h-14 bg-gray-200"></div>
                     <div className="text-center">
-                      <p className="text-xs text-gray-500 mb-0.5">이번주 최고</p>
-                      <p className="text-xl font-bold text-green-600">{weeklyMaxRate}%</p>
-                      <p className="text-xs text-gray-400 mt-0.5">탕감율 달성</p>
+                      <p className="text-xs text-gray-500 mb-1">이번주 최고</p>
+                      <p className="text-2xl font-bold text-green-600">{weeklyMaxRate}<span className="text-lg">%</span></p>
                     </div>
                   </div>
                 </div>
