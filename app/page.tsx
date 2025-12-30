@@ -342,7 +342,7 @@ export default function Home() {
                     <div className="w-px h-14 bg-gray-200"></div>
                     <div className="text-center">
                       <p className="text-xs text-gray-500 mb-1">이번주 최고</p>
-                      <p className="text-2xl font-bold text-green-600">{displayWeeklyMaxRate}<span className="text-lg">%</span></p>
+                      <p className="text-2xl font-bold text-green-600">{displayWeeklyMaxRate}<span className="text-lg">%</span><span className="text-sm font-medium text-gray-500 ml-0.5">탕감</span></p>
                     </div>
                   </div>
                 </div>
