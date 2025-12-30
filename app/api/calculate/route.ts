@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { calculatePresentValue, findMinimumRepaymentPeriod } from '@/utils/leibnizCalculation';
+import { supabaseAdmin, isSupabaseConfigured } from '@/app/config/supabase';
 
 // 최저생계비 데이터 (서버에서만 관리)
 const minimumLivingCostData: Record<string, number> = {
@@ -75,6 +76,62 @@ function checkDependentAdjustment(
   }
 
   return { canAdjust: false, suggestedDependents: null, reason: null };
+}
+
+// Supabase에 계산 결과 저장 (비동기, 에러 무시)
+async function saveCalculationResult(
+  request: NextRequest,
+  formData: {
+    totalDebt: number;
+    monthlyIncome: number;
+    assetValue: number;
+    dependents: number;
+    homeAddress?: string;
+    workAddress?: string;
+    courtJurisdiction?: string;
+    priorityRepaymentRegion?: string;
+  },
+  result: {
+    reductionRate: number;
+    reductionAmount: number;
+    repaymentAmount: number;
+    monthlyPayment: number;
+    repaymentPeriod: number;
+    needsConsultation?: boolean;
+    liquidationValueViolation?: boolean;
+    consultationReason?: string;
+  }
+) {
+  if (!isSupabaseConfigured()) return;
+
+  try {
+    // IP 주소 가져오기
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const realIp = request.headers.get('x-real-ip');
+    const ipAddress = forwardedFor?.split(',')[0]?.trim() || realIp || 'unknown';
+
+    await supabaseAdmin.from('calculation_results').insert({
+      ip_address: ipAddress,
+      total_debt: formData.totalDebt,
+      monthly_income: formData.monthlyIncome,
+      asset_value: formData.assetValue,
+      dependents: formData.dependents,
+      home_address: formData.homeAddress || null,
+      work_address: formData.workAddress || null,
+      court_jurisdiction: formData.courtJurisdiction || null,
+      priority_repayment_region: formData.priorityRepaymentRegion || null,
+      reduction_rate: result.reductionRate,
+      reduction_amount: result.reductionAmount,
+      repayment_amount: result.repaymentAmount,
+      monthly_payment: result.monthlyPayment,
+      repayment_period: result.repaymentPeriod,
+      needs_consultation: result.needsConsultation || false,
+      liquidation_value_violation: result.liquidationValueViolation || false,
+      consultation_reason: result.consultationReason || null,
+    });
+  } catch (error) {
+    console.error('Failed to save calculation result:', error);
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -173,7 +230,7 @@ export async function POST(request: NextRequest) {
           const reductionAmount = totalDebt - repaymentAmount;
           const reductionRate = totalDebt > 0 ? (reductionAmount / totalDebt) * 100 : 0;
 
-          return NextResponse.json({
+          const resultData = {
             reductionRate: Math.max(0, Math.min(100, reductionRate)),
             repaymentAmount: Math.max(0, repaymentAmount),
             reductionAmount: Math.max(0, reductionAmount),
@@ -182,12 +239,17 @@ export async function POST(request: NextRequest) {
             liquidationValueViolation: false,
             needsConsultation: true,
             consultationReason,
-          });
+          };
+
+          // 비동기로 저장 (응답 지연 없음)
+          saveCalculationResult(request, body, resultData);
+
+          return NextResponse.json(resultData);
         }
       }
 
       // 조정 불가능하면 빨간불
-      return NextResponse.json({
+      const redResultData = {
         reductionRate: 0,
         repaymentAmount: 0,
         reductionAmount: 0,
@@ -196,7 +258,12 @@ export async function POST(request: NextRequest) {
         liquidationValueViolation: true,
         needsConsultation,
         consultationReason: consultationReason || undefined,
-      });
+      };
+
+      // 비동기로 저장 (응답 지연 없음)
+      saveCalculationResult(request, body, redResultData);
+
+      return NextResponse.json(redResultData);
     }
 
     const totalRepaymentPV = calculatePresentValue(monthlyRepayment, repaymentPeriod);
@@ -204,7 +271,7 @@ export async function POST(request: NextRequest) {
     const reductionAmount = totalDebt - repaymentAmount;
     const reductionRate = totalDebt > 0 ? (reductionAmount / totalDebt) * 100 : 0;
 
-    return NextResponse.json({
+    const successResultData = {
       reductionRate: Math.max(0, Math.min(100, reductionRate)),
       repaymentAmount: Math.max(0, repaymentAmount),
       reductionAmount: Math.max(0, reductionAmount),
@@ -212,7 +279,12 @@ export async function POST(request: NextRequest) {
       repaymentPeriod,
       liquidationValueViolation: false,
       needsConsultation: false,
-    });
+    };
+
+    // 비동기로 저장 (응답 지연 없음)
+    saveCalculationResult(request, body, successResultData);
+
+    return NextResponse.json(successResultData);
   } catch (error) {
     console.error('계산 오류:', error);
     return NextResponse.json(
