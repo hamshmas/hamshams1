@@ -241,8 +241,8 @@ export async function POST(request: NextRequest) {
             consultationReason,
           };
 
-          // 비동기로 저장 (응답 지연 없음)
-          saveCalculationResult(request, body, resultData);
+          // Supabase에 저장
+          await saveCalculationResult(request, body, resultData);
 
           return NextResponse.json(resultData);
         }
@@ -260,8 +260,8 @@ export async function POST(request: NextRequest) {
         consultationReason: consultationReason || undefined,
       };
 
-      // 비동기로 저장 (응답 지연 없음)
-      saveCalculationResult(request, body, redResultData);
+      // Supabase에 저장
+      await saveCalculationResult(request, body, redResultData);
 
       return NextResponse.json(redResultData);
     }
@@ -281,8 +281,8 @@ export async function POST(request: NextRequest) {
       needsConsultation: false,
     };
 
-    // 비동기로 저장 (응답 지연 없음)
-    saveCalculationResult(request, body, successResultData);
+    // Supabase에 저장
+    await saveCalculationResult(request, body, successResultData);
 
     return NextResponse.json(successResultData);
   } catch (error) {
