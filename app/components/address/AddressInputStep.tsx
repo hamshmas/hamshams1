@@ -267,6 +267,29 @@ export function AddressInputStep({
             다음
           </button>
         </div>
+
+        {/* 서울회생법원 바로가기 */}
+        {!homeAddressData && (
+          <button
+            onClick={() => {
+              onNext({
+                homeAddress: "",
+                workAddress: "",
+                courtJurisdiction: "seoul" as CourtCode,
+                homeAddressData: {
+                  address: "",
+                  jibunAddress: "",
+                  zonecode: "",
+                  sido: "서울특별시",
+                  sigungu: "",
+                },
+              });
+            }}
+            className="w-full text-center text-sm text-gray-500 hover:text-primary-600 py-2 transition-colors"
+          >
+            주소 입력 없이 <span className="font-semibold text-primary-600">서울회생법원</span>에서 진행하기
+          </button>
+        )}
       </div>
     );
   }
