@@ -878,8 +878,8 @@ export default function Home() {
         </div>
       )}
 
-      {/* 플로팅 상담 버튼 - 결과 화면 제외 */}
-      {currentStep !== 6 && (
+      {/* 플로팅 상담 버튼 - 웰컴 화면과 결과 화면 제외 */}
+      {currentStep >= 1 && currentStep <= 5 && (
         <div className="fixed right-3 bottom-1/4 z-50 flex flex-col gap-3">
           <a
             href={KAKAO_CONSULTATION_URL}
