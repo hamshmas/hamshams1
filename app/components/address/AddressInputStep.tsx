@@ -295,6 +295,18 @@ export function AddressInputStep({
 
         <div className="space-y-3">
           <button
+            onClick={() => setHasWorkAddress(false)}
+            className={`w-full border-2 rounded-xl p-4 transition-all text-left ${
+              hasWorkAddress === false
+                ? "border-primary-500 bg-primary-50"
+                : "border-gray-200 hover:border-primary-300 bg-white"
+            }`}
+          >
+            <p className="font-bold text-gray-900 text-sm">🏠 아니오, 집 주소만 사용하겠습니다 <span className="text-primary-600">추천</span></p>
+            <p className="text-xs text-gray-600 mt-1">집 주소 기준으로 자동 결정됩니다</p>
+          </button>
+
+          <button
             onClick={() => setHasWorkAddress(true)}
             className={`w-full border-2 rounded-xl p-4 transition-all text-left ${
               hasWorkAddress === true
@@ -304,18 +316,6 @@ export function AddressInputStep({
           >
             <p className="font-bold text-gray-900 text-sm">💼 네, 직장 주소를 입력하겠습니다</p>
             <p className="text-xs text-gray-600 mt-1">관할법원을 선택할 수 있습니다</p>
-          </button>
-
-          <button
-            onClick={() => setHasWorkAddress(false)}
-            className={`w-full border-2 rounded-xl p-4 transition-all text-left ${
-              hasWorkAddress === false
-                ? "border-primary-500 bg-primary-50"
-                : "border-gray-200 hover:border-primary-300 bg-white"
-            }`}
-          >
-            <p className="font-bold text-gray-900 text-sm">🏠 아니오, 집 주소만 사용하겠습니다</p>
-            <p className="text-xs text-gray-600 mt-1">집 주소 기준으로 자동 결정됩니다</p>
           </button>
         </div>
 

@@ -63,37 +63,29 @@ export function convertWonToManwon(won: number): number {
 }
 
 /**
- * 숫자를 한글 금액으로 변환 (예: 100000000 → "1억", 50000000 → "5천만")
+ * 숫자를 한글 금액으로 변환 (예: 100000000 → "1억원", 50000000 → "5000만원")
  * @param value - 변환할 숫자
  * @returns 한글 금액 문자열
  */
 export function formatKoreanCurrency(value: number): string {
   if (!value || value === 0) return '';
 
-  const units = [
-    { value: 1000000000000, label: '조' },
-    { value: 100000000, label: '억' },
-    { value: 10000000, label: '천만' },
-    { value: 1000000, label: '백만' },
-    { value: 10000, label: '만' },
-    { value: 1000, label: '천' },
-    { value: 100, label: '백' },
-  ];
+  const eok = Math.floor(value / 100000000); // 억 단위
+  const man = Math.floor((value % 100000000) / 10000); // 만 단위
 
   let result = '';
-  let remaining = value;
 
-  for (const unit of units) {
-    if (remaining >= unit.value) {
-      const count = Math.floor(remaining / unit.value);
-      result += `${count}${unit.label} `;
-      remaining = remaining % unit.value;
-    }
+  if (eok > 0) {
+    result += `${eok}억 `;
   }
 
-  // 남은 금액이 있으면 추가
-  if (remaining > 0) {
-    result += `${remaining}`;
+  if (man > 0) {
+    result += `${man}만 `;
+  }
+
+  // 만원 미만만 있는 경우
+  if (eok === 0 && man === 0) {
+    return `${value}원`;
   }
 
   return result.trim() + '원';

@@ -32,19 +32,19 @@ export function AssetInputModeSelection({
       <div className="space-y-3">
         <button
           onClick={() => onSelect('direct')}
-          className="group w-full bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-indigo-400 rounded-2xl p-6 text-left transition-all duration-300 hover:shadow-lg"
+          className="group w-full bg-gradient-to-br from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 border-2 border-indigo-200 hover:border-indigo-400 rounded-2xl p-6 text-left transition-all duration-300 hover:shadow-lg"
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-indigo-100 group-hover:to-indigo-200 rounded-2xl flex items-center justify-center transition-all">
-              <svg className="w-6 h-6 text-gray-600 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
             </div>
             <div className="flex-1">
-              <p className="font-bold text-gray-900 text-lg">직접 입력</p>
+              <p className="font-bold text-gray-900 text-lg">직접 입력 <span className="text-indigo-600">추천</span></p>
               <p className="text-sm text-gray-600">자산 가액을 알고 있어요</p>
             </div>
-            <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-indigo-500 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </div>
@@ -52,19 +52,19 @@ export function AssetInputModeSelection({
 
         <button
           onClick={() => onSelect('calculate')}
-          className="group w-full bg-gradient-to-br from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 border-2 border-indigo-200 hover:border-indigo-400 rounded-2xl p-6 text-left transition-all duration-300 hover:shadow-lg"
+          className="group w-full bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-indigo-400 rounded-2xl p-6 text-left transition-all duration-300 hover:shadow-lg"
         >
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-indigo-100 group-hover:to-indigo-200 rounded-2xl flex items-center justify-center transition-all">
+              <svg className="w-6 h-6 text-gray-600 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
             </div>
             <div className="flex-1">
-              <p className="font-bold text-gray-900 text-lg">계산하기 <span className="text-indigo-600">추천</span></p>
+              <p className="font-bold text-gray-900 text-lg">계산하기</p>
               <p className="text-sm text-gray-600">주거 형태로 자동 계산할게요</p>
             </div>
-            <svg className="w-5 h-5 text-indigo-500 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-400 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </div>
