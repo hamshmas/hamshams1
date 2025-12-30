@@ -718,7 +718,7 @@ export function ResultPage({
           </div>
           <div>
             <p className="text-white font-bold text-base">블랙스톤 법률사무소</p>
-            <p className="text-slate-400 text-xs">회생의 기적 · 무료 상담</p>
+            <p className="text-slate-400 text-xs">무료 상담 · 개인회생 전문</p>
           </div>
         </div>
 

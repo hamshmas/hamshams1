@@ -302,7 +302,7 @@ export default function Home() {
                     빚, 얼마나<br/>줄일 수 있을까요?
                   </h1>
                   <p className="text-lg text-gray-500">
-                    3분이면 예상 탕감율을 알 수 있어요
+                    1분이면 탕감율을 알 수 있어요
                   </p>
                 </div>
 
