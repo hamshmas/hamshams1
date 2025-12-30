@@ -51,7 +51,7 @@ export default function Home() {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [userCount, setUserCount] = useState<number | null>(null); // 실제 이용자 수 (로딩 전: null)
   const [displayCount, setDisplayCount] = useState(0); // 화면에 표시되는 숫자
-  const [weeklyMaxRate, setWeeklyMaxRate] = useState<number>(85); // 이번주 최고 탕감율 (기본값 85%)
+  const [displayWeeklyMaxRate, setDisplayWeeklyMaxRate] = useState(0); // 화면에 표시되는 탕감율 (애니메이션)
   const hasAnimatedRef = useRef(false); // 애니메이션 완료 여부
 
   // 사용자 수 조회 및 애니메이션
@@ -61,6 +61,7 @@ export default function Home() {
       if (hasAnimatedRef.current) return;
 
       let targetCount = 1300; // 기본값
+      let targetRate = 85; // 기본값
 
       // API에서 통계 조회
       try {
@@ -69,17 +70,17 @@ export default function Home() {
           const data = await response.json();
           targetCount = data.userCount || 1300;
           if (data.weeklyMaxRate && data.weeklyMaxRate > 0) {
-            setWeeklyMaxRate(data.weeklyMaxRate);
+            targetRate = data.weeklyMaxRate;
           }
         }
       } catch {
-        // API 호출 실패 시 기본값 사용 (85%)
+        // API 호출 실패 시 기본값 사용
       }
 
       setUserCount(targetCount);
       hasAnimatedRef.current = true;
 
-      // 카운트업 애니메이션 실행
+      // 카운트업 애니메이션 실행 (이용자 수 + 탕감율 동시 애니메이션)
       const duration = 1200;
       const steps = 30;
       const stepDuration = duration / steps;
@@ -90,6 +91,7 @@ export default function Home() {
         // easeOutQuad 효과
         const eased = 1 - (1 - progress) * (1 - progress);
         setDisplayCount(Math.round(targetCount * eased));
+        setDisplayWeeklyMaxRate(Math.round(targetRate * eased));
       }
     };
 
@@ -340,7 +342,7 @@ export default function Home() {
                     <div className="w-px h-14 bg-gray-200"></div>
                     <div className="text-center">
                       <p className="text-xs text-gray-500 mb-1">이번주 최고</p>
-                      <p className="text-2xl font-bold text-green-600">{weeklyMaxRate}<span className="text-lg">%</span></p>
+                      <p className="text-2xl font-bold text-green-600">{displayWeeklyMaxRate}<span className="text-lg">%</span></p>
                     </div>
                   </div>
                 </div>
