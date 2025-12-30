@@ -244,15 +244,27 @@ export function ResultPage({
       setTimeout(() => setCopySuccess(false), COPY_SUCCESS_NOTIFICATION_DURATION);
     }
 
-    // 상담 신청 정보 콘솔 로그
-    console.log('[Consultation] 상담 신청:', {
-      name,
-      phone,
-      totalDebt: formData.totalDebt,
-      monthlyIncome: formData.monthlyIncome,
-      reductionRate: result.reductionRate,
-      timestamp: new Date().toISOString(),
-    });
+    // 상담 신청 정보 Supabase에 저장
+    try {
+      const response = await fetch('/api/consultation/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          phone,
+          formData,
+          calculationResult: result,
+        }),
+      });
+
+      if (response.ok) {
+        console.log('[Consultation] 상담 신청 저장 성공');
+      } else {
+        console.error('[Consultation] 상담 신청 저장 실패:', await response.text());
+      }
+    } catch (error) {
+      console.error('[Consultation] 상담 신청 저장 오류:', error);
+    }
 
     // 카카오톡 채널 열기
     window.open(KAKAO_CONSULTATION_URL, "_blank", "noopener,noreferrer");
