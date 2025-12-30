@@ -7,6 +7,7 @@ import { generateConsultationMessage } from "@/utils/generateConsultationMessage
 import { ConsultationModal, CopySuccessNotification } from "@/app/components/consultation";
 import { KAKAO_CONSULTATION_URL, COPY_SUCCESS_NOTIFICATION_DURATION } from "@/app/config/consultation";
 import { supabase } from "@/lib/supabase";
+import { CelebrationEffects } from "./CelebrationEffects";
 
 interface ResultPageProps {
   result: CalculationResult;
@@ -63,6 +64,14 @@ export function ResultPage({
   const [animatedRate, setAnimatedRate] = useState(0);
   const [animatedAmount, setAnimatedAmount] = useState(0);
   const hasSaved = useRef(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+
+  // 채무액과 재산 비교
+  const hasMoreAssetThanDebt = formData.assetValue >= formData.totalDebt;
+  // 가용소득 체크 (채무액이 재산보다 많은 경우만)
+  const hasNoIncome = !hasMoreAssetThanDebt && result.monthlyPayment <= 0;
+  // 개인회생 가능 여부
+  const canShowCelebration = !hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation;
 
   // 탕감률 & 탕감액 카운트업 애니메이션
   useEffect(() => {
@@ -81,6 +90,10 @@ export function ResultPage({
         setAnimatedRate(targetRate);
         setAnimatedAmount(targetAmount);
         clearInterval(timer);
+        // 카운트업 완료 후 축하 효과 시작 (개인회생 가능한 경우만)
+        if (canShowCelebration) {
+          setShowCelebration(true);
+        }
       } else {
         setAnimatedRate(Math.round(rateIncrement * currentStep));
         setAnimatedAmount(Math.round(amountIncrement * currentStep));
@@ -88,7 +101,7 @@ export function ResultPage({
     }, stepDuration);
 
     return () => clearInterval(timer);
-  }, [result.reductionRate, result.reductionAmount]);
+  }, [result.reductionRate, result.reductionAmount, canShowCelebration]);
 
   // 결과 페이지 도달 시 Supabase에 데이터 저장 (환경 변수가 설정된 경우에만)
   useEffect(() => {
@@ -279,13 +292,14 @@ export function ResultPage({
   const circumference = 2 * Math.PI * 54;
   const strokeDashoffset = circumference - (animatedRate / 100) * circumference;
 
-  // 채무액과 재산 비교
-  const hasMoreAssetThanDebt = formData.assetValue >= formData.totalDebt;
-  // 가용소득 체크 (채무액이 재산보다 많은 경우만)
-  const hasNoIncome = !hasMoreAssetThanDebt && result.monthlyPayment <= 0;
-
   return (
     <div className="space-y-4 animate-fadeIn">
+      {/* 축하 효과 */}
+      <CelebrationEffects
+        reductionRate={result.reductionRate}
+        isActive={showCelebration}
+      />
+
       {hasMoreAssetThanDebt ? (
         // 토스 스타일: 희망 제시 메시지
         <div className="text-center mb-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl p-8 shadow-2xl border-2 border-blue-200">
