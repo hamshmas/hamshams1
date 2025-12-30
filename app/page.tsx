@@ -51,7 +51,7 @@ export default function Home() {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [userCount, setUserCount] = useState<number | null>(null); // 실제 이용자 수 (로딩 전: null)
   const [displayCount, setDisplayCount] = useState(0); // 화면에 표시되는 숫자
-  const [weeklyMaxRate, setWeeklyMaxRate] = useState<number | null>(null); // 이번주 최고 탕감율
+  const [weeklyMaxRate, setWeeklyMaxRate] = useState<number>(85); // 이번주 최고 탕감율 (기본값 85%)
   const hasAnimatedRef = useRef(false); // 애니메이션 완료 여부
 
   // 사용자 수 조회 및 애니메이션
@@ -68,12 +68,12 @@ export default function Home() {
         if (response.ok) {
           const data = await response.json();
           targetCount = data.userCount || 1300;
-          if (data.weeklyMaxRate) {
+          if (data.weeklyMaxRate && data.weeklyMaxRate > 0) {
             setWeeklyMaxRate(data.weeklyMaxRate);
           }
         }
       } catch {
-        // API 호출 실패 시 기본값 사용
+        // API 호출 실패 시 기본값 사용 (85%)
       }
 
       setUserCount(targetCount);
@@ -343,16 +343,12 @@ export default function Home() {
                       <p className="text-xl font-bold text-blue-600">{displayCount.toLocaleString()}명</p>
                       <p className="text-xs text-gray-400 mt-0.5">이 이용했어요</p>
                     </div>
-                    {weeklyMaxRate && (
-                      <>
-                        <div className="w-px h-12 bg-gray-200"></div>
-                        <div className="text-center">
-                          <p className="text-xs text-gray-500 mb-0.5">이번주 최고</p>
-                          <p className="text-xl font-bold text-green-600">{weeklyMaxRate}%</p>
-                          <p className="text-xs text-gray-400 mt-0.5">탕감율 달성</p>
-                        </div>
-                      </>
-                    )}
+                    <div className="w-px h-12 bg-gray-200"></div>
+                    <div className="text-center">
+                      <p className="text-xs text-gray-500 mb-0.5">이번주 최고</p>
+                      <p className="text-xl font-bold text-green-600">{weeklyMaxRate}%</p>
+                      <p className="text-xs text-gray-400 mt-0.5">탕감율 달성</p>
+                    </div>
                   </div>
                 </div>
                 {/* 법률사무소 정보 */}
