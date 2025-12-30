@@ -117,25 +117,29 @@ async function saveCalculationResult(
 
     console.log('[SaveResult] Inserting data for IP:', ipAddress);
 
-    const { data, error } = await supabaseAdmin.from('calculation_results').insert({
+    const insertData = {
       ip_address: ipAddress,
-      total_debt: Math.round(formData.totalDebt),
-      monthly_income: Math.round(formData.monthlyIncome),
-      asset_value: Math.round(formData.assetValue),
-      dependents: formData.dependents,
+      total_debt: Math.round(formData.totalDebt || 0),
+      monthly_income: Math.round(formData.monthlyIncome || 0),
+      asset_value: Math.round(formData.assetValue || 0),
+      dependents: Math.round(formData.dependents || 1),
       home_address: formData.homeAddress || null,
       work_address: formData.workAddress || null,
       court_jurisdiction: formData.courtJurisdiction || null,
       priority_repayment_region: formData.priorityRepaymentRegion || null,
-      reduction_rate: result.reductionRate,
-      reduction_amount: Math.round(result.reductionAmount),
-      repayment_amount: Math.round(result.repaymentAmount),
-      monthly_payment: Math.round(result.monthlyPayment),
-      repayment_period: result.repaymentPeriod,
+      reduction_rate: Math.round(result.reductionRate * 100) / 100, // 소수점 2자리
+      reduction_amount: Math.round(result.reductionAmount || 0),
+      repayment_amount: Math.round(result.repaymentAmount || 0),
+      monthly_payment: Math.round(result.monthlyPayment || 0),
+      repayment_period: Math.round(result.repaymentPeriod || 36),
       needs_consultation: result.needsConsultation || false,
       liquidation_value_violation: result.liquidationValueViolation || false,
       consultation_reason: result.consultationReason || null,
-    }).select();
+    };
+
+    console.log('[SaveResult] Insert data:', JSON.stringify(insertData));
+
+    const { data, error } = await supabaseAdmin.from('calculation_results').insert(insertData).select();
 
     if (error) {
       console.error('[SaveResult] Supabase insert error:', error);
