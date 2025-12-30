@@ -6,7 +6,7 @@ export async function GET() {
     if (!isSupabaseConfigured()) {
       return NextResponse.json({
         userCount: 1300,
-        weeklyMaxRate: null,
+        weeklyMaxRate: 85, // 기본값
       });
     }
 
@@ -24,16 +24,33 @@ export async function GET() {
     startOfWeek.setDate(now.getDate() - dayOfWeek);
     startOfWeek.setHours(0, 0, 0, 0);
 
-    const { data: maxRateData, error: rateError } = await supabaseAdmin
+    let weeklyMaxRate = null;
+
+    // 이번주 데이터 조회
+    const { data: weeklyData } = await supabaseAdmin
       .from('calculation_results')
       .select('reduction_rate')
       .gte('created_at', startOfWeek.toISOString())
       .order('reduction_rate', { ascending: false })
       .limit(1);
 
-    let weeklyMaxRate = null;
-    if (!rateError && maxRateData && maxRateData.length > 0) {
-      weeklyMaxRate = Math.round(maxRateData[0].reduction_rate);
+    if (weeklyData && weeklyData.length > 0) {
+      weeklyMaxRate = Math.round(weeklyData[0].reduction_rate);
+    } else {
+      // 이번주 데이터가 없으면 최근 7일 데이터 조회
+      const sevenDaysAgo = new Date(now);
+      sevenDaysAgo.setDate(now.getDate() - 7);
+
+      const { data: recentData } = await supabaseAdmin
+        .from('calculation_results')
+        .select('reduction_rate')
+        .gte('created_at', sevenDaysAgo.toISOString())
+        .order('reduction_rate', { ascending: false })
+        .limit(1);
+
+      if (recentData && recentData.length > 0) {
+        weeklyMaxRate = Math.round(recentData[0].reduction_rate);
+      }
     }
 
     return NextResponse.json({
@@ -44,7 +61,7 @@ export async function GET() {
     console.error('Stats API error:', error);
     return NextResponse.json({
       userCount: 1300,
-      weeklyMaxRate: null,
+      weeklyMaxRate: 85, // 에러 시 기본값
     });
   }
 }
