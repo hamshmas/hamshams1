@@ -13,12 +13,14 @@ export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
 
 // 환경 변수 검증 함수
 export function isSupabaseConfigured(): boolean {
-  return !!(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
-    process.env.SUPABASE_SERVICE_ROLE_KEY &&
-    process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co'
-  );
+  const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const hasAnonKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const isNotPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder.supabase.co';
+
+  console.log('[Supabase] Config check:', { hasUrl, hasAnonKey, hasServiceKey, isNotPlaceholder });
+
+  return hasUrl && hasAnonKey && hasServiceKey && isNotPlaceholder;
 }
 
 // 타입 정의

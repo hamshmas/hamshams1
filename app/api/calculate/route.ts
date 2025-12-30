@@ -78,7 +78,7 @@ function checkDependentAdjustment(
   return { canAdjust: false, suggestedDependents: null, reason: null };
 }
 
-// Supabase에 계산 결과 저장 (비동기, 에러 무시)
+// Supabase에 계산 결과 저장
 async function saveCalculationResult(
   request: NextRequest,
   formData: {
@@ -102,7 +102,12 @@ async function saveCalculationResult(
     consultationReason?: string;
   }
 ) {
-  if (!isSupabaseConfigured()) return;
+  console.log('[SaveResult] Starting save, isSupabaseConfigured:', isSupabaseConfigured());
+
+  if (!isSupabaseConfigured()) {
+    console.log('[SaveResult] Supabase not configured, skipping save');
+    return;
+  }
 
   try {
     // IP 주소 가져오기
@@ -110,7 +115,9 @@ async function saveCalculationResult(
     const realIp = request.headers.get('x-real-ip');
     const ipAddress = forwardedFor?.split(',')[0]?.trim() || realIp || 'unknown';
 
-    await supabaseAdmin.from('calculation_results').insert({
+    console.log('[SaveResult] Inserting data for IP:', ipAddress);
+
+    const { data, error } = await supabaseAdmin.from('calculation_results').insert({
       ip_address: ipAddress,
       total_debt: formData.totalDebt,
       monthly_income: formData.monthlyIncome,
@@ -128,9 +135,15 @@ async function saveCalculationResult(
       needs_consultation: result.needsConsultation || false,
       liquidation_value_violation: result.liquidationValueViolation || false,
       consultation_reason: result.consultationReason || null,
-    });
+    }).select();
+
+    if (error) {
+      console.error('[SaveResult] Supabase insert error:', error);
+    } else {
+      console.log('[SaveResult] Successfully saved:', data);
+    }
   } catch (error) {
-    console.error('Failed to save calculation result:', error);
+    console.error('[SaveResult] Exception:', error);
   }
 }
 
