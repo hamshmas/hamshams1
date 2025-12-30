@@ -882,26 +882,26 @@ export default function Home() {
 
       {/* 플로팅 상담 버튼 - 결과 화면 제외 */}
       {currentStep !== 6 && (
-        <div className="fixed right-4 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2">
+        <div className="fixed right-3 bottom-1/4 z-50 flex flex-col gap-3">
           <a
             href={KAKAO_CONSULTATION_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center w-12 h-12 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-full shadow-lg transition-all hover:scale-110"
-            title="카카오톡 상담"
+            className="flex items-center gap-2 px-4 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-full shadow-lg transition-all hover:scale-105"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 3C6.48 3 2 6.58 2 11c0 2.76 1.81 5.18 4.5 6.57-.15.53-.5 1.93-.57 2.24-.09.38.14.37.29.27.12-.08 1.89-1.26 2.66-1.77.7.1 1.42.16 2.12.16 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
             </svg>
+            <span className="text-sm font-semibold whitespace-nowrap">바로상담</span>
           </a>
           <a
             href={`tel:${PHONE_NUMBER}`}
-            className="flex items-center justify-center w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-all hover:scale-110"
-            title="전화 상담"
+            className="flex items-center gap-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-all hover:scale-105"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
+            <span className="text-sm font-semibold whitespace-nowrap">전화걸기</span>
           </a>
         </div>
       )}
