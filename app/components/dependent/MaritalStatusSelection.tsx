@@ -3,10 +3,11 @@ import type { MaritalStatus } from "@/app/types";
 interface MaritalStatusSelectionProps {
   onSelect: (status: MaritalStatus) => void;
   onBack: () => void;
+  excludeMarried?: boolean; // 기혼 옵션 제외 여부
 }
 
-export function MaritalStatusSelection({ onSelect, onBack }: MaritalStatusSelectionProps) {
-  const options = [
+export function MaritalStatusSelection({ onSelect, onBack, excludeMarried = false }: MaritalStatusSelectionProps) {
+  const allOptions = [
     {
       value: 'married' as const,
       label: '기혼',
@@ -44,6 +45,10 @@ export function MaritalStatusSelection({ onSelect, onBack }: MaritalStatusSelect
       )
     },
   ];
+
+  const options = excludeMarried
+    ? allOptions.filter(opt => opt.value !== 'married')
+    : allOptions;
 
   return (
     <div className="space-y-6 animate-fadeInUp">

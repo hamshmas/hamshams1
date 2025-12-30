@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { handleNumberInput, parseNumberFromFormatted, convertManwonToWon, convertWonToManwon } from "@/utils/formatNumber";
+import { handleNumberInput, parseNumberFromFormatted, formatKoreanCurrency } from "@/utils/formatNumber";
 import { REGIONS, MAIN_COURT_REGIONS } from "@/app/constants";
 import type { HousingType, RegionType } from "@/app/types";
 
@@ -246,47 +246,64 @@ export function MonthlyRentDepositInput({
   onBack: () => void;
   initialValue: number;
 }) {
-  const manwonValue = initialValue > 0 ? convertWonToManwon(initialValue) : 0;
-  const [value, setValue] = useState(manwonValue > 0 ? manwonValue.toLocaleString() : "");
+  const displayValue = initialValue > 0 ? initialValue : 0;
+  const [value, setValue] = useState(displayValue > 0 ? displayValue.toLocaleString() : "");
 
   const handleSubmit = () => {
-    const numericManwon = parseNumberFromFormatted(value);
-    onNext(convertManwonToWon(numericManwon));
+    const numericValue = parseNumberFromFormatted(value);
+    onNext(numericValue);
   };
 
   const isValid = value && parseNumberFromFormatted(value) >= 0;
 
   return (
-    <div className="space-y-4 animate-slideIn">
-      <div className="space-y-1">
-        <h2 className="text-2xl font-extrabold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
+    <div className="flex-1 flex flex-col animate-fadeIn">
+      <div className="mb-8">
+        <h2 className="text-[26px] font-bold text-gray-900 leading-tight mb-2">
           월세 보증금은 얼마인가요?
         </h2>
-        <p className="text-gray-600 text-sm">현재 거주 중인 월세 보증금</p>
+        <p className="text-[15px] text-gray-500 leading-relaxed">현재 거주 중인 월세 보증금</p>
       </div>
 
-      <div className="relative">
-        <input
-          type="text"
-          inputMode="numeric"
-          value={value}
-          onChange={(e) => setValue(handleNumberInput(e.target.value))}
-          onKeyPress={(e) => e.key === 'Enter' && isValid && handleSubmit()}
-          className="input-modern"
-          placeholder="0"
-          autoFocus
-        />
-        <p className="text-right text-primary-600 font-bold mt-2 text-sm">만원</p>
+      <div className="flex-1">
+        <div className="relative mb-6">
+          <div className="flex items-baseline border-b-2 border-gray-200 focus-within:border-blue-500 transition-colors pb-2">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={value}
+              onChange={(e) => setValue(handleNumberInput(e.target.value))}
+              onKeyPress={(e) => e.key === 'Enter' && isValid && handleSubmit()}
+              className="flex-1 text-[32px] font-bold text-gray-900 outline-none bg-transparent placeholder:text-gray-300"
+              placeholder="0"
+              autoFocus
+            />
+            <span className="text-[20px] font-medium text-gray-400 ml-2">원</span>
+          </div>
+          {/* 한글 금액 표시 */}
+          {value && parseNumberFromFormatted(value) > 0 && (
+            <p className="text-[15px] text-blue-500 mt-2">
+              {formatKoreanCurrency(parseNumberFromFormatted(value))}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="flex gap-2">
-        <button onClick={onBack} className="w-1/3 secondary-button text-sm py-2.5">
+      <div className="mt-auto pt-6 flex gap-3">
+        <button
+          onClick={onBack}
+          className="flex-1 py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+        >
           이전
         </button>
         <button
           onClick={handleSubmit}
           disabled={!isValid}
-          className="w-2/3 primary-button disabled:opacity-50 disabled:cursor-not-allowed text-sm py-2.5"
+          className={`flex-[2] py-4 rounded-xl text-[17px] font-semibold transition-all ${
+            isValid
+              ? 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          }`}
         >
           다음
         </button>
@@ -397,6 +414,227 @@ export function CourtJurisdictionSelection({
       <button onClick={onBack} className="w-full secondary-button text-sm py-2.5">
         이전
       </button>
+    </div>
+  );
+}
+
+// 배우자 재산을 위한 결혼 여부 확인
+export function MarriageCheckForAsset({
+  onSelect,
+  onBack,
+}: {
+  onSelect: (isMarried: boolean) => void;
+  onBack: () => void;
+}) {
+  return (
+    <div className="flex-1 flex flex-col animate-fadeIn">
+      <div className="mb-8">
+        <h2 className="text-[26px] font-bold text-gray-900 leading-tight mb-2">
+          결혼하셨나요?
+        </h2>
+        <p className="text-[15px] text-gray-500 leading-relaxed">
+          배우자 재산이 청산가치에 포함될 수 있어요
+        </p>
+      </div>
+
+      <div className="flex-1 space-y-3">
+        <button
+          onClick={() => onSelect(true)}
+          className="w-full bg-white border-2 border-gray-200 hover:border-blue-400 rounded-2xl p-5 text-left transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">💑</span>
+            </div>
+            <div>
+              <p className="font-bold text-gray-900 text-lg">네, 기혼이에요</p>
+              <p className="text-sm text-gray-500 mt-0.5">배우자 재산을 확인할게요</p>
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onSelect(false)}
+          className="w-full bg-white border-2 border-gray-200 hover:border-blue-400 rounded-2xl p-5 text-left transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">🙋</span>
+            </div>
+            <div>
+              <p className="font-bold text-gray-900 text-lg">아니요</p>
+              <p className="text-sm text-gray-500 mt-0.5">미혼 또는 이혼</p>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <div className="mt-auto pt-6">
+        <button
+          onClick={onBack}
+          className="w-full py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+        >
+          이전
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 배우자 재산 유무 확인
+export function SpouseAssetCheck({
+  onSelect,
+  onBack,
+}: {
+  onSelect: (hasAsset: boolean) => void;
+  onBack: () => void;
+}) {
+  return (
+    <div className="flex-1 flex flex-col animate-fadeIn">
+      <div className="mb-8">
+        <h2 className="text-[26px] font-bold text-gray-900 leading-tight mb-2">
+          배우자 명의 재산이 있나요?
+        </h2>
+        <p className="text-[15px] text-gray-500 leading-relaxed">
+          부동산, 예금, 주식, 자동차 등 배우자 명의 재산
+        </p>
+      </div>
+
+      <div className="flex-1 space-y-3">
+        <button
+          onClick={() => onSelect(true)}
+          className="w-full bg-white border-2 border-gray-200 hover:border-blue-400 rounded-2xl p-5 text-left transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">✅</span>
+            </div>
+            <div>
+              <p className="font-bold text-gray-900 text-lg">네, 있어요</p>
+              <p className="text-sm text-gray-500 mt-0.5">배우자 재산 금액을 입력할게요</p>
+            </div>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onSelect(false)}
+          className="w-full bg-white border-2 border-gray-200 hover:border-blue-400 rounded-2xl p-5 text-left transition-all"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center">
+              <span className="text-2xl">❌</span>
+            </div>
+            <div>
+              <p className="font-bold text-gray-900 text-lg">아니요, 없어요</p>
+              <p className="text-sm text-gray-500 mt-0.5">배우자 재산이 없어요</p>
+            </div>
+          </div>
+        </button>
+      </div>
+
+      <div className="mt-auto pt-6">
+        <button
+          onClick={onBack}
+          className="w-full py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+        >
+          이전
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// 배우자 재산 금액 입력
+export function SpouseAssetInput({
+  onNext,
+  onBack,
+  initialValue,
+  isMainCourt,
+}: {
+  onNext: (value: number) => void;
+  onBack: () => void;
+  initialValue: number;
+  isMainCourt: boolean;
+}) {
+  const displayValue = initialValue > 0 ? initialValue : 0;
+  const [value, setValue] = useState(displayValue > 0 ? displayValue.toLocaleString() : "");
+
+  const handleSubmit = () => {
+    const numericValue = parseNumberFromFormatted(value);
+    onNext(numericValue);
+  };
+
+  const isValid = value && parseNumberFromFormatted(value) > 0;
+
+  return (
+    <div className="flex-1 flex flex-col animate-fadeIn">
+      <div className="mb-8">
+        <h2 className="text-[26px] font-bold text-gray-900 leading-tight mb-2">
+          배우자 재산은 얼마인가요?
+        </h2>
+        <p className="text-[15px] text-gray-500 leading-relaxed">
+          부동산, 예금, 주식, 자동차 등 모두 포함해주세요
+        </p>
+      </div>
+
+      <div className="flex-1">
+        <div className="relative mb-6">
+          <div className="flex items-baseline border-b-2 border-gray-200 focus-within:border-blue-500 transition-colors pb-2">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={value}
+              onChange={(e) => setValue(handleNumberInput(e.target.value))}
+              onKeyPress={(e) => e.key === 'Enter' && isValid && handleSubmit()}
+              className="flex-1 text-[32px] font-bold text-gray-900 outline-none bg-transparent placeholder:text-gray-300"
+              placeholder="0"
+              autoFocus
+            />
+            <span className="text-[20px] font-medium text-gray-400 ml-2">원</span>
+          </div>
+          {/* 한글 금액 표시 */}
+          {value && parseNumberFromFormatted(value) > 0 && (
+            <p className="text-[15px] text-blue-500 mt-2">
+              {formatKoreanCurrency(parseNumberFromFormatted(value))}
+            </p>
+          )}
+        </div>
+
+        {/* 안내 메시지 */}
+        <div className="bg-blue-50 rounded-xl p-4">
+          <p className="text-sm text-blue-800">
+            {isMainCourt ? (
+              <>
+                <span className="font-semibold">회생법원 관할</span>이므로 배우자 재산은 청산가치에 <span className="font-semibold">포함되지 않아요</span>
+              </>
+            ) : (
+              <>
+                <span className="font-semibold">기타 법원 관할</span>이므로 배우자 재산의 <span className="font-semibold">50%</span>가 청산가치에 포함돼요
+              </>
+            )}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-auto pt-6 flex gap-3">
+        <button
+          onClick={onBack}
+          className="flex-1 py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+        >
+          이전
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={!isValid}
+          className={`flex-[2] py-4 rounded-xl text-[17px] font-semibold transition-all ${
+            isValid
+              ? 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          다음
+        </button>
+      </div>
     </div>
   );
 }

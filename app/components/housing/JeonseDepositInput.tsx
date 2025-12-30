@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { handleNumberInput, parseNumberFromFormatted, convertManwonToWon, convertWonToManwon } from "@/utils/formatNumber";
+import { handleNumberInput, parseNumberFromFormatted, formatKoreanCurrency } from "@/utils/formatNumber";
 
 interface JeonseDepositInputProps {
   onNext: (value: number) => void;
@@ -10,47 +10,64 @@ interface JeonseDepositInputProps {
 }
 
 export function JeonseDepositInput({ onNext, onBack, initialValue }: JeonseDepositInputProps) {
-  const manwonValue = initialValue > 0 ? convertWonToManwon(initialValue) : 0;
-  const [value, setValue] = useState(manwonValue > 0 ? manwonValue.toLocaleString() : "");
+  const displayValue = initialValue > 0 ? initialValue : 0;
+  const [value, setValue] = useState(displayValue > 0 ? displayValue.toLocaleString() : "");
 
   const handleSubmit = () => {
-    const numericManwon = parseNumberFromFormatted(value);
-    onNext(convertManwonToWon(numericManwon));
+    const numericValue = parseNumberFromFormatted(value);
+    onNext(numericValue);
   };
 
   const isValid = value && parseNumberFromFormatted(value) > 0;
 
   return (
-    <div className="space-y-4 animate-slideIn">
-      <div className="space-y-1">
-        <h2 className="text-2xl font-extrabold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
+    <div className="flex-1 flex flex-col animate-fadeIn">
+      <div className="mb-8">
+        <h2 className="text-[26px] font-bold text-gray-900 leading-tight mb-2">
           전세보증금은 얼마인가요?
         </h2>
-        <p className="text-gray-600 text-sm">현재 거주 중인 전세 보증금</p>
+        <p className="text-[15px] text-gray-500 leading-relaxed">현재 거주 중인 전세 보증금</p>
       </div>
 
-      <div className="relative">
-        <input
-          type="text"
-          inputMode="numeric"
-          value={value}
-          onChange={(e) => setValue(handleNumberInput(e.target.value))}
-          onKeyPress={(e) => e.key === 'Enter' && isValid && handleSubmit()}
-          className="input-modern"
-          placeholder="0"
-          autoFocus
-        />
-        <p className="text-right text-primary-600 font-bold mt-2 text-sm">만원</p>
+      <div className="flex-1">
+        <div className="relative mb-6">
+          <div className="flex items-baseline border-b-2 border-gray-200 focus-within:border-blue-500 transition-colors pb-2">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={value}
+              onChange={(e) => setValue(handleNumberInput(e.target.value))}
+              onKeyPress={(e) => e.key === 'Enter' && isValid && handleSubmit()}
+              className="flex-1 text-[32px] font-bold text-gray-900 outline-none bg-transparent placeholder:text-gray-300"
+              placeholder="0"
+              autoFocus
+            />
+            <span className="text-[20px] font-medium text-gray-400 ml-2">원</span>
+          </div>
+          {/* 한글 금액 표시 */}
+          {value && parseNumberFromFormatted(value) > 0 && (
+            <p className="text-[15px] text-blue-500 mt-2">
+              {formatKoreanCurrency(parseNumberFromFormatted(value))}
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="flex gap-2">
-        <button onClick={onBack} className="w-1/3 secondary-button text-sm py-2.5">
+      <div className="mt-auto pt-6 flex gap-3">
+        <button
+          onClick={onBack}
+          className="flex-1 py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+        >
           이전
         </button>
         <button
           onClick={handleSubmit}
           disabled={!isValid}
-          className="w-2/3 primary-button disabled:opacity-50 disabled:cursor-not-allowed text-sm py-2.5"
+          className={`flex-[2] py-4 rounded-xl text-[17px] font-semibold transition-all ${
+            isValid
+              ? 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          }`}
         >
           다음
         </button>

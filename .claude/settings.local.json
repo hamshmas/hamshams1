@@ -7,7 +7,20 @@
       "Bash(taskkill:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nRedesign entire UI with Apple design philosophy\n\nMajor changes:\n- Add WelcomeScreen component with modern hero design\n- Redesign all 5 input steps with consistent Apple aesthetics\n- Update address, debt, income, asset, and dependent input screens\n- Implement smooth animations (fadeInUp, fadeIn, pulse-slow)\n- Add gradient icons with shadows for each step\n- Consistent button styles with hover and scale effects\n- Improve typography with larger titles and better spacing\n- Add color-coded sections (blue for home, purple for work, etc.)\n- Enhance form inputs with larger text and better focus states\n- Improve overall user experience with modern, clean design\n\nTechnical improvements:\n- Add Apple system font rendering optimizations\n- Implement consistent 3xl rounded corners\n- Add smooth transitions (300ms duration)\n- Improve accessibility with better contrast\n- Mobile-optimized responsive design\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run start:*)",
+      "Bash(npx next start -p 3001)",
+      "Bash(npx vercel:*)",
+      "Bash(gh api:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm ls:*)",
+      "Bash(npm install:*)",
+      "Bash(npm audit fix:*)"
     ],
     "deny": [],
     "ask": []

@@ -6,8 +6,9 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PRIORITY_REPAYMENT } from "@/app/constants";
+import { supabase } from "@/lib/supabase";
 import type { FormData, CalculationResult, CourtCode } from "@/app/types";
 import {
   AssetInputModeSelection,
@@ -15,21 +16,28 @@ import {
   SpouseHousingCheck,
   MonthlyRentDepositInput,
   SpouseHousingJurisdictionInfo,
+  MarriageCheckForAsset,
+  SpouseAssetCheck,
+  SpouseAssetInput,
 } from "@/app/components/asset";
 import { MortgageCheck, KBPriceInput, MortgageAmountInput, JeonseDepositInput } from "@/app/components/housing";
 import { InputStep } from "@/app/components/steps";
-import { LoadingScreen, ProgressSteps } from "@/app/components/ui";
+import { LoadingScreen } from "@/app/components/ui";
 import { ResultPage } from "@/app/components/result";
 import { AddressInputStep } from "@/app/components/address";
-import { MaritalStatusSelection, ChildrenCountInput, SpouseIncomeCheck } from "@/app/components/dependent";
-import { WelcomeScreen } from "@/app/components/welcome";
+import { DependentInputModeSelection, MaritalStatusSelection, ChildrenCountInput, SpouseIncomeCheck } from "@/app/components/dependent";
+import { IncomeTypeSelection } from "@/app/components/income";
 import { useAssetCalculation } from "@/app/hooks/useAssetCalculation";
 import { useDependentCalculation } from "@/app/hooks/useDependentCalculation";
 import { getPriorityRepaymentRegion, getCourtName } from "@/utils/courtJurisdiction";
+import type { IncomeType } from "@/app/types";
+import { KAKAO_CONSULTATION_URL } from "@/app/config/consultation";
+
+const APP_VERSION = "1.1.0";
+const PHONE_NUMBER = "02-6101-3100";
 
 export default function Home() {
-  const [showWelcome, setShowWelcome] = useState(true);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0); // 0: 웰컴, 1: 주소, 2~6: 입력 단계
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     totalDebt: 0,
@@ -42,6 +50,58 @@ export default function Home() {
     priorityRepaymentRegion: "그밖의지역",
   });
   const [result, setResult] = useState<CalculationResult | null>(null);
+  const [userCount, setUserCount] = useState<number | null>(null); // 실제 이용자 수 (로딩 전: null)
+  const [displayCount, setDisplayCount] = useState(0); // 화면에 표시되는 숫자
+  const hasAnimatedRef = useRef(false); // 애니메이션 완료 여부
+
+  // 사용자 수 조회 및 애니메이션
+  useEffect(() => {
+    const fetchAndAnimate = async () => {
+      // 이미 애니메이션 완료했으면 스킵
+      if (hasAnimatedRef.current) return;
+
+      let targetCount = 1300; // 기본값
+
+      // Supabase에서 실제 카운트 조회
+      if (supabase) {
+        try {
+          const { count, error } = await supabase
+            .from('calculation_results')
+            .select('*', { count: 'exact', head: true });
+
+          if (!error && count !== null) {
+            targetCount = count + 1300;
+          }
+        } catch {
+          // DB 연결 실패 시 기본값 사용
+        }
+      }
+
+      setUserCount(targetCount);
+      hasAnimatedRef.current = true;
+
+      // 카운트업 애니메이션 실행
+      const duration = 1200;
+      const steps = 30;
+      const stepDuration = duration / steps;
+
+      for (let i = 1; i <= steps; i++) {
+        await new Promise(resolve => setTimeout(resolve, stepDuration));
+        const progress = i / steps;
+        // easeOutQuad 효과
+        const eased = 1 - (1 - progress) * (1 - progress);
+        setDisplayCount(Math.round(targetCount * eased));
+      }
+    };
+
+    if (currentStep === 0) {
+      fetchAndAnimate();
+    }
+  }, [currentStep]);
+
+  // 소득 관련 상태
+  const [incomeType, setIncomeType] = useState<IncomeType | null>(null);
+  const [incomeSubStep, setIncomeSubStep] = useState(0);
 
   // 자산 계산 관련 상태
   const {
@@ -65,11 +125,26 @@ export default function Home() {
     setIsSpouseHousing,
     isMainCourtJurisdiction,
     setIsMainCourtJurisdiction,
+    housingAsset,
+    setHousingAsset,
+    otherAsset,
+    setOtherAsset,
+    isMarriedForAsset,
+    setIsMarriedForAsset,
+    hasSpouseAsset,
+    setHasSpouseAsset,
+    spouseAsset,
+    setSpouseAsset,
     resetAssetState,
   } = useAssetCalculation();
 
+  // 회생법원 여부 확인 (서울, 수원, 대전, 부산)
+  const isMainCourt = ['seoul', 'suwon', 'daejeon', 'busan'].includes(formData.courtJurisdiction);
+
   // 부양가족 계산 관련 상태
   const {
+    dependentInputMode,
+    setDependentInputMode,
     dependentSubStep,
     setDependentSubStep,
     maritalStatus,
@@ -84,7 +159,7 @@ export default function Home() {
     resetDependentState,
   } = useDependentCalculation();
 
-  const totalSteps = 5;
+  const totalSteps = 5; // 1: 주소, 2: 부채, 3: 소득, 4: 자산, 5: 부양가족 (결과는 step 6)
 
   // 주소 데이터 처리
   const handleAddressNext = (data: {
@@ -141,8 +216,13 @@ export default function Home() {
   };
 
   const handleBack = () => {
-    if (currentStep > 1) {
+    if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // 3단계에서 돌아갈 때 소득 관련 상태 초기화
+      if (currentStep === 4) {
+        setIncomeType(null);
+        setIncomeSubStep(0);
+      }
       // 4단계로 돌아갈 때 상태 초기화
       if (currentStep === 5) {
         resetAssetState();
@@ -152,7 +232,7 @@ export default function Home() {
   };
 
   const handleRestart = () => {
-    setCurrentStep(1);
+    setCurrentStep(0);
     setFormData({
       totalDebt: 0,
       monthlyIncome: 0,
@@ -164,32 +244,119 @@ export default function Home() {
       priorityRepaymentRegion: "그밖의지역",
     });
     setResult(null);
+    setIncomeType(null);
+    setIncomeSubStep(0);
     resetAssetState();
     resetDependentState();
   };
 
-  // Show Welcome Screen
-  if (showWelcome) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-        <WelcomeScreen onStart={() => setShowWelcome(false)} />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-500/10 via-white to-accent-500/10 flex items-center justify-center p-3 relative overflow-hidden">
-      <div className="absolute top-20 left-10 w-72 h-72 bg-primary-400/20 rounded-full blur-3xl animate-float"></div>
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent-400/20 rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
+    <div className="min-h-dvh bg-white flex flex-col">
+      {/* Toss 스타일 헤더 - 웰컴 화면(step 0)과 결과 화면(step 6)에서는 숨김 */}
+      {currentStep >= 1 && currentStep <= totalSteps && (
+        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
+          <div className="max-w-lg mx-auto px-5 h-14 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleBack}
+                className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <span className="text-sm font-semibold text-gray-900">회생의 기적</span>
+            </div>
+<span className="text-xs text-gray-500">{currentStep}/{totalSteps}</span>
+          </div>
+          {/* 프로그레스 바 */}
+          <div className="h-1 bg-gray-100">
+            <div
+              className="h-full bg-blue-500 transition-all duration-500 ease-out"
+              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+            />
+          </div>
+        </header>
+      )}
 
-      <div className="w-full max-w-md relative z-10">
-        {/* Progress Steps */}
-        {currentStep <= totalSteps && (
-          <ProgressSteps currentStep={currentStep} totalSteps={totalSteps} />
-        )}
+      {/* 메인 컨텐츠 */}
+      <main className="flex-1 flex flex-col">
+        <div className="max-w-lg mx-auto w-full flex-1 flex flex-col">
+          {/* 웰컴 화면 (step 0) */}
+          {currentStep === 0 && (
+            <div className="flex-1 flex flex-col px-5 pt-12 pb-24 animate-fadeIn">
+              {/* 히어로 섹션 */}
+              <div className="flex-1">
+                <div className="mb-8">
+                  {/* 브랜드 뱃지 */}
+                  <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold mb-4">
+                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                    회생의 기적
+                  </div>
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h1 className="text-[32px] font-bold text-gray-900 leading-tight mb-3">
+                    빚, 얼마나<br/>줄일 수 있을까요?
+                  </h1>
+                  <p className="text-lg text-gray-500">
+                    3분이면 예상 탕감율을 알 수 있어요
+                  </p>
+                </div>
 
-        {/* Main Card */}
-        <div className="glass-card p-5 animate-scaleIn shadow-xl">
+                {/* 신뢰 지표 */}
+                <div className="space-y-3 mb-8">
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="text-[15px]">무료로 계산할 수 있어요</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="text-[15px]">개인정보는 저장하지 않아요</span>
+                  </div>
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <span className="text-[15px]">전문가가 직접 확인해드려요</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 하단 고정 영역 */}
+              <div className="mt-auto">
+                <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+                  <div className="flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-xs text-gray-500 mb-0.5">지금까지</p>
+                      <p className="text-xl font-bold text-blue-600">{displayCount.toLocaleString()}명</p>
+                      <p className="text-xs text-gray-400 mt-0.5">이 이용했어요</p>
+                    </div>
+                  </div>
+                </div>
+                {/* 법률사무소 정보 */}
+                <p className="text-center text-xs text-gray-400">
+                  <span className="font-medium text-gray-500">블랙스톤 법률사무소</span> · v{APP_VERSION}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* 입력 단계 컨테이너 */}
+          {currentStep >= 1 && (
+          <div className="flex-1 flex flex-col px-5 pt-6 pb-safe">
           {isLoading ? (
             <LoadingScreen />
           ) : (
@@ -203,25 +370,40 @@ export default function Home() {
               )}
               {currentStep === 2 && (
                 <InputStep
-                  title="총 부채액은 얼마인가요?"
-                  subtitle="모든 부채를 합산한 금액"
+                  title="갚아야 할 돈은 얼마인가요?"
+                  subtitle="카드빚, 대출, 밀린 돈 모두 포함해주세요 · 대략적인 금액으로도 괜찮아요"
                   onNext={(value) => handleNext("totalDebt", value)}
                   onBack={handleBack}
                   initialValue={formData.totalDebt}
-                  quickAmounts={[100, 500, 1000, 3000, 5000]}
                   minValue={1}
                 />
               )}
               {currentStep === 3 && (
-                <InputStep
-                  title="월 소득은 얼마인가요?"
-                  subtitle="실수령액 기준"
-                  onNext={(value) => handleNext("monthlyIncome", value)}
-                  onBack={handleBack}
-                  initialValue={formData.monthlyIncome}
-                  quickAmounts={[100, 200, 300, 500, 1000]}
-                  minValue={0}
-                />
+                <>
+                  {incomeSubStep === 0 && (
+                    <IncomeTypeSelection
+                      onNext={(type) => {
+                        setIncomeType(type);
+                        setIncomeSubStep(1);
+                      }}
+                      onBack={handleBack}
+                      initialValue={incomeType}
+                    />
+                  )}
+                  {incomeSubStep === 1 && (
+                    <InputStep
+                      title="한 달에 얼마 버세요?"
+                      subtitle="실제로 받는 돈을 말씀해주세요 · 정확하지 않아도 괜찮아요"
+                      onNext={(value) => handleNext("monthlyIncome", value)}
+                      onBack={() => {
+                        setIncomeSubStep(0);
+                        setIncomeType(null);
+                      }}
+                      initialValue={formData.monthlyIncome}
+                      minValue={0}
+                    />
+                  )}
+                </>
               )}
               {currentStep === 4 && (
                 <>
@@ -236,17 +418,67 @@ export default function Home() {
                       onBack={handleBack}
                     />
                   )}
-                  {assetInputMode === 'direct' && (
+                  {assetInputMode === 'direct' && assetSubStep === 0 && (
                     <InputStep
-                      title="보유 자산 가액은 얼마인가요?"
-                      subtitle="부동산, 차량 등 모든 자산의 시장 가치"
-                      onNext={(value) => handleNext("assetValue", value)}
+                      title="가진 재산은 얼마인가요?"
+                      subtitle="집, 차, 예금, 주식 등 모두 포함해주세요 · 대략적인 금액으로도 괜찮아요"
+                      onNext={(value) => {
+                        setHousingAsset(value); // 직접 입력값을 housingAsset에 저장
+                        setOtherAsset(0);
+                        setAssetSubStep(1000); // 결혼 여부 확인으로
+                      }}
                       onBack={() => {
                         setAssetInputMode(null);
                       }}
                       initialValue={formData.assetValue}
-                      quickAmounts={[100, 500, 1000, 3000, 5000]}
                       minValue={0}
+                    />
+                  )}
+
+                  {/* 직접 입력 모드 - 배우자 재산 결혼 여부 확인 */}
+                  {assetInputMode === 'direct' && assetSubStep === 1000 && (
+                    <MarriageCheckForAsset
+                      onSelect={(isMarried) => {
+                        setIsMarriedForAsset(isMarried);
+                        if (isMarried) {
+                          setAssetSubStep(1001);
+                        } else {
+                          const totalAsset = housingAsset + otherAsset;
+                          handleNext("assetValue", totalAsset);
+                        }
+                      }}
+                      onBack={() => setAssetSubStep(0)}
+                    />
+                  )}
+
+                  {/* 직접 입력 모드 - 배우자 재산 유무 확인 */}
+                  {assetInputMode === 'direct' && assetSubStep === 1001 && (
+                    <SpouseAssetCheck
+                      onSelect={(hasAsset) => {
+                        setHasSpouseAsset(hasAsset);
+                        if (hasAsset) {
+                          setAssetSubStep(1002);
+                        } else {
+                          const totalAsset = housingAsset + otherAsset;
+                          handleNext("assetValue", totalAsset);
+                        }
+                      }}
+                      onBack={() => setAssetSubStep(1000)}
+                    />
+                  )}
+
+                  {/* 직접 입력 모드 - 배우자 재산 금액 입력 */}
+                  {assetInputMode === 'direct' && assetSubStep === 1002 && (
+                    <SpouseAssetInput
+                      onNext={(value) => {
+                        setSpouseAsset(value);
+                        const spouseAssetContribution = isMainCourt ? 0 : Math.floor(value / 2);
+                        const totalAsset = housingAsset + otherAsset + spouseAssetContribution;
+                        handleNext("assetValue", totalAsset);
+                      }}
+                      onBack={() => setAssetSubStep(1001)}
+                      initialValue={spouseAsset}
+                      isMainCourt={isMainCourt}
                     />
                   )}
                   {assetInputMode === 'calculate' && assetSubStep === 0 && (
@@ -293,7 +525,8 @@ export default function Home() {
                       onNext={(value) => {
                         setKbPrice(value);
                         const finalAsset = value - mortgageAmount;
-                        handleNext("assetValue", Math.max(0, finalAsset));
+                        setHousingAsset(Math.max(0, finalAsset));
+                        setAssetSubStep(999); // 기타자산 입력 단계로
                       }}
                       onBack={() => {
                         if (hasMortgage) {
@@ -313,7 +546,8 @@ export default function Home() {
                         // formData.priorityRepaymentRegion 사용 (집 주소 기반 자동 계산)
                         const priorityAmount = PRIORITY_REPAYMENT[formData.priorityRepaymentRegion];
                         const assetDeposit = Math.max(0, value - priorityAmount);
-                        handleNext("assetValue", assetDeposit);
+                        setHousingAsset(assetDeposit);
+                        setAssetSubStep(999); // 기타자산 입력 단계로
                       }}
                       onBack={() => {
                         setAssetSubStep(0);
@@ -330,7 +564,8 @@ export default function Home() {
                         // formData.priorityRepaymentRegion 사용 (집 주소 기반 자동 계산)
                         const priorityAmount = PRIORITY_REPAYMENT[formData.priorityRepaymentRegion];
                         const assetDeposit = Math.max(0, value - priorityAmount);
-                        handleNext("assetValue", assetDeposit);
+                        setHousingAsset(assetDeposit);
+                        setAssetSubStep(999); // 기타자산 입력 단계로
                       }}
                       onBack={() => {
                         setAssetSubStep(0);
@@ -345,7 +580,8 @@ export default function Home() {
                       onSelect={(isSpouse) => {
                         setIsSpouseHousing(isSpouse);
                         if (!isSpouse) {
-                          handleNext("assetValue", 0);
+                          setHousingAsset(0);
+                          setAssetSubStep(999); // 기타자산 입력 단계로
                         } else {
                           setAssetSubStep(2);
                         }
@@ -365,7 +601,8 @@ export default function Home() {
                       }}
                       onNext={(isMainCourt) => {
                         if (isMainCourt) {
-                          handleNext("assetValue", 0);
+                          setHousingAsset(0);
+                          setAssetSubStep(999); // 기타자산 입력 단계로
                         } else {
                           setIsMainCourtJurisdiction(false);
                           setAssetSubStep(3);
@@ -404,7 +641,8 @@ export default function Home() {
                       onNext={(value) => {
                         setKbPrice(value);
                         const assetSpouse = value - mortgageAmount;
-                        handleNext("assetValue", Math.max(0, assetSpouse / 2));
+                        setHousingAsset(Math.max(0, assetSpouse / 2));
+                        setAssetSubStep(999); // 기타자산 입력 단계로
                       }}
                       onBack={() => {
                         if (hasMortgage) {
@@ -416,22 +654,136 @@ export default function Home() {
                       initialValue={kbPrice}
                     />
                   )}
+                  {/* 기타자산 입력 단계 (주거형태 계산 완료 후) */}
+                  {assetInputMode === 'calculate' && assetSubStep === 999 && (
+                    <InputStep
+                      title="다른 재산도 있나요?"
+                      subtitle="예금, 주식, 자동차 등을 말해주세요"
+                      onNext={(value) => {
+                        setOtherAsset(value);
+                        setAssetSubStep(1000); // 결혼 여부 확인으로
+                      }}
+                      onBack={() => {
+                        // 각 주거형태의 마지막 단계로 돌아가기
+                        if (housingType === 'owned') {
+                          setAssetSubStep(hasMortgage ? 3 : 2);
+                        } else if (housingType === 'jeonse' || housingType === 'monthly') {
+                          setAssetSubStep(1);
+                        } else if (housingType === 'free') {
+                          if (isSpouseHousing === false) {
+                            setAssetSubStep(1);
+                          } else if (isMainCourtJurisdiction === true) {
+                            setAssetSubStep(2);
+                          } else {
+                            setAssetSubStep(hasMortgage ? 5 : 4);
+                          }
+                        }
+                      }}
+                      initialValue={otherAsset}
+                      minValue={0}
+                    />
+                  )}
+
+                  {/* 배우자 재산 - 결혼 여부 확인 */}
+                  {assetInputMode === 'calculate' && assetSubStep === 1000 && (
+                    <MarriageCheckForAsset
+                      onSelect={(isMarried) => {
+                        setIsMarriedForAsset(isMarried);
+                        if (isMarried) {
+                          setAssetSubStep(1001); // 배우자 재산 유무 확인으로
+                        } else {
+                          // 미혼: 바로 완료
+                          const totalAsset = housingAsset + otherAsset;
+                          handleNext("assetValue", totalAsset);
+                        }
+                      }}
+                      onBack={() => setAssetSubStep(999)}
+                    />
+                  )}
+
+                  {/* 배우자 재산 - 유무 확인 */}
+                  {assetInputMode === 'calculate' && assetSubStep === 1001 && (
+                    <SpouseAssetCheck
+                      onSelect={(hasAsset) => {
+                        setHasSpouseAsset(hasAsset);
+                        if (hasAsset) {
+                          setAssetSubStep(1002); // 배우자 재산 금액 입력으로
+                        } else {
+                          // 없음: 바로 완료
+                          const totalAsset = housingAsset + otherAsset;
+                          handleNext("assetValue", totalAsset);
+                        }
+                      }}
+                      onBack={() => setAssetSubStep(1000)}
+                    />
+                  )}
+
+                  {/* 배우자 재산 - 금액 입력 */}
+                  {assetInputMode === 'calculate' && assetSubStep === 1002 && (
+                    <SpouseAssetInput
+                      onNext={(value) => {
+                        setSpouseAsset(value);
+                        // 회생법원이 아닌 경우 배우자 재산의 50% 추가
+                        const spouseAssetContribution = isMainCourt ? 0 : Math.floor(value / 2);
+                        const totalAsset = housingAsset + otherAsset + spouseAssetContribution;
+                        handleNext("assetValue", totalAsset);
+                      }}
+                      onBack={() => setAssetSubStep(1001)}
+                      initialValue={spouseAsset}
+                      isMainCourt={isMainCourt}
+                    />
+                  )}
                 </>
               )}
               {currentStep === 5 && (
                 <>
-                  {/* 혼인 상태 선택 */}
-                  {dependentSubStep === 0 && (
+                  {/* 입력 모드 선택 */}
+                  {dependentInputMode === null && (
+                    <DependentInputModeSelection
+                      onSelect={(mode) => {
+                        setDependentInputMode(mode);
+                        if (mode === 'calculate') {
+                          // 이미 자산 단계에서 기혼이라고 응답한 경우, 혼인 상태 선택 건너뛰기
+                          if (isMarriedForAsset === true) {
+                            setMaritalStatus('married');
+                            setDependentSubStep(1); // 바로 자녀 수 입력으로
+                          } else {
+                            setDependentSubStep(0);
+                          }
+                        }
+                      }}
+                      onBack={handleBack}
+                    />
+                  )}
+                  {/* 직접 입력 모드 */}
+                  {dependentInputMode === 'direct' && (
+                    <InputStep
+                      title="함께 사는 가족이 몇 명이에요?"
+                      subtitle="본인도 포함해주세요 · 가족 수에 따라 생활비가 달라져요"
+                      onNext={(value) => handleNext("dependents", value)}
+                      onBack={() => {
+                        setDependentInputMode(null);
+                      }}
+                      initialValue={formData.dependents}
+                      minValue={1}
+                      unitType="count"
+                    />
+                  )}
+                  {/* 계산 모드 - 혼인 상태 선택 (이미 기혼이라고 응답한 경우 건너뜀) */}
+                  {dependentInputMode === 'calculate' && dependentSubStep === 0 && (
                     <MaritalStatusSelection
                       onSelect={(status) => {
                         setMaritalStatus(status);
                         setDependentSubStep(1);
                       }}
-                      onBack={handleBack}
+                      onBack={() => {
+                        setDependentInputMode(null);
+                      }}
+                      excludeMarried={isMarriedForAsset === false}
                     />
                   )}
-                  {/* 자녀 수 입력 */}
-                  {dependentSubStep === 1 && maritalStatus && (
+                  {/* 계산 모드 - 자녀 수 입력 */}
+                  {dependentInputMode === 'calculate' && dependentSubStep === 1 && maritalStatus && (
                     <ChildrenCountInput
                       maritalStatus={maritalStatus}
                       onNext={(count) => {
@@ -454,13 +806,19 @@ export default function Home() {
                         }
                       }}
                       onBack={() => {
-                        setDependentSubStep(0);
-                        setMaritalStatus(null);
+                        // 자산 단계에서 기혼으로 응답해서 혼인상태를 건너뛴 경우, 입력 모드 선택으로 돌아감
+                        if (isMarriedForAsset === true) {
+                          setDependentInputMode(null);
+                          setMaritalStatus(null);
+                        } else {
+                          setDependentSubStep(0);
+                          setMaritalStatus(null);
+                        }
                       }}
                     />
                   )}
-                  {/* 배우자 소득 확인 (주요 법원인 경우만) */}
-                  {dependentSubStep === 2 && maritalStatus === 'married' && (
+                  {/* 계산 모드 - 배우자 소득 확인 (주요 법원인 경우만) */}
+                  {dependentInputMode === 'calculate' && dependentSubStep === 2 && maritalStatus === 'married' && (
                     <SpouseIncomeCheck
                       onSelect={(noIncome) => {
                         setHasNoSpouseIncome(noIncome);
@@ -482,6 +840,7 @@ export default function Home() {
                   result={result}
                   formData={formData}
                   onRestart={handleRestart}
+                  onBack={() => setCurrentStep(5)}
                   assetInputMode={assetInputMode}
                   housingType={housingType}
                   hasMortgage={hasMortgage}
@@ -489,15 +848,63 @@ export default function Home() {
                   kbPrice={kbPrice}
                   depositAmount={depositAmount}
                   isSpouseHousing={isSpouseHousing}
+                  housingAsset={housingAsset}
+                  otherAsset={otherAsset}
                   maritalStatus={maritalStatus}
                   childrenCount={childrenCount}
                   hasNoSpouseIncome={hasNoSpouseIncome}
+                  isMarriedForAsset={isMarriedForAsset}
+                  hasSpouseAsset={hasSpouseAsset}
+                  spouseAsset={spouseAsset}
+                  isMainCourt={isMainCourt}
                 />
               )}
             </>
           )}
+          </div>
+        )}
         </div>
-      </div>
+      </main>
+
+      {/* 하단 고정 CTA 버튼 - 웰컴 화면(step 0)에서만 표시 */}
+      {currentStep === 0 && (
+        <div className="sticky bottom-0 bg-white border-t border-gray-100 px-5 pt-4 pb-safe">
+          <div className="max-w-lg mx-auto">
+            <button
+              onClick={() => setCurrentStep(1)}
+              className="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-semibold py-4 rounded-xl transition-colors text-[17px]"
+            >
+              시작하기
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 플로팅 상담 버튼 - 결과 화면 제외 */}
+      {currentStep !== 6 && (
+        <div className="fixed right-4 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2">
+          <a
+            href={KAKAO_CONSULTATION_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-12 h-12 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-full shadow-lg transition-all hover:scale-110"
+            title="카카오톡 상담"
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 3C6.48 3 2 6.58 2 11c0 2.76 1.81 5.18 4.5 6.57-.15.53-.5 1.93-.57 2.24-.09.38.14.37.29.27.12-.08 1.89-1.26 2.66-1.77.7.1 1.42.16 2.12.16 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
+            </svg>
+          </a>
+          <a
+            href={`tel:${PHONE_NUMBER}`}
+            className="flex items-center justify-center w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-all hover:scale-110"
+            title="전화 상담"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+          </a>
+        </div>
+      )}
     </div>
   );
 }

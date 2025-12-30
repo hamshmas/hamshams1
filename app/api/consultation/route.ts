@@ -1,61 +1,31 @@
 /**
  * 상담 신청 API
- * POST /api/consultation - 새 상담 신청 저장
+ * POST /api/consultation - 상담 신청 로그 기록
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase-admin';
-import type {
-  CreateConsultationRequest,
-  CreateConsultationResponse,
-  ConsultationData,
-  CalculationInput,
-  AssetDetails,
-  DependentDetails,
-  ConsultationMetadata,
-} from '@/app/types/consultation';
 
-/**
- * 객체에서 undefined 값을 재귀적으로 제거하는 함수
- */
-function removeUndefined(obj: any): any {
-  if (obj === null || obj === undefined) {
-    return undefined;
-  }
+// Consultation types
+interface CreateConsultationRequest {
+  applicant: {
+    name: string;
+    phone: string;
+    email?: string;
+    privacyConsent: boolean;
+  };
+  formData: any;
+  result: any;
+}
 
-  if (Array.isArray(obj)) {
-    return obj.map(item => removeUndefined(item)).filter(item => item !== undefined);
-  }
-
-  if (typeof obj === 'object') {
-    const result: any = {};
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const value = removeUndefined(obj[key]);
-        if (value !== undefined) {
-          result[key] = value;
-        }
-      }
-    }
-    return result;
-  }
-
-  return obj;
+interface CreateConsultationResponse {
+  success: boolean;
+  consultationId?: string;
+  message?: string;
+  error?: string;
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Firebase Admin이 초기화되지 않은 경우 처리
-    if (!adminDb) {
-      return NextResponse.json(
-        {
-          error: 'Database service not available',
-          message: 'Firebase Admin is not initialized. Please configure Firebase credentials.'
-        },
-        { status: 503 }
-      );
-    }
-
     const body: CreateConsultationRequest = await request.json();
 
     // 필수 필드 검증
@@ -82,107 +52,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 계산 입력 데이터 구성
-    const calculationInput: CalculationInput = {
-      totalDebt: body.formData.totalDebt,
-      monthlyIncome: body.formData.monthlyIncome,
-      assetValue: body.formData.assetValue,
-      dependents: body.formData.dependents,
-      homeAddress: body.formData.homeAddress,
-      workAddress: body.formData.workAddress,
-      courtJurisdiction: body.formData.courtJurisdiction,
-      priorityRepaymentRegion: body.formData.priorityRepaymentRegion,
-    };
-
-    // 자산 상세 정보 구성
-    const assetDetails: AssetDetails | undefined = body.housingType
-      ? {
-          housingType: body.housingType,
-          kbPrice: body.kbPrice,
-          mortgageAmount: body.mortgageAmount,
-          depositAmount: body.depositAmount,
-          hasMortgage: body.hasMortgage ?? undefined,
-          isSpouseHousing: body.isSpouseHousing ?? undefined,
-        }
-      : undefined;
-
-    // 부양가족 상세 정보 구성
-    const dependentDetails: DependentDetails | undefined = body.maritalStatus
-      ? {
-          maritalStatus: body.maritalStatus,
-          childrenCount: body.childrenCount,
-          hasNoSpouseIncome: body.hasNoSpouseIncome ?? undefined,
-        }
-      : undefined;
-
-    // 메타데이터 구성
-    const now = new Date();
-    const userAgent = request.headers.get('user-agent') || 'unknown';
-    const isMobile = /mobile|android|iphone|ipad|phone/i.test(userAgent);
-
-    const metadata: ConsultationMetadata = {
-      createdAt: now,
-      updatedAt: now,
-      status: 'pending',
-      source: isMobile ? 'mobile' : 'web',
-      userAgent,
-    };
-
-    // Firestore에 저장할 데이터 구성 (id 제외)
-    const consultationDataWithoutId: Record<string, any> = {
-      applicant: body.applicant,
-      input: calculationInput,
-      result: body.result,
-      metadata,
-      notes: [],
-    };
-
-    // assetDetails가 있으면 추가
-    if (assetDetails) {
-      consultationDataWithoutId.assetDetails = assetDetails;
-    }
-
-    // dependentDetails가 있으면 추가
-    if (dependentDetails) {
-      consultationDataWithoutId.dependentDetails = dependentDetails;
-    }
-
-    // undefined 값을 재귀적으로 제거
-    const cleanedData = removeUndefined(consultationDataWithoutId);
-
-    // Firestore에 문서 추가
-    const docRef = await adminDb.collection('consultations').add(cleanedData);
-
-    console.log('[Consultation] New consultation created:', {
-      id: docRef.id,
+    // 콘솔에 로그 기록 (개발용)
+    console.log('[Consultation] New consultation request:', {
       name: body.applicant.name,
       phone: body.applicant.phone,
-      status: metadata.status,
+      email: body.applicant.email,
+      totalDebt: body.formData.totalDebt,
+      monthlyIncome: body.formData.monthlyIncome,
+      reductionRate: body.result.reductionRate,
+      timestamp: new Date().toISOString(),
     });
 
+    // 성공 응답
     return NextResponse.json<CreateConsultationResponse>(
       {
         success: true,
-        consultationId: docRef.id,
+        consultationId: `local-${Date.now()}`,
         message: '상담 신청이 접수되었습니다.',
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error('[Consultation] Error creating consultation:', error);
-
-    // Firebase 관련 에러 처리
-    if (error instanceof Error) {
-      if (error.message.includes('FIREBASE_SERVICE_ACCOUNT_KEY')) {
-        return NextResponse.json<CreateConsultationResponse>(
-          {
-            success: false,
-            error: 'Firebase 설정이 완료되지 않았습니다. 관리자에게 문의하세요.',
-          },
-          { status: 500 }
-        );
-      }
-    }
+    console.error('[Consultation] Error processing consultation:', error);
 
     return NextResponse.json<CreateConsultationResponse>(
       {

@@ -76,7 +76,8 @@ export function AddressInputStep({
       : null
   );
   const [selectedCourt, setSelectedCourt] = useState<CourtCode | null>(null);
-  const [step, setStep] = useState<"home" | "work" | "court">("home");
+  const [step, setStep] = useState<"home" | "workChoice" | "work" | "court">("home");
+  const [hasWorkAddress, setHasWorkAddress] = useState<boolean | null>(null);
 
   // 카카오 주소 검색 팝업 열기
   const openAddressSearch = (type: "home" | "work") => {
@@ -107,7 +108,20 @@ export function AddressInputStep({
   // 다음 단계로 진행
   const handleNext = () => {
     if (step === "home" && homeAddressData) {
-      setStep("work");
+      setStep("workChoice");
+    } else if (step === "workChoice") {
+      if (hasWorkAddress) {
+        setStep("work");
+      } else {
+        // 직장 주소 없이 바로 완료
+        const homeCourt = getCourtFromAddress(homeAddressData!);
+        onNext({
+          homeAddress: homeAddressData!.address,
+          workAddress: "",
+          courtJurisdiction: homeCourt,
+          homeAddressData: homeAddressData!,
+        });
+      }
     } else if (step === "work" && workAddressData && homeAddressData) {
       // 관할법원 자동 계산
       const homeCourt = getCourtFromAddress(homeAddressData);
@@ -142,8 +156,11 @@ export function AddressInputStep({
       setStep("work");
       setSelectedCourt(null);
     } else if (step === "work") {
-      setStep("home");
+      setStep("workChoice");
       setWorkAddressData(null);
+    } else if (step === "workChoice") {
+      setStep("home");
+      setHasWorkAddress(null);
     } else if (onBack) {
       onBack();
     }
@@ -245,6 +262,72 @@ export function AddressInputStep({
               homeAddressData
                 ? "hover:shadow-xl hover:scale-105 active:scale-100"
                 : "opacity-40 cursor-not-allowed"
+            }`}
+          >
+            다음
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === "workChoice") {
+    return (
+      <div className="space-y-4 animate-slideIn">
+        <div className="text-center mb-2">
+          <h2 className="text-2xl font-extrabold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent mb-1">
+            직장 주소를 입력하시겠습니까?
+          </h2>
+          <p className="text-gray-600 text-sm">직장 주소는 관할법원 결정에 사용됩니다</p>
+        </div>
+
+        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+          <div className="flex items-start gap-2">
+            <span className="text-lg">💡</span>
+            <div className="flex-1 text-xs text-blue-900 leading-relaxed">
+              <p className="font-bold mb-1">직장 주소를 입력하면:</p>
+              <p>• 집 주소와 직장 주소 중 선택하여 관할법원을 정할 수 있습니다</p>
+              <p className="mt-2 font-bold">입력하지 않으면:</p>
+              <p>• 집 주소 기준으로 자동으로 관할법원이 정해집니다</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <button
+            onClick={() => setHasWorkAddress(true)}
+            className={`w-full border-2 rounded-xl p-4 transition-all text-left ${
+              hasWorkAddress === true
+                ? "border-primary-500 bg-primary-50"
+                : "border-gray-200 hover:border-primary-300 bg-white"
+            }`}
+          >
+            <p className="font-bold text-gray-900 text-sm">💼 네, 직장 주소를 입력하겠습니다</p>
+            <p className="text-xs text-gray-600 mt-1">관할법원을 선택할 수 있습니다</p>
+          </button>
+
+          <button
+            onClick={() => setHasWorkAddress(false)}
+            className={`w-full border-2 rounded-xl p-4 transition-all text-left ${
+              hasWorkAddress === false
+                ? "border-primary-500 bg-primary-50"
+                : "border-gray-200 hover:border-primary-300 bg-white"
+            }`}
+          >
+            <p className="font-bold text-gray-900 text-sm">🏠 아니오, 집 주소만 사용하겠습니다</p>
+            <p className="text-xs text-gray-600 mt-1">집 주소 기준으로 자동 결정됩니다</p>
+          </button>
+        </div>
+
+        <div className="flex gap-2">
+          <button onClick={handleBack} className="secondary-button flex-1 text-sm py-2.5">
+            이전
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={hasWorkAddress === null}
+            className={`primary-button flex-1 text-sm py-2.5 ${
+              hasWorkAddress === null ? "opacity-50 cursor-not-allowed" : ""
             }`}
           >
             다음
