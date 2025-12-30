@@ -871,7 +871,11 @@ export default function Home() {
         <div className="sticky bottom-0 bg-white border-t border-gray-100 px-5 pt-4 pb-safe">
           <div className="max-w-lg mx-auto">
             <button
-              onClick={() => setCurrentStep(1)}
+              onClick={() => {
+                // 시작하기 클릭 추적
+                fetch('/api/track-start', { method: 'POST' }).catch(() => {});
+                setCurrentStep(1);
+              }}
               className="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-semibold py-4 rounded-xl transition-colors text-[17px]"
             >
               시작하기

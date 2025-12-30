@@ -62,3 +62,22 @@ CREATE POLICY "Only admins can view calculation results"
   ON calculation_results
   FOR SELECT
   USING (auth.role() = 'authenticated');
+
+-- 시작하기 버튼 클릭 추적 테이블
+CREATE TABLE IF NOT EXISTS user_visits (
+  id BIGSERIAL PRIMARY KEY,
+  ip_address VARCHAR(45) NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 인덱스 생성
+CREATE INDEX IF NOT EXISTS idx_user_visits_created_at ON user_visits(created_at DESC);
+
+-- RLS 활성화
+ALTER TABLE user_visits ENABLE ROW LEVEL SECURITY;
+
+-- 익명 사용자도 INSERT 가능하도록 정책 설정
+CREATE POLICY "Anyone can insert user visits"
+  ON user_visits
+  FOR INSERT
+  WITH CHECK (true);

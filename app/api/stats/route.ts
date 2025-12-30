@@ -10,9 +10,9 @@ export async function GET() {
       });
     }
 
-    // 총 사용자 수 조회
+    // 총 사용자 수 조회 (시작하기 버튼 클릭 수)
     const { count, error: countError } = await supabaseAdmin
-      .from('calculation_results')
+      .from('user_visits')
       .select('*', { count: 'exact', head: true });
 
     const userCount = (!countError && count !== null) ? count + 1300 : 1300;
