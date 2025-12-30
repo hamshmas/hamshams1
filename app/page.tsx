@@ -8,7 +8,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { PRIORITY_REPAYMENT } from "@/app/constants";
-import { supabase } from "@/lib/supabase";
 import type { FormData, CalculationResult, CourtCode } from "@/app/types";
 import {
   AssetInputModeSelection,
@@ -63,37 +62,18 @@ export default function Home() {
 
       let targetCount = 1300; // 기본값
 
-      // Supabase에서 실제 카운트 조회
-      if (supabase) {
-        try {
-          const { count, error } = await supabase
-            .from('calculation_results')
-            .select('*', { count: 'exact', head: true });
-
-          if (!error && count !== null) {
-            targetCount = count + 1300;
+      // API에서 통계 조회
+      try {
+        const response = await fetch('/api/stats');
+        if (response.ok) {
+          const data = await response.json();
+          targetCount = data.userCount || 1300;
+          if (data.weeklyMaxRate) {
+            setWeeklyMaxRate(data.weeklyMaxRate);
           }
-
-          // 이번주 최고 탕감율 조회
-          const now = new Date();
-          const dayOfWeek = now.getDay();
-          const startOfWeek = new Date(now);
-          startOfWeek.setDate(now.getDate() - dayOfWeek);
-          startOfWeek.setHours(0, 0, 0, 0);
-
-          const { data: maxRateData } = await supabase
-            .from('calculation_results')
-            .select('reduction_rate')
-            .gte('created_at', startOfWeek.toISOString())
-            .order('reduction_rate', { ascending: false })
-            .limit(1);
-
-          if (maxRateData && maxRateData.length > 0) {
-            setWeeklyMaxRate(Math.round(maxRateData[0].reduction_rate));
-          }
-        } catch {
-          // DB 연결 실패 시 기본값 사용
         }
+      } catch {
+        // API 호출 실패 시 기본값 사용
       }
 
       setUserCount(targetCount);
