@@ -6,13 +6,35 @@ interface WelcomeScreenProps {
   onStart: () => void;
 }
 
+interface Stats {
+  userCount: number;
+  dailyMaxRate: number | null;
+}
+
 export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const [stats, setStats] = useState<Stats>({ userCount: 1300, dailyMaxRate: null });
 
   useEffect(() => {
     // Fade in animation on mount
     const timer = setTimeout(() => setIsVisible(true), 100);
     return () => clearTimeout(timer);
+  }, []);
+
+  // 통계 데이터 로드
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/stats');
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    };
+    fetchStats();
   }, []);
 
   return (
@@ -65,6 +87,21 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
             </p>
           </div>
         </div>
+
+        {/* 24시간 내 최대 탕감률 표시 */}
+        {stats.dailyMaxRate && stats.dailyMaxRate > 0 && (
+          <div className="animate-fadeInUp">
+            <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-full shadow-lg">
+              <div className="flex items-center gap-1">
+                <span className="text-amber-600 text-lg">🔥</span>
+                <span className="text-sm font-medium text-gray-700">24시간 내 최대 탕감률</span>
+              </div>
+              <span className="text-2xl font-black bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                {stats.dailyMaxRate}%
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-6 px-4">

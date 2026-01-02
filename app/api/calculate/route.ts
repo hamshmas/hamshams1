@@ -8,6 +8,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { calculatePresentValue, findMinimumRepaymentPeriod } from '@/utils/leibnizCalculation';
 import { supabaseAdmin, isSupabaseConfigured } from '@/app/config/supabase';
 
+// 개인회생 최대 탕감률 (법정 한도)
+const MAX_REDUCTION_RATE = 96.9;
+
 // 최저생계비 데이터 (서버에서만 관리)
 const minimumLivingCostData: Record<string, number> = {
   "0": 1538543,
@@ -247,10 +250,15 @@ export async function POST(request: NextRequest) {
           const reductionAmount = totalDebt - repaymentAmount;
           const reductionRate = totalDebt > 0 ? (reductionAmount / totalDebt) * 100 : 0;
 
+          // 최대 탕감률 제한 적용
+          const cappedReductionRate = Math.min(reductionRate, MAX_REDUCTION_RATE);
+          const cappedReductionAmount = totalDebt * (cappedReductionRate / 100);
+          const cappedRepaymentAmount = totalDebt - cappedReductionAmount;
+
           const resultData = {
-            reductionRate: Math.max(0, Math.min(100, reductionRate)),
-            repaymentAmount: Math.max(0, repaymentAmount),
-            reductionAmount: Math.max(0, reductionAmount),
+            reductionRate: Math.max(0, cappedReductionRate),
+            repaymentAmount: Math.max(0, cappedRepaymentAmount),
+            reductionAmount: Math.max(0, cappedReductionAmount),
             monthlyPayment: adjustedMonthlyPayment,
             repaymentPeriod: adjustedRepaymentPeriod,
             liquidationValueViolation: false,
@@ -288,10 +296,15 @@ export async function POST(request: NextRequest) {
     const reductionAmount = totalDebt - repaymentAmount;
     const reductionRate = totalDebt > 0 ? (reductionAmount / totalDebt) * 100 : 0;
 
+    // 최대 탕감률 제한 적용
+    const cappedReductionRate = Math.min(reductionRate, MAX_REDUCTION_RATE);
+    const cappedReductionAmount = totalDebt * (cappedReductionRate / 100);
+    const cappedRepaymentAmount = totalDebt - cappedReductionAmount;
+
     const successResultData = {
-      reductionRate: Math.max(0, Math.min(100, reductionRate)),
-      repaymentAmount: Math.max(0, repaymentAmount),
-      reductionAmount: Math.max(0, reductionAmount),
+      reductionRate: Math.max(0, cappedReductionRate),
+      repaymentAmount: Math.max(0, cappedRepaymentAmount),
+      reductionAmount: Math.max(0, cappedReductionAmount),
       monthlyPayment: monthlyRepayment,
       repaymentPeriod,
       liquidationValueViolation: false,

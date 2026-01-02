@@ -20,7 +20,9 @@
       "Bash(npx tsc:*)",
       "Bash(npm ls:*)",
       "Bash(npm install:*)",
-      "Bash(npm audit fix:*)"
+      "Bash(npm audit fix:*)",
+      "Bash(gh auth status:*)",
+      "Bash(git remote set-url:*)"
     ],
     "deny": [],
     "ask": []
