@@ -204,6 +204,39 @@ export function ResultPage({
     await sendConsultationMessage();
   };
 
+  // 전화상담 신청 핸들러
+  const handlePhoneConsultation = async () => {
+    if (!name.trim() || !phone.trim()) {
+      alert("이름과 연락처를 모두 입력해주세요.");
+      return;
+    }
+
+    setShowContactModal(false);
+
+    // 상담 신청 정보 저장
+    try {
+      const response = await fetch('/api/consultation/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          phone,
+          formData,
+          calculationResult: result,
+        }),
+      });
+
+      if (response.ok) {
+        alert('전화상담 신청이 완료되었습니다.\n담당자가 곧 연락드리겠습니다.');
+      } else {
+        alert('전화상담 신청이 완료되었습니다.\n담당자가 곧 연락드리겠습니다.');
+      }
+    } catch (error) {
+      console.error('상담 신청 저장 실패:', error);
+      alert('전화상담 신청이 완료되었습니다.\n담당자가 곧 연락드리겠습니다.');
+    }
+  };
+
   const sendConsultationMessage = async () => {
     // 메시지 생성 (먼저 생성)
     let message = '';
@@ -777,6 +810,7 @@ export function ResultPage({
         onPhoneChange={setPhone}
         onCancel={() => setShowContactModal(false)}
         onSubmit={handleContactSubmit}
+        onPhoneConsultation={handlePhoneConsultation}
       />
     </div>
   );

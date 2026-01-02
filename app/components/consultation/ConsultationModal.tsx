@@ -8,6 +8,7 @@ interface ConsultationModalProps {
   onPhoneChange: (phone: string) => void;
   onCancel: () => void;
   onSubmit: () => void;
+  onPhoneConsultation?: () => void;
 }
 
 export function ConsultationModal({
@@ -18,6 +19,7 @@ export function ConsultationModal({
   onPhoneChange,
   onCancel,
   onSubmit,
+  onPhoneConsultation,
 }: ConsultationModalProps) {
   if (!isOpen) return null;
 
@@ -110,18 +112,28 @@ export function ConsultationModal({
           </p>
         </div>
 
-        <div className="flex gap-2 pt-2">
+        <div className="flex flex-col gap-2 pt-2">
+          <div className="flex gap-2">
+            <button
+              onClick={onSubmit}
+              className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-sm hover:scale-105 transform"
+            >
+              💬 카카오톡 상담
+            </button>
+            {onPhoneConsultation && (
+              <button
+                onClick={onPhoneConsultation}
+                className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-sm hover:scale-105 transform"
+              >
+                📞 전화상담 신청
+              </button>
+            )}
+          </div>
           <button
             onClick={onCancel}
-            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl transition-all text-sm"
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-xl transition-all text-sm"
           >
             취소
-          </button>
-          <button
-            onClick={onSubmit}
-            className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-sm hover:scale-105 transform"
-          >
-            카카오톡 상담 시작
           </button>
         </div>
 
