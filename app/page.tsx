@@ -32,7 +32,7 @@ import { getPriorityRepaymentRegion, getCourtName } from "@/utils/courtJurisdict
 import type { IncomeType } from "@/app/types";
 import { KAKAO_CONSULTATION_URL } from "@/app/config/consultation";
 
-const APP_VERSION = "1.1.0";
+const LAST_UPDATED = "2025.01.02";
 const PHONE_NUMBER = "02-6101-3100";
 
 export default function Home() {
@@ -348,7 +348,7 @@ export default function Home() {
                 </div>
                 {/* 법률사무소 정보 */}
                 <p className="text-center text-xs text-gray-400">
-                  <span className="font-medium text-gray-500">블랙스톤 법률사무소</span> · v{APP_VERSION}
+                  <span className="font-medium text-gray-500">블랙스톤 법률사무소</span> · 최종수정 {LAST_UPDATED}
                 </p>
               </div>
             </div>
