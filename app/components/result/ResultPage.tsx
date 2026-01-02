@@ -478,9 +478,19 @@ export function ResultPage({
             </div>
           </div>
           <h2 className="text-4xl font-black text-gray-900 mb-3 animate-fadeIn leading-tight">
-            정리할 수 있어요
+            {result.reductionRate >= 90 ? "🎉 대박! 거의 다 없어져요!" :
+             result.reductionRate >= 80 ? "🔥 와우! 엄청난 탕감!" :
+             result.reductionRate >= 70 ? "✨ 놀라워요! 확 줄어요!" :
+             result.reductionRate >= 60 ? "💪 좋아요! 많이 줄어요!" :
+             "👍 희망이 보여요!"}
           </h2>
-          <p className="text-base text-gray-600 font-medium mb-6">이만큼 줄어들어요</p>
+          <p className="text-base text-gray-600 font-medium mb-6">
+            {result.reductionRate >= 90 ? "빚의 90% 이상 탕감 가능!" :
+             result.reductionRate >= 80 ? "빚의 80% 이상이 사라져요!" :
+             result.reductionRate >= 70 ? "빚이 3분의 1 이하로!" :
+             result.reductionRate >= 60 ? "빚의 절반 이상 탕감!" :
+             "새출발의 기회가 있어요!"}
+          </p>
           <div className="relative inline-block animate-scaleIn">
             <svg className="w-40 h-40 transform -rotate-90 drop-shadow-xl" viewBox="0 0 120 120">
               <defs>
