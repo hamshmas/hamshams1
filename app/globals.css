@@ -91,105 +91,28 @@ body {
   animation: fadeIn 0.5s ease-out;
 }
 
-/* 축하 효과 애니메이션 */
-@keyframes celebration-text {
+/* 축하 효과 애니메이션 - 차분하고 우아한 스타일 */
+@keyframes confetti-fall {
   0% {
     opacity: 0;
-    transform: scale(0.3) rotate(-10deg);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2) rotate(5deg);
-  }
-  70% {
-    transform: scale(0.9) rotate(-2deg);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1) rotate(0deg) translateY(-50px);
-  }
-}
-
-@keyframes money-fall {
-  0% {
-    opacity: 0;
-    transform: translateY(-20px) rotate(0deg);
+    transform: translateY(0) rotate(0deg);
   }
   10% {
-    opacity: 1;
+    opacity: 0.8;
   }
   90% {
-    opacity: 1;
+    opacity: 0.6;
   }
   100% {
     opacity: 0;
-    transform: translateY(110vh) rotate(720deg);
-  }
-}
-
-@keyframes money-bag {
-  0% {
-    opacity: 0;
-    transform: translateX(-50%) scale(0) translateY(100px);
-  }
-  30% {
-    opacity: 1;
-    transform: translateX(-50%) scale(1.3) translateY(0);
-  }
-  50% {
-    transform: translateX(-50%) scale(1) translateY(-20px);
-  }
-  70% {
-    transform: translateX(-50%) scale(1.1) translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-50%) scale(1) translateY(-50px);
-  }
-}
-
-@keyframes coin-pop {
-  0% {
-    opacity: 0;
-    transform: translateY(0) scale(0);
-  }
-  50% {
-    opacity: 1;
-    transform: translateY(-30px) scale(1.2);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-60px) scale(0.8);
-  }
-}
-
-@keyframes sparkle {
-  0%, 100% {
-    opacity: 0;
-    transform: scale(0) rotate(0deg);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1) rotate(180deg);
-  }
-}
-
-@keyframes bounce-gentle {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-15px);
+    transform: translateY(100vh) rotate(360deg);
   }
 }
 
 @keyframes scaleIn {
   0% {
     opacity: 0;
-    transform: scale(0.5);
-  }
-  60% {
-    transform: scale(1.1);
+    transform: scale(0.8);
   }
   100% {
     opacity: 1;
@@ -197,32 +120,12 @@ body {
   }
 }
 
-.animate-celebration-text {
-  animation: celebration-text 3s ease-out forwards;
-}
-
-.animate-money-fall {
-  animation: money-fall 3s ease-in forwards;
-}
-
-.animate-money-bag {
-  animation: money-bag 3s ease-out forwards;
-}
-
-.animate-coin-pop {
-  animation: coin-pop 1.5s ease-out forwards;
-}
-
-.animate-sparkle {
-  animation: sparkle 2s ease-in-out infinite;
-}
-
-.animate-bounce-gentle {
-  animation: bounce-gentle 1s ease-in-out infinite;
+.animate-confetti-fall {
+  animation: confetti-fall ease-out forwards;
 }
 
 .animate-scaleIn {
-  animation: scaleIn 0.8s ease-out;
+  animation: scaleIn 0.6s ease-out;
 }
 
 @layer components {
