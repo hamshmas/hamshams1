@@ -376,6 +376,7 @@ export default function Home() {
                   onBack={handleBack}
                   initialValue={formData.totalDebt}
                   minValue={1}
+                  checkSmallValue={true}
                 />
               )}
               {currentStep === 3 && (
@@ -401,6 +402,7 @@ export default function Home() {
                       }}
                       initialValue={formData.monthlyIncome}
                       minValue={0}
+                      checkSmallValue={true}
                     />
                   )}
                 </>
