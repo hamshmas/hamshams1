@@ -522,7 +522,7 @@ export function ResultPage({
               onClick={handleConsultationClick}
               className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm animate-bounce-glow"
             >
-              💬 지금 바로 상담받기
+              💬 바로상담
             </button>
             <button
               onClick={() => setShowContactModal(true)}
