@@ -1,6 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, isSupabaseConfigured } from '@/app/config/supabase';
 
+const GOOGLE_CHAT_WEBHOOK_URL = process.env.GOOGLE_CHAT_WEBHOOK_URL;
+
+// Google Chat으로 알림 전송
+async function sendGoogleChatNotification(data: {
+  name: string;
+  phone: string;
+  formData: {
+    totalDebt: number;
+    monthlyIncome: number;
+    assetValue: number;
+    dependents: number;
+    homeAddress?: string;
+    workAddress?: string;
+  };
+  calculationResult: {
+    reductionRate: number;
+    reductionAmount: number;
+    repaymentAmount: number;
+    monthlyPayment: number;
+  };
+}) {
+  if (!GOOGLE_CHAT_WEBHOOK_URL) {
+    console.log('[GoogleChat] Webhook URL not configured, skipping notification');
+    return;
+  }
+
+  try {
+    const message = {
+      cards: [{
+        header: {
+          title: "🔔 새 상담 신청",
+          subtitle: new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
+        },
+        sections: [{
+          widgets: [
+            { keyValue: { topLabel: "이름", content: data.name } },
+            { keyValue: { topLabel: "연락처", content: data.phone } },
+            { keyValue: { topLabel: "채무액", content: `${(data.formData.totalDebt / 10000).toLocaleString()}만원` } },
+            { keyValue: { topLabel: "월소득", content: `${(data.formData.monthlyIncome / 10000).toLocaleString()}만원` } },
+            { keyValue: { topLabel: "예상 탕감률", content: `${data.calculationResult.reductionRate.toFixed(1)}%` } },
+            { keyValue: { topLabel: "예상 탕감액", content: `${(data.calculationResult.reductionAmount / 10000).toLocaleString()}만원` } },
+            { keyValue: { topLabel: "주소", content: data.formData.homeAddress || '-' } },
+          ]
+        }]
+      }]
+    };
+
+    const response = await fetch(GOOGLE_CHAT_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(message),
+    });
+
+    if (!response.ok) {
+      console.error('[GoogleChat] Failed to send notification:', response.status);
+    } else {
+      console.log('[GoogleChat] Notification sent successfully');
+    }
+  } catch (error) {
+    console.error('[GoogleChat] Error sending notification:', error);
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // 환경 변수 확인
@@ -47,6 +110,9 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    // Google Chat으로 알림 전송 (비동기, 실패해도 응답에 영향 없음)
+    sendGoogleChatNotification({ name, phone, formData, calculationResult });
 
     return NextResponse.json({
       success: true,
