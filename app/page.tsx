@@ -51,7 +51,7 @@ export default function Home() {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [userCount, setUserCount] = useState<number | null>(null); // 실제 이용자 수 (로딩 전: null)
   const [displayCount, setDisplayCount] = useState(0); // 화면에 표시되는 숫자
-  const [displayWeeklyMaxRate, setDisplayWeeklyMaxRate] = useState(0); // 화면에 표시되는 탕감율 (애니메이션)
+  const [displayDailyMaxRate, setDisplayDailyMaxRate] = useState(0); // 화면에 표시되는 탕감율 (애니메이션)
   const hasAnimatedRef = useRef(false); // 애니메이션 완료 여부
 
   // 사용자 수 조회 및 애니메이션
@@ -69,8 +69,8 @@ export default function Home() {
         if (response.ok) {
           const data = await response.json();
           targetCount = data.userCount || 1300;
-          if (data.weeklyMaxRate && data.weeklyMaxRate > 0) {
-            targetRate = data.weeklyMaxRate;
+          if (data.dailyMaxRate && data.dailyMaxRate > 0) {
+            targetRate = data.dailyMaxRate;
           }
         }
       } catch {
@@ -91,7 +91,7 @@ export default function Home() {
         // easeOutQuad 효과
         const eased = 1 - (1 - progress) * (1 - progress);
         setDisplayCount(Math.round(targetCount * eased));
-        setDisplayWeeklyMaxRate(Math.round(targetRate * eased));
+        setDisplayDailyMaxRate(Math.round(targetRate * eased));
       }
     };
 
@@ -341,8 +341,8 @@ export default function Home() {
                     </div>
                     <div className="w-px h-14 bg-gray-200"></div>
                     <div className="text-center">
-                      <p className="text-xs text-gray-500 mb-1">이번주 최고</p>
-                      <p className="text-2xl font-bold text-green-600">{displayWeeklyMaxRate}<span className="text-lg">%</span><span className="text-sm font-medium text-gray-500 ml-0.5">탕감</span></p>
+                      <p className="text-xs text-gray-500 mb-1">24시간 내 최고</p>
+                      <p className="text-2xl font-bold text-green-600">{displayDailyMaxRate}<span className="text-lg">%</span><span className="text-sm font-medium text-gray-500 ml-0.5">탕감</span></p>
                     </div>
                   </div>
                 </div>
