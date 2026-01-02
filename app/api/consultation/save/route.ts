@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, isSupabaseConfigured } from '@/app/config/supabase';
 
-const GOOGLE_CHAT_WEBHOOK_URL = process.env.GOOGLE_CHAT_WEBHOOK_URL;
-
 // Google Chat으로 알림 전송
 async function sendGoogleChatNotification(data: {
   name: string;
@@ -22,7 +20,12 @@ async function sendGoogleChatNotification(data: {
     monthlyPayment: number;
   };
 }) {
-  if (!GOOGLE_CHAT_WEBHOOK_URL) {
+  const webhookUrl = process.env.GOOGLE_CHAT_WEBHOOK_URL;
+
+  console.log('[GoogleChat] Attempting to send notification...');
+  console.log('[GoogleChat] Webhook URL exists:', !!webhookUrl);
+
+  if (!webhookUrl) {
     console.log('[GoogleChat] Webhook URL not configured, skipping notification');
     return;
   }
@@ -48,14 +51,19 @@ async function sendGoogleChatNotification(data: {
       }]
     };
 
-    const response = await fetch(GOOGLE_CHAT_WEBHOOK_URL, {
+    console.log('[GoogleChat] Sending message to webhook...');
+    const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(message),
     });
 
+    const responseText = await response.text();
+    console.log('[GoogleChat] Response status:', response.status);
+    console.log('[GoogleChat] Response body:', responseText);
+
     if (!response.ok) {
-      console.error('[GoogleChat] Failed to send notification:', response.status);
+      console.error('[GoogleChat] Failed to send notification:', response.status, responseText);
     } else {
       console.log('[GoogleChat] Notification sent successfully');
     }
@@ -111,8 +119,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Google Chat으로 알림 전송 (비동기, 실패해도 응답에 영향 없음)
-    sendGoogleChatNotification({ name, phone, formData, calculationResult });
+    // Google Chat으로 알림 전송
+    console.log('[Consultation] DB saved, now sending Google Chat notification...');
+    await sendGoogleChatNotification({ name, phone, formData, calculationResult });
+    console.log('[Consultation] Google Chat notification process completed');
 
     return NextResponse.json({
       success: true,
