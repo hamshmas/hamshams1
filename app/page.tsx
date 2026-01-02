@@ -32,17 +32,19 @@ import { getPriorityRepaymentRegion, getCourtName } from "@/utils/courtJurisdict
 import type { IncomeType } from "@/app/types";
 import { KAKAO_CONSULTATION_URL } from "@/app/config/consultation";
 
-const LAST_UPDATED = "2025.01.02";
+const LAST_UPDATED = "2025.01.03";
 const PHONE_NUMBER = "02-6101-3100";
 
 // 업데이트 이력
 const UPDATE_HISTORY = [
+  { date: "2025.01.03", content: "결과 화면 UI/UX 대폭 개선 (도파민 효과)" },
+  { date: "2025.01.03", content: "실제 의뢰인 후기 섹션 추가" },
+  { date: "2025.01.03", content: "상담 신뢰도 강화 (변호사 직접 상담 배지)" },
   { date: "2025.01.02", content: "법정 최소 변제액 조건 적용 (5천만원 기준)" },
   { date: "2025.01.02", content: "최대 탕감률 96.9% 제한 적용" },
   { date: "2025.01.02", content: "24시간 내 최대 탕감률 표시" },
   { date: "2025.01.01", content: "소액 입력 시 단위 확인 기능 추가" },
   { date: "2024.12.30", content: "서울회생법원 주소 건너뛰기 옵션 추가" },
-  { date: "2024.12.28", content: "탕감률 결과 화면 개선" },
 ];
 
 export default function Home() {
