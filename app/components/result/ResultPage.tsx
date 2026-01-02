@@ -368,6 +368,22 @@ export function ResultPage({
               </div>
             </div>
           </div>
+
+          {/* 상단 상담 버튼 */}
+          <div className="mt-6 flex gap-2 max-w-sm mx-auto">
+            <button
+              onClick={handleConsultationClick}
+              className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
+            >
+              💬 무료 상담받기
+            </button>
+            <button
+              onClick={() => setShowContactModal(true)}
+              className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
+            >
+              📞 전화상담
+            </button>
+          </div>
         </div>
       ) : hasNoIncome ? (
         // 토스 스타일: 개인파산 안내 (희망적)
@@ -393,6 +409,22 @@ export function ResultPage({
               수입이 없거나 적을 때는 개인파산이 더 좋은 선택일 수 있어요. 전문가와 상담하면 정확한 답을 찾을 수 있습니다.
             </p>
           </div>
+
+          {/* 상단 상담 버튼 */}
+          <div className="mt-6 flex gap-2 max-w-sm mx-auto">
+            <button
+              onClick={handleConsultationClick}
+              className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
+            >
+              💬 무료 상담받기
+            </button>
+            <button
+              onClick={() => setShowContactModal(true)}
+              className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
+            >
+              📞 전화상담
+            </button>
+          </div>
         </div>
       ) : result.liquidationValueViolation ? (
         // 토스 스타일: 청산가치 위반
@@ -417,6 +449,22 @@ export function ResultPage({
             <p className="text-xs text-gray-700 leading-relaxed">
               복잡한 상황이라 정확한 판단을 위해선 변호사와 상담이 필요합니다. 무료 상담으로 해결책을 찾아보세요.
             </p>
+          </div>
+
+          {/* 상단 상담 버튼 */}
+          <div className="mt-6 flex gap-2 max-w-sm mx-auto">
+            <button
+              onClick={handleConsultationClick}
+              className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
+            >
+              💬 무료 상담받기
+            </button>
+            <button
+              onClick={() => setShowContactModal(true)}
+              className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
+            >
+              📞 전화상담
+            </button>
           </div>
         </div>
       ) : (
@@ -467,6 +515,22 @@ export function ResultPage({
               </p>
             </div>
           )}
+
+          {/* 상단 상담 버튼 */}
+          <div className="mt-6 flex gap-2 max-w-sm mx-auto">
+            <button
+              onClick={handleConsultationClick}
+              className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm animate-bounce-glow"
+            >
+              💬 지금 바로 상담받기
+            </button>
+            <button
+              onClick={() => setShowContactModal(true)}
+              className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
+            >
+              📞 전화상담
+            </button>
+          </div>
         </div>
       )}
 
