@@ -513,9 +513,12 @@ export function ResultPage({
               </div>
             </div>
           </div>
-          <div className="mt-3 bg-white/80 backdrop-blur-sm border-2 border-amber-300 rounded-xl p-3 shadow-lg">
-            <p className="text-gray-700 text-sm font-semibold">
-              약 <span className="font-black text-lg bg-gradient-to-r from-yellow-600 via-amber-600 to-orange-600 bg-clip-text text-transparent">{animatedAmount.toLocaleString()}원</span> 탕감 예상
+          <div className="mt-3 bg-white/80 backdrop-blur-sm border-2 border-amber-300 rounded-xl p-4 shadow-lg">
+            <p className="text-gray-800 text-base font-bold mb-1">
+              🎊 약 <span className="font-black text-xl bg-gradient-to-r from-yellow-600 via-amber-600 to-orange-600 bg-clip-text text-transparent">{animatedAmount.toLocaleString()}원</span> 탕감!
+            </p>
+            <p className="text-gray-600 text-xs">
+              이제 빚 걱정 없이 새출발할 수 있어요
             </p>
           </div>
           {result.consultationReason && (
@@ -792,6 +795,42 @@ export function ResultPage({
         </div>
       )}
 
+      {/* 성공 사례 - 사회적 증거 */}
+      <a
+        href="https://www.blst.kr/main/review.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-2xl p-4 space-y-3 hover:border-amber-400 hover:shadow-lg transition-all cursor-pointer"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg">💬</span>
+            <p className="text-sm font-bold text-amber-900">실제 의뢰인 후기</p>
+          </div>
+          <div className="flex items-center gap-1 text-amber-600">
+            <span className="text-xs font-semibold">더보기</span>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="bg-white/80 rounded-xl p-3 border border-amber-100">
+            <p className="text-xs text-gray-700 leading-relaxed italic">
+              "처음엔 반신반의했는데, 월 150만원 갚던 빚이 <span className="font-bold text-amber-700">40만원으로 줄었어요.</span> 이제 숨통이 트였습니다."
+            </p>
+            <p className="text-[10px] text-gray-500 mt-2 text-right">- 김○○님 (서울회생법원)</p>
+          </div>
+          <div className="bg-white/80 rounded-xl p-3 border border-amber-100">
+            <p className="text-xs text-gray-700 leading-relaxed italic">
+              "카드빚 8천만원이 <span className="font-bold text-amber-700">1천만원대로 탕감</span>됐어요. 전문가 상담 덕분입니다."
+            </p>
+            <p className="text-[10px] text-gray-500 mt-2 text-right">- 박○○님 (인천회생법원)</p>
+          </div>
+        </div>
+      </a>
+
       {/* 상담 혜택 안내 - 모든 경우에 표시 */}
       {!hasNoIncome && !result.liquidationValueViolation && (
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-300 rounded-2xl p-4 space-y-3">
@@ -839,7 +878,26 @@ export function ResultPage({
           </div>
           <div>
             <p className="text-white font-bold text-base">블랙스톤 법률사무소</p>
-            <p className="text-slate-400 text-xs">무료 상담 · 개인회생 전문</p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-slate-400 text-xs">개인회생 전문</span>
+              <span className="bg-green-500/20 text-green-400 text-[10px] px-1.5 py-0.5 rounded-full font-semibold">변호사 직접 상담</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 신뢰 배지 */}
+        <div className="flex justify-center gap-2">
+          <div className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-full">
+            <span className="text-green-400 text-xs">✓</span>
+            <span className="text-xs text-white/80 font-medium">상담료 0원</span>
+          </div>
+          <div className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-full">
+            <span className="text-blue-400 text-xs">🔒</span>
+            <span className="text-xs text-white/80 font-medium">비밀 보장</span>
+          </div>
+          <div className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-full">
+            <span className="text-amber-400 text-xs">⚡</span>
+            <span className="text-xs text-white/80 font-medium">3분 소요</span>
           </div>
         </div>
 
@@ -857,8 +915,8 @@ export function ResultPage({
             📞 전화상담 신청
           </button>
         </div>
-        <p className="text-center text-xs text-slate-400">
-          무료 상담 · 3분 소요
+        <p className="text-center text-[11px] text-slate-500">
+          개인정보는 상담 목적으로만 사용되며 안전하게 보호됩니다
         </p>
       </div>
 

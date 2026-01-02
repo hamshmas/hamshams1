@@ -185,6 +185,9 @@ export function AddressInputStep({
           <p className="text-base text-gray-600 leading-relaxed max-w-sm mx-auto">
             관할법원과 최우선변제금 계산에<br />사용됩니다
           </p>
+          <p className="text-xs text-gray-500 mt-2">
+            🔒 주소는 저장되지 않으며, 탕감율 계산에만 사용됩니다
+          </p>
         </div>
 
         <div className="space-y-4">
