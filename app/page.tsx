@@ -358,9 +358,9 @@ export default function Home() {
                   </div>
                 </div>
                 {/* 법률사무소 정보 */}
-                <p className="text-center text-xs text-gray-400">
-                  <span className="font-medium text-gray-500">블랙스톤 법률사무소</span> · <button onClick={() => setShowUpdateHistory(true)} className="hover:text-gray-600 underline underline-offset-2">최종수정 {LAST_UPDATED}</button>
-                </p>
+                <div className="text-center text-xs text-gray-400">
+                  <span className="font-medium text-gray-500">블랙스톤 법률사무소</span> · <button type="button" onClick={() => setShowUpdateHistory(true)} className="hover:text-gray-600 underline underline-offset-2 cursor-pointer">최종수정 {LAST_UPDATED}</button>
+                </div>
 
                 {/* 업데이트 이력 모달 */}
                 {showUpdateHistory && (
