@@ -769,23 +769,22 @@ export function ResultPage({
           </div>
         </div>
 
-        {result.needsConsultation ? (
+        <div className="flex gap-2">
           <button
             onClick={handleConsultationClick}
-            className="w-full bg-white hover:bg-gray-100 text-slate-900 font-bold py-4 px-4 rounded-xl transition-all shadow-lg text-center text-base"
+            className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold py-4 px-4 rounded-xl transition-all shadow-lg text-center text-sm"
           >
-            전문 변호사 상담받기
+            💬 카카오톡 상담
           </button>
-        ) : (
           <button
-            onClick={handleConsultationClick}
-            className="w-full bg-white hover:bg-gray-100 text-slate-900 font-bold py-4 px-4 rounded-xl transition-all shadow-lg text-center text-base"
+            onClick={() => setShowContactModal(true)}
+            className="flex-1 bg-white hover:bg-gray-100 text-slate-900 font-bold py-4 px-4 rounded-xl transition-all shadow-lg text-center text-sm"
           >
-            무료 상담 신청하기
+            📞 전화상담 신청
           </button>
-        )}
+        </div>
         <p className="text-center text-xs text-slate-400">
-          카카오톡으로 간편하게 · 3분 소요
+          무료 상담 · 3분 소요
         </p>
       </div>
 
