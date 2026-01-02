@@ -345,18 +345,20 @@ export function AddressInputStep({
           </button>
         </div>
 
-        <div className="flex gap-2">
-          <button onClick={handleBack} className="secondary-button flex-1 text-sm py-2.5">
-            이전
+        <div className="grid grid-cols-2 gap-3">
+          <button onClick={handleBack} className="py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+            ← 이전
           </button>
           <button
             onClick={handleNext}
             disabled={hasWorkAddress === null}
-            className={`primary-button flex-1 text-sm py-2.5 ${
-              hasWorkAddress === null ? "opacity-50 cursor-not-allowed" : ""
+            className={`py-4 rounded-xl text-[17px] font-semibold transition-all ${
+              hasWorkAddress !== null
+                ? 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
           >
-            다음
+            다음 →
           </button>
         </div>
       </div>
@@ -422,23 +424,23 @@ export function AddressInputStep({
           )}
         </div>
 
-        <div className="flex gap-3 pt-4">
+        <div className="grid grid-cols-2 gap-3 pt-4">
           <button
             onClick={handleBack}
-            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-semibold transition-all duration-300 active:scale-95"
+            className="py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
           >
-            이전
+            ← 이전
           </button>
           <button
             onClick={handleNext}
             disabled={!workAddressData}
-            className={`flex-1 bg-gradient-to-r from-primary-600 to-accent-600 text-white py-4 rounded-2xl font-semibold shadow-lg transition-all duration-300 ${
+            className={`py-4 rounded-xl text-[17px] font-semibold transition-all ${
               workAddressData
-                ? "hover:shadow-xl hover:scale-105 active:scale-100"
-                : "opacity-40 cursor-not-allowed"
+                ? "bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
           >
-            다음
+            다음 →
           </button>
         </div>
       </div>
@@ -535,23 +537,23 @@ export function AddressInputStep({
           </button>
         </div>
 
-        <div className="flex gap-3 pt-4">
+        <div className="grid grid-cols-2 gap-3 pt-4">
           <button
             onClick={handleBack}
-            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-semibold transition-all duration-300 active:scale-95"
+            className="py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
           >
-            이전
+            ← 이전
           </button>
           <button
             onClick={handleNext}
             disabled={!selectedCourt}
-            className={`flex-1 bg-gradient-to-r from-primary-600 to-accent-600 text-white py-4 rounded-2xl font-semibold shadow-lg transition-all duration-300 ${
+            className={`py-4 rounded-xl text-[17px] font-semibold transition-all ${
               selectedCourt
-                ? "hover:shadow-xl hover:scale-105 active:scale-100"
-                : "opacity-40 cursor-not-allowed"
+                ? "bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
           >
-            다음
+            다음 →
           </button>
         </div>
       </div>

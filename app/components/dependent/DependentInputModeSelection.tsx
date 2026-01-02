@@ -50,8 +50,8 @@ export function DependentInputModeSelection({
         </div>
       </div>
 
-      <button onClick={onBack} className="secondary-button w-full text-sm py-2.5">
-        이전
+      <button onClick={onBack} className="w-full py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+        ← 이전
       </button>
     </div>
   );

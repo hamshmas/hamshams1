@@ -42,18 +42,18 @@ export function SpouseHousingJurisdictionInfo({
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-3">
         <button
           onClick={onBack}
-          className="secondary-button flex-1 text-sm py-2.5"
+          className="py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
         >
-          이전
+          ← 이전
         </button>
         <button
           onClick={() => onNext(isMainCourt)}
-          className="primary-button flex-1 text-sm py-2.5"
+          className="py-4 rounded-xl text-[17px] font-semibold bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white transition-all"
         >
-          다음
+          다음 →
         </button>
       </div>
     </div>

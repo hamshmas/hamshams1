@@ -73,16 +73,20 @@ export function ChildrenCountInput({ maritalStatus, onNext, onBack }: ChildrenCo
         ))}
       </div>
 
-      <div className="flex gap-2">
-        <button onClick={onBack} className="w-1/3 secondary-button text-sm py-2.5">
-          이전
+      <div className="grid grid-cols-2 gap-3">
+        <button onClick={onBack} className="py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+          ← 이전
         </button>
         <button
           onClick={() => onNext(Number(value))}
           disabled={!isValid}
-          className="w-2/3 primary-button disabled:opacity-50 disabled:cursor-not-allowed text-sm py-2.5"
+          className={`py-4 rounded-xl text-[17px] font-semibold transition-all ${
+            isValid
+              ? 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white'
+              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          }`}
         >
-          다음
+          다음 →
         </button>
       </div>
     </div>
