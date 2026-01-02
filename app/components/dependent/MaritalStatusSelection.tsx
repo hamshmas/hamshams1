@@ -91,9 +91,9 @@ export function MaritalStatusSelection({ onSelect, onBack, excludeMarried = fals
 
       <button
         onClick={onBack}
-        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-semibold transition-all duration-300 active:scale-95"
+        className="w-full py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
       >
-        이전
+        ← 이전
       </button>
     </div>
   );

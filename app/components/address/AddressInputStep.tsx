@@ -249,25 +249,27 @@ export function AddressInputStep({
           )}
         </div>
 
-        <div className="flex gap-3 pt-4">
+        <div className="grid grid-cols-2 gap-3 pt-4">
           {onBack && (
             <button
               onClick={onBack}
-              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-semibold transition-all duration-300 active:scale-95"
+              className="py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
             >
-              이전
+              ← 이전
             </button>
           )}
           <button
             onClick={handleNext}
             disabled={!homeAddressData}
-            className={`flex-1 bg-gradient-to-r from-primary-600 to-accent-600 text-white py-4 rounded-2xl font-semibold shadow-lg transition-all duration-300 ${
+            className={`py-4 rounded-xl text-[17px] font-semibold transition-all ${
+              onBack ? '' : 'col-span-2'
+            } ${
               homeAddressData
-                ? "hover:shadow-xl hover:scale-105 active:scale-100"
-                : "opacity-40 cursor-not-allowed"
+                ? "bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
           >
-            다음
+            다음 →
           </button>
         </div>
 

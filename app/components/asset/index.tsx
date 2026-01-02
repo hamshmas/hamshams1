@@ -73,9 +73,9 @@ export function AssetInputModeSelection({
 
       <button
         onClick={onBack}
-        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-semibold transition-all duration-300 active:scale-95"
+        className="w-full py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
       >
-        이전
+        ← 이전
       </button>
     </div>
   );
@@ -181,9 +181,9 @@ export function HousingTypeSelection({
 
       <button
         onClick={onBack}
-        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-semibold transition-all duration-300 active:scale-95"
+        className="w-full py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
       >
-        이전
+        ← 이전
       </button>
     </div>
   );
@@ -289,24 +289,26 @@ export function MonthlyRentDepositInput({
         </div>
       </div>
 
-      <div className="mt-auto pt-6 flex gap-3">
-        <button
-          onClick={onBack}
-          className="flex-1 py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-        >
-          이전
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={!isValid}
-          className={`flex-[2] py-4 rounded-xl text-[17px] font-semibold transition-all ${
-            isValid
-              ? 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          다음
-        </button>
+      <div className="mt-auto pt-6">
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={onBack}
+            className="py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+          >
+            ← 이전
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!isValid}
+            className={`py-4 rounded-xl text-[17px] font-semibold transition-all ${
+              isValid
+                ? 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            다음 →
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -474,7 +476,7 @@ export function MarriageCheckForAsset({
           onClick={onBack}
           className="w-full py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
         >
-          이전
+          ← 이전
         </button>
       </div>
     </div>
@@ -537,7 +539,7 @@ export function SpouseAssetCheck({
           onClick={onBack}
           className="w-full py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
         >
-          이전
+          ← 이전
         </button>
       </div>
     </div>
@@ -616,24 +618,26 @@ export function SpouseAssetInput({
         </div>
       </div>
 
-      <div className="mt-auto pt-6 flex gap-3">
-        <button
-          onClick={onBack}
-          className="flex-1 py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-        >
-          이전
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={!isValid}
-          className={`flex-[2] py-4 rounded-xl text-[17px] font-semibold transition-all ${
-            isValid
-              ? 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white'
-              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          다음
-        </button>
+      <div className="mt-auto pt-6">
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={onBack}
+            className="py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+          >
+            ← 이전
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!isValid}
+            className={`py-4 rounded-xl text-[17px] font-semibold transition-all ${
+              isValid
+                ? 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            다음 →
+          </button>
+        </div>
       </div>
     </div>
   );
