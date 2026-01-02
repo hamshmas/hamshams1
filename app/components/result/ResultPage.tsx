@@ -787,11 +787,14 @@ export function ResultPage({
             </p>
           </div>
 
-          <div className="bg-purple-600 rounded-lg p-2.5">
+          <button
+            onClick={() => setShowContactModal(true)}
+            className="w-full bg-purple-600 hover:bg-purple-700 rounded-lg p-2.5 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          >
             <p className="text-xs text-white font-semibold text-center">
-              전문가 상담을 통해 최적의 해결방안을 찾아보세요!
+              👆 전문가 상담을 통해 최적의 해결방안을 찾아보세요!
             </p>
-          </div>
+          </button>
         </div>
       )}
 
