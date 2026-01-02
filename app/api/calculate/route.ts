@@ -11,6 +11,18 @@ import { supabaseAdmin, isSupabaseConfigured } from '@/app/config/supabase';
 // 개인회생 최대 탕감률 (법정 한도)
 const MAX_REDUCTION_RATE = 96.9;
 
+// 최소 변제액 계산 함수 (법정 최소 변제 기준)
+// 채무 5000만원 이하: 채무액의 5%
+// 채무 5000만원 초과: 채무액의 3% + 100만원
+function calculateMinimumRepayment(totalDebt: number): number {
+  const threshold = 50000000; // 5000만원
+  if (totalDebt <= threshold) {
+    return totalDebt * 0.05; // 5%
+  } else {
+    return totalDebt * 0.03 + 1000000; // 3% + 100만원
+  }
+}
+
 // 최저생계비 데이터 (서버에서만 관리)
 const minimumLivingCostData: Record<string, number> = {
   "0": 1538543,
@@ -246,7 +258,14 @@ export async function POST(request: NextRequest) {
         if (adjustedRepaymentPeriod !== null) {
           // 조정 후 실제 탕감률 계산
           const totalRepaymentPV = calculatePresentValue(adjustedMonthlyPayment, adjustedRepaymentPeriod);
-          const repaymentAmount = Math.min(Math.max(totalRepaymentPV, adjustedLiquidationValue), totalDebt);
+          let repaymentAmount = Math.min(Math.max(totalRepaymentPV, adjustedLiquidationValue), totalDebt);
+
+          // 최소 변제액 조건 적용
+          const minimumRepayment = calculateMinimumRepayment(totalDebt);
+          if (repaymentAmount < minimumRepayment) {
+            repaymentAmount = minimumRepayment;
+          }
+
           const reductionAmount = totalDebt - repaymentAmount;
           const reductionRate = totalDebt > 0 ? (reductionAmount / totalDebt) * 100 : 0;
 
@@ -292,7 +311,14 @@ export async function POST(request: NextRequest) {
     }
 
     const totalRepaymentPV = calculatePresentValue(monthlyRepayment, repaymentPeriod);
-    const repaymentAmount = Math.min(Math.max(totalRepaymentPV, liquidationValue), totalDebt);
+    let repaymentAmount = Math.min(Math.max(totalRepaymentPV, liquidationValue), totalDebt);
+
+    // 최소 변제액 조건 적용
+    const minimumRepayment = calculateMinimumRepayment(totalDebt);
+    if (repaymentAmount < minimumRepayment) {
+      repaymentAmount = minimumRepayment;
+    }
+
     const reductionAmount = totalDebt - repaymentAmount;
     const reductionRate = totalDebt > 0 ? (reductionAmount / totalDebt) * 100 : 0;
 
