@@ -35,17 +35,6 @@ import { KAKAO_CONSULTATION_URL } from "@/app/config/consultation";
 const LAST_UPDATED = "2025.01.02";
 const PHONE_NUMBER = "02-6101-3100";
 
-// 업데이트 이력
-const UPDATE_HISTORY = [
-  { date: "2025.01.02", content: "결과 화면 UI/UX 대폭 개선 (도파민 효과)" },
-  { date: "2025.01.02", content: "실제 의뢰인 후기 섹션 추가" },
-  { date: "2025.01.02", content: "상담 신뢰도 강화 (변호사 직접 상담 배지)" },
-  { date: "2025.01.02", content: "법정 최소 변제액 조건 적용 (5천만원 기준)" },
-  { date: "2025.01.02", content: "최대 탕감률 96.9% 제한 적용" },
-  { date: "2025.01.02", content: "24시간 내 최대 탕감률 표시" },
-  { date: "2025.01.01", content: "소액 입력 시 단위 확인 기능 추가" },
-  { date: "2024.12.30", content: "서울회생법원 주소 건너뛰기 옵션 추가" },
-];
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(0); // 0: 웰컴, 1: 주소, 2~6: 입력 단계
@@ -65,7 +54,6 @@ export default function Home() {
   const [displayCount, setDisplayCount] = useState(0); // 화면에 표시되는 숫자
   const [displayDailyMaxRate, setDisplayDailyMaxRate] = useState(0); // 화면에 표시되는 탕감율 (애니메이션)
   const hasAnimatedRef = useRef(false); // 애니메이션 완료 여부
-  const [showUpdateHistory, setShowUpdateHistory] = useState(false); // 업데이트 이력 모달
 
   // 사용자 수 조회 및 애니메이션
   useEffect(() => {
@@ -361,32 +349,8 @@ export default function Home() {
                 </div>
                 {/* 법률사무소 정보 */}
                 <div className="text-center text-xs text-gray-400">
-                  <span className="font-medium text-gray-500">블랙스톤 법률사무소</span> · <button type="button" onClick={() => setShowUpdateHistory(true)} className="hover:text-gray-600 underline underline-offset-2 cursor-pointer">최종수정 {LAST_UPDATED}</button>
+                  <span className="font-medium text-gray-500">블랙스톤 법률사무소</span> · <span className="text-gray-400">최종수정 {LAST_UPDATED}</span>
                 </div>
-
-                {/* 업데이트 이력 모달 */}
-                {showUpdateHistory && (
-                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowUpdateHistory(false)}>
-                    <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scaleIn" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-gray-900">업데이트 이력</h3>
-                        <button onClick={() => setShowUpdateHistory(false)} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
-                          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                      <div className="space-y-3 max-h-80 overflow-y-auto">
-                        {UPDATE_HISTORY.map((item, index) => (
-                          <div key={index} className="flex gap-3 text-sm">
-                            <span className="text-gray-400 whitespace-nowrap">{item.date}</span>
-                            <span className="text-gray-700">{item.content}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           )}
