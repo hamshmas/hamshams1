@@ -361,7 +361,7 @@ export default function Home() {
                 </div>
                 {/* 법률사무소 정보 */}
                 <div className="text-center text-xs text-gray-400">
-                  <span className="font-medium text-gray-500">블랙스톤 법률사무소</span> · <button type="button" onClick={() => setShowUpdateHistory(true)} className="hover:text-gray-600 underline underline-offset-2 cursor-pointer">최종수정 {LAST_UPDATED}</button>
+                  <span className="font-medium text-gray-500">블랙스톤 법률사무소</span> · <span>최종수정 {LAST_UPDATED}</span>
                 </div>
 
                 {/* 업데이트 이력 모달 */}
