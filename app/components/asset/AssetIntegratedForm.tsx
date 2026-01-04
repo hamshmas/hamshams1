@@ -24,6 +24,70 @@ function formatKoreanCurrency(value: number): string {
   return result ? result + "원" : "";
 }
 
+// 소액 확인 모달 컴포넌트
+function SmallValueModal({
+  value,
+  label,
+  onConfirm,
+  onConvertToMan,
+  onCancel,
+}: {
+  value: number;
+  label: string;
+  onConfirm: () => void;
+  onConvertToMan: () => void;
+  onCancel: () => void;
+}) {
+  const convertedValue = value * 10000;
+
+  return (
+    <div
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fadeIn"
+      onClick={onCancel}
+    >
+      <div
+        className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 space-y-4 animate-scaleIn"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-amber-100 to-amber-200 rounded-full mb-3">
+            <span className="text-3xl">⚠️</span>
+          </div>
+          <h3 className="text-xl font-extrabold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+            {label} 금액을 확인해주세요
+          </h3>
+          <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+            입력하신 금액이 <span className="font-bold text-amber-600">{value.toLocaleString()}원</span>입니다.
+            <br />
+            혹시 <span className="font-bold text-blue-600">{value.toLocaleString()}만원</span>을 입력하려고 하신 건가요?
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2 pt-2">
+          <button
+            onClick={onConvertToMan}
+            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl text-sm hover:scale-105 transform"
+          >
+            {value.toLocaleString()}만원 ({formatKoreanCurrency(convertedValue)})
+          </button>
+          <button
+            onClick={onConfirm}
+            className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-xl transition-all text-sm"
+          >
+            {value.toLocaleString()}원이 맞습니다
+          </button>
+          <button
+            onClick={onCancel}
+            className="w-full text-gray-500 font-medium text-sm hover:text-gray-700 transition-colors py-2"
+          >
+            다시 입력하기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface AssetIntegratedFormProps {
   onNext: (totalAsset: number, isMarried: boolean) => void;
   onBack: () => void;
@@ -44,8 +108,53 @@ export function AssetIntegratedForm({
   const [hasSpouse, setHasSpouse] = useState<boolean | null>(null);
   const [spouseAsset, setSpouseAsset] = useState(""); // 배우자 재산
 
+  // 소액 확인 모달 상태
+  const [showSmallValueModal, setShowSmallValueModal] = useState(false);
+  const [smallValueField, setSmallValueField] = useState<"housing" | "mortgage" | null>(null);
+  const [pendingSmallValue, setPendingSmallValue] = useState(0);
+
   const isMainCourt = MAIN_COURTS.includes(courtJurisdiction);
   const priorityAmount = PRIORITY_REPAYMENT[priorityRepaymentRegion] || 0;
+
+  // 소액 확인이 필요한지 체크 (99,000원 이하)
+  const checkSmallValue = (value: number, field: "housing" | "mortgage"): boolean => {
+    if (value > 0 && value <= 99000) {
+      setPendingSmallValue(value);
+      setSmallValueField(field);
+      setShowSmallValueModal(true);
+      return true;
+    }
+    return false;
+  };
+
+  // 만원 단위로 변환
+  const handleConvertToMan = () => {
+    const convertedValue = (pendingSmallValue * 10000).toLocaleString();
+    if (smallValueField === "housing") {
+      setHousingValue(convertedValue);
+    } else if (smallValueField === "mortgage") {
+      setMortgageAmount(convertedValue);
+    }
+    setShowSmallValueModal(false);
+    setSmallValueField(null);
+  };
+
+  // 원래 값 유지
+  const handleConfirmSmallValue = () => {
+    setShowSmallValueModal(false);
+    setSmallValueField(null);
+  };
+
+  // 다시 입력
+  const handleCancelSmallValue = () => {
+    if (smallValueField === "housing") {
+      setHousingValue("");
+    } else if (smallValueField === "mortgage") {
+      setMortgageAmount("");
+    }
+    setShowSmallValueModal(false);
+    setSmallValueField(null);
+  };
 
   // 자산 계산
   const calculateTotal = () => {
@@ -81,9 +190,9 @@ export function AssetIntegratedForm({
   };
 
   const housingTypes: { type: HousingType; label: string; desc: string }[] = [
-    { type: "owned", label: "자가", desc: "본인 소유 주택" },
-    { type: "jeonse", label: "전세", desc: "전세 거주" },
     { type: "monthly", label: "월세", desc: "월세 거주" },
+    { type: "jeonse", label: "전세", desc: "전세 거주" },
+    { type: "owned", label: "자가", desc: "본인 소유 주택" },
     { type: "free", label: "무상거주", desc: "부모님 집 등" },
   ];
 
@@ -128,6 +237,7 @@ export function AssetIntegratedForm({
               inputMode="numeric"
               value={housingValue}
               onChange={(e) => setHousingValue(formatNumber(e.target.value))}
+              onBlur={() => checkSmallValue(parseNumber(housingValue), "housing")}
               className="flex-1 text-2xl font-bold text-gray-900 outline-none bg-transparent placeholder:text-gray-300"
               placeholder="0"
             />
@@ -149,6 +259,7 @@ export function AssetIntegratedForm({
               inputMode="numeric"
               value={mortgageAmount}
               onChange={(e) => setMortgageAmount(formatNumber(e.target.value))}
+              onBlur={() => checkSmallValue(parseNumber(mortgageAmount), "mortgage")}
               className="flex-1 text-2xl font-bold text-gray-900 outline-none bg-transparent placeholder:text-gray-300"
               placeholder="0"
             />
@@ -269,6 +380,17 @@ export function AssetIntegratedForm({
           다음 →
         </button>
       </div>
+
+      {/* 소액 확인 모달 */}
+      {showSmallValueModal && (
+        <SmallValueModal
+          value={pendingSmallValue}
+          label={smallValueField === "housing" ? (housingType === "owned" ? "KB시세" : "보증금") : "담보대출"}
+          onConfirm={handleConfirmSmallValue}
+          onConvertToMan={handleConvertToMan}
+          onCancel={handleCancelSmallValue}
+        />
+      )}
     </div>
   );
 }
