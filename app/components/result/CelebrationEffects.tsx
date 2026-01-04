@@ -36,21 +36,17 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
     '#FFD700', '#FF69B4', '#00FF7F', '#87CEEB', '#DDA0DD'
   ];
 
-  // 삼각형 형태로 컨페티 생성 (위에서 점점 퍼지면서 떨어짐)
+  // 삼각형 형태로 컨페티 생성 (0도~45도 사이로 꽉 차게)
   const createConfetti = useCallback((waveProgress: number = 0): Confetti => {
     const types: ('square' | 'circle' | 'ribbon')[] = ['square', 'circle', 'ribbon', 'square', 'ribbon'];
     const type = types[Math.floor(Math.random() * types.length)];
 
-    // 삼각형 형태: 시작점(꼭지점)에서 점점 넓어지며 퍼짐
-    // waveProgress에 따라 시작 x 범위가 넓어짐 (0~1)
-    const spreadFactor = waveProgress * 20; // 최대 20% 폭으로 퍼짐
-    const startX = Math.random() * spreadFactor;
-    const startY = -5 - waveProgress * 10; // 더 위에서 시작
+    // 왼쪽 위 모서리에서 시작
+    const startX = Math.random() * 5; // 0-5% 범위
+    const startY = -3 + Math.random() * 3; // 약간 위에서
 
-    // 정확한 45도 각도 (약간의 변화만)
-    const baseAngle = Math.PI / 4; // 정확히 45도
-    const angleVariation = (Math.random() - 0.5) * (Math.PI / 12); // ±7.5도만 변화
-    const angle = baseAngle + angleVariation;
+    // 0도(오른쪽)에서 45도(대각선 아래) 사이로 꽉 차게 퍼짐
+    const angle = Math.random() * (Math.PI / 4); // 0 ~ π/4 (0도 ~ 45도)
     const speed = 3 + Math.random() * 2;
 
     return {
@@ -83,14 +79,14 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
     }
     setConfetti(initialConfetti);
 
-    // 간헐적 분출을 위한 타이머
+    // 간헐적 분출을 위한 타이머 (더 짧은 텀)
     let burstPhase = 0;
     const burstInterval = setInterval(() => {
       burstPhase++;
-      // 3초 분출, 1.5초 멈춤 패턴
-      const isOn = (burstPhase % 9) < 6; // 6틱 켜짐, 3틱 꺼짐 (500ms 간격)
+      // 1.5초 분출, 0.6초 멈춤 패턴
+      const isOn = (burstPhase % 7) < 5; // 5틱 켜짐, 2틱 꺼짐 (300ms 간격)
       setIsBursting(isOn);
-    }, 500);
+    }, 300);
 
     // 지속적으로 새 컨페티 추가 (삼각형 웨이브 형태)
     let waveTime = 0;
