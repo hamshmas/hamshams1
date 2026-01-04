@@ -46,9 +46,9 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
     const startY = -2 + Math.random() * 2;
 
     // 지정된 각도 + 약간의 변화 (45도 ~ 90도 범위)
-    const angleVariation = (Math.random() - 0.5) * 3; // ±1.5도 변화
+    const angleVariation = (Math.random() - 0.5) * 8; // ±4도 변화 (더 자연스럽게)
     const angle = (angleDegree + angleVariation) * (Math.PI / 180);
-    const speed = 3.5 + Math.random() * 1.5;
+    const speed = 2.0 + Math.random() * 1.0; // 더 느린 속도
 
     return {
       id: Date.now() + Math.random() * 100000,
@@ -114,14 +114,14 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
       setConfetti(prev => prev
         .map(c => ({
           ...c,
-          x: c.x + c.vx * 0.5,
-          y: c.y + c.vy * 0.5,
-          vy: c.vy + 0.05, // 중력 (45도 유지하기 위해 약하게)
-          vx: c.vx * 0.998, // 공기저항 최소화
-          rotation: c.rotation + c.rotationSpeed,
-          opacity: c.y > 100 ? Math.max(0, c.opacity - 0.05) : c.opacity,
+          x: c.x + c.vx * 0.35, // 더 느리게
+          y: c.y + c.vy * 0.35, // 더 느리게
+          vy: c.vy + 0.03, // 중력 약하게 (더 자연스럽게)
+          vx: c.vx * 0.995 + (Math.random() - 0.5) * 0.02, // 약간의 흔들림 추가
+          rotation: c.rotation + c.rotationSpeed * 0.8,
+          opacity: c.y > 40 ? Math.max(0, c.opacity - 0.05) : c.opacity, // 40%부터 천천히 페이드아웃
         }))
-        .filter(c => c.y < 120 && c.opacity > 0 && c.x < 120)
+        .filter(c => c.y < 50 && c.opacity > 0 && c.x < 120) // 화면 절반(50%)까지만
       );
     }, 20);
 
