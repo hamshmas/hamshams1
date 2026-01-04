@@ -126,3 +126,27 @@ export const MAIN_COURT_REGIONS = [
   { label: '대전/충청', desc: '대전지방법원 관할' },
   { label: '부산/울산/경남', desc: '부산회생법원 관할' },
 ];
+
+// 시/도 목록 (주소 입력 간소화용)
+export const SIDO_LIST = [
+  { label: '서울특별시', value: 'seoul', court: 'seoul', region: '서울특별시' as const },
+  { label: '경기도', value: 'gyeonggi', court: 'suwon', region: '수도권과밀억제권역' as const },
+  { label: '인천광역시', value: 'incheon', court: 'incheon', region: '수도권과밀억제권역' as const },
+  { label: '부산광역시', value: 'busan', court: 'busan', region: '광역시' as const },
+  { label: '대구광역시', value: 'daegu', court: 'daegu', region: '광역시' as const },
+  { label: '대전광역시', value: 'daejeon', court: 'daejeon', region: '광역시' as const },
+  { label: '광주광역시', value: 'gwangju', court: 'gwangju', region: '광역시' as const },
+  { label: '울산광역시', value: 'ulsan', court: 'busan', region: '광역시' as const },
+  { label: '세종특별자치시', value: 'sejong', court: 'daejeon', region: '수도권과밀억제권역' as const },
+  { label: '강원특별자치도', value: 'gangwon', court: 'chuncheon', region: '그밖의지역' as const },
+  { label: '충청북도', value: 'chungbuk', court: 'cheongju', region: '그밖의지역' as const },
+  { label: '충청남도', value: 'chungnam', court: 'daejeon', region: '그밖의지역' as const },
+  { label: '전북특별자치도', value: 'jeonbuk', court: 'jeonju', region: '그밖의지역' as const },
+  { label: '전라남도', value: 'jeonnam', court: 'gwangju', region: '그밖의지역' as const },
+  { label: '경상북도', value: 'gyeongbuk', court: 'daegu', region: '그밖의지역' as const },
+  { label: '경상남도', value: 'gyeongnam', court: 'changwon', region: '그밖의지역' as const },
+  { label: '제주특별자치도', value: 'jeju', court: 'jeju', region: '그밖의지역' as const },
+];
+
+// 4대 회생법원 코드
+export const MAIN_COURTS = ['seoul', 'suwon', 'daejeon', 'busan'];

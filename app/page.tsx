@@ -7,28 +7,16 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { PRIORITY_REPAYMENT } from "@/app/constants";
 import type { FormData, CalculationResult, CourtCode } from "@/app/types";
-import {
-  AssetInputModeSelection,
-  HousingTypeSelection,
-  SpouseHousingCheck,
-  MonthlyRentDepositInput,
-  SpouseHousingJurisdictionInfo,
-  MarriageCheckForAsset,
-  SpouseAssetCheck,
-  SpouseAssetInput,
-} from "@/app/components/asset";
-import { MortgageCheck, KBPriceInput, MortgageAmountInput, JeonseDepositInput } from "@/app/components/housing";
+import { AssetIntegratedForm } from "@/app/components/asset/AssetIntegratedForm";
 import { InputStep } from "@/app/components/steps";
 import { LoadingScreen } from "@/app/components/ui";
 import { ResultPage } from "@/app/components/result";
-import { AddressInputStep } from "@/app/components/address";
+import { RegionSelectStep } from "@/app/components/address/RegionSelectStep";
 import { DependentInputModeSelection, MaritalStatusSelection, ChildrenCountInput, SpouseIncomeCheck } from "@/app/components/dependent";
 import { IncomeTypeSelection } from "@/app/components/income";
-import { useAssetCalculation } from "@/app/hooks/useAssetCalculation";
 import { useDependentCalculation } from "@/app/hooks/useDependentCalculation";
-import { getPriorityRepaymentRegion, getCourtName } from "@/utils/courtJurisdiction";
+import { getCourtName } from "@/utils/courtJurisdiction";
 import type { IncomeType } from "@/app/types";
 import { KAKAO_CONSULTATION_URL } from "@/app/config/consultation";
 
@@ -117,43 +105,8 @@ export default function Home() {
   const [incomeType, setIncomeType] = useState<IncomeType | null>(null);
   const [incomeSubStep, setIncomeSubStep] = useState(0);
 
-  // 자산 계산 관련 상태
-  const {
-    assetInputMode,
-    setAssetInputMode,
-    assetSubStep,
-    setAssetSubStep,
-    housingType,
-    setHousingType,
-    hasMortgage,
-    setHasMortgage,
-    mortgageAmount,
-    setMortgageAmount,
-    kbPrice,
-    setKbPrice,
-    depositAmount,
-    setDepositAmount,
-    selectedRegion,
-    setSelectedRegion,
-    isSpouseHousing,
-    setIsSpouseHousing,
-    isMainCourtJurisdiction,
-    setIsMainCourtJurisdiction,
-    housingAsset,
-    setHousingAsset,
-    otherAsset,
-    setOtherAsset,
-    isMarriedForAsset,
-    setIsMarriedForAsset,
-    hasSpouseAsset,
-    setHasSpouseAsset,
-    spouseAsset,
-    setSpouseAsset,
-    resetAssetState,
-  } = useAssetCalculation();
-
-  // 회생법원 여부 확인 (서울, 수원, 대전, 부산)
-  const isMainCourt = ['seoul', 'suwon', 'daejeon', 'busan'].includes(formData.courtJurisdiction);
+  // 자산 계산 관련 상태 (결혼 여부만 부양가족 계산에 필요)
+  const [isMarriedForAsset, setIsMarriedForAsset] = useState<boolean | null>(null);
 
   // 부양가족 계산 관련 상태
   const {
@@ -174,26 +127,6 @@ export default function Home() {
   } = useDependentCalculation();
 
   const totalSteps = 5; // 1: 주소, 2: 부채, 3: 소득, 4: 자산, 5: 부양가족 (결과는 step 6)
-
-  // 주소 데이터 처리
-  const handleAddressNext = (data: {
-    homeAddress: string;
-    workAddress: string;
-    courtJurisdiction: CourtCode;
-    homeAddressData: import("@/app/types").AddressData;
-  }) => {
-    // 집 주소 기반으로 최우선변제금 지역 자동 계산
-    const priorityRegion = getPriorityRepaymentRegion(data.homeAddressData);
-
-    setFormData({
-      ...formData,
-      homeAddress: data.homeAddress,
-      workAddress: data.workAddress,
-      courtJurisdiction: data.courtJurisdiction,
-      priorityRepaymentRegion: priorityRegion,
-    });
-    setCurrentStep(currentStep + 1);
-  };
 
   const handleNext = async (field: keyof FormData, value: number) => {
     const updatedFormData = { ...formData, [field]: value };
@@ -237,9 +170,8 @@ export default function Home() {
         setIncomeType(null);
         setIncomeSubStep(0);
       }
-      // 4단계로 돌아갈 때 상태 초기화
+      // 5단계에서 돌아갈 때 부양가족 상태 초기화
       if (currentStep === 5) {
-        resetAssetState();
         resetDependentState();
       }
     }
@@ -260,7 +192,7 @@ export default function Home() {
     setResult(null);
     setIncomeType(null);
     setIncomeSubStep(0);
-    resetAssetState();
+    setIsMarriedForAsset(null);
     resetDependentState();
   };
 
@@ -399,10 +331,17 @@ export default function Home() {
           ) : (
             <>
               {currentStep === 1 && (
-                <AddressInputStep
-                  onNext={handleAddressNext}
-                  initialHomeAddress={formData.homeAddress}
-                  initialWorkAddress={formData.workAddress}
+                <RegionSelectStep
+                  onNext={(data) => {
+                    setFormData({
+                      ...formData,
+                      homeAddress: data.selectedRegion,
+                      workAddress: "",
+                      courtJurisdiction: data.courtJurisdiction,
+                      priorityRepaymentRegion: data.priorityRepaymentRegion,
+                    });
+                    setCurrentStep(currentStep + 1);
+                  }}
                 />
               )}
               {currentStep === 2 && (
@@ -445,334 +384,15 @@ export default function Home() {
                 </>
               )}
               {currentStep === 4 && (
-                <>
-                  {assetInputMode === null && (
-                    <AssetInputModeSelection
-                      onSelect={(mode) => {
-                        setAssetInputMode(mode);
-                        if (mode === 'calculate') {
-                          setAssetSubStep(0);
-                        }
-                      }}
-                      onBack={handleBack}
-                    />
-                  )}
-                  {assetInputMode === 'direct' && assetSubStep === 0 && (
-                    <InputStep
-                      title="가진 재산은 얼마인가요?"
-                      subtitle="집, 차, 예금, 주식 등 모두 포함해주세요 · 대략적인 금액으로도 괜찮아요"
-                      onNext={(value) => {
-                        setHousingAsset(value); // 직접 입력값을 housingAsset에 저장
-                        setOtherAsset(0);
-                        setAssetSubStep(1000); // 결혼 여부 확인으로
-                      }}
-                      onBack={() => {
-                        setAssetInputMode(null);
-                      }}
-                      initialValue={formData.assetValue}
-                      minValue={0}
-                    />
-                  )}
-
-                  {/* 직접 입력 모드 - 배우자 재산 결혼 여부 확인 */}
-                  {assetInputMode === 'direct' && assetSubStep === 1000 && (
-                    <MarriageCheckForAsset
-                      onSelect={(isMarried) => {
-                        setIsMarriedForAsset(isMarried);
-                        if (isMarried) {
-                          setAssetSubStep(1001);
-                        } else {
-                          const totalAsset = housingAsset + otherAsset;
-                          handleNext("assetValue", totalAsset);
-                        }
-                      }}
-                      onBack={() => setAssetSubStep(0)}
-                    />
-                  )}
-
-                  {/* 직접 입력 모드 - 배우자 재산 유무 확인 */}
-                  {assetInputMode === 'direct' && assetSubStep === 1001 && (
-                    <SpouseAssetCheck
-                      onSelect={(hasAsset) => {
-                        setHasSpouseAsset(hasAsset);
-                        if (hasAsset) {
-                          setAssetSubStep(1002);
-                        } else {
-                          const totalAsset = housingAsset + otherAsset;
-                          handleNext("assetValue", totalAsset);
-                        }
-                      }}
-                      onBack={() => setAssetSubStep(1000)}
-                    />
-                  )}
-
-                  {/* 직접 입력 모드 - 배우자 재산 금액 입력 */}
-                  {assetInputMode === 'direct' && assetSubStep === 1002 && (
-                    <SpouseAssetInput
-                      onNext={(value) => {
-                        setSpouseAsset(value);
-                        const spouseAssetContribution = isMainCourt ? 0 : Math.floor(value / 2);
-                        const totalAsset = housingAsset + otherAsset + spouseAssetContribution;
-                        handleNext("assetValue", totalAsset);
-                      }}
-                      onBack={() => setAssetSubStep(1001)}
-                      initialValue={spouseAsset}
-                      isMainCourt={isMainCourt}
-                    />
-                  )}
-                  {assetInputMode === 'calculate' && assetSubStep === 0 && (
-                    <HousingTypeSelection
-                      onSelect={(type) => {
-                        setHousingType(type);
-                        setAssetSubStep(1);
-                      }}
-                      onBack={() => {
-                        setAssetInputMode(null);
-                        setAssetSubStep(0);
-                      }}
-                    />
-                  )}
-                  {/* Owned Housing Flow */}
-                  {assetInputMode === 'calculate' && housingType === 'owned' && assetSubStep === 1 && (
-                    <MortgageCheck
-                      onSelect={(has) => {
-                        setHasMortgage(has);
-                        setAssetSubStep(2);
-                      }}
-                      onBack={() => {
-                        setAssetSubStep(0);
-                        setHousingType(null);
-                      }}
-                    />
-                  )}
-                  {assetInputMode === 'calculate' && housingType === 'owned' && hasMortgage === true && assetSubStep === 2 && (
-                    <MortgageAmountInput
-                      onNext={(value) => {
-                        setMortgageAmount(value);
-                        setAssetSubStep(3);
-                      }}
-                      onBack={() => {
-                        setAssetSubStep(1);
-                        setHasMortgage(null);
-                      }}
-                      initialValue={mortgageAmount}
-                    />
-                  )}
-                  {assetInputMode === 'calculate' && housingType === 'owned' &&
-                   ((hasMortgage === false && assetSubStep === 2) || (hasMortgage === true && assetSubStep === 3)) && (
-                    <KBPriceInput
-                      onNext={(value) => {
-                        setKbPrice(value);
-                        const finalAsset = value - mortgageAmount;
-                        setHousingAsset(Math.max(0, finalAsset));
-                        setAssetSubStep(999); // 기타자산 입력 단계로
-                      }}
-                      onBack={() => {
-                        if (hasMortgage) {
-                          setAssetSubStep(2);
-                        } else {
-                          setAssetSubStep(1);
-                        }
-                      }}
-                      initialValue={kbPrice}
-                    />
-                  )}
-                  {/* Jeonse Flow */}
-                  {assetInputMode === 'calculate' && housingType === 'jeonse' && assetSubStep === 1 && (
-                    <JeonseDepositInput
-                      onNext={(value) => {
-                        setDepositAmount(value);
-                        // formData.priorityRepaymentRegion 사용 (집 주소 기반 자동 계산)
-                        const priorityAmount = PRIORITY_REPAYMENT[formData.priorityRepaymentRegion];
-                        const assetDeposit = Math.max(0, value - priorityAmount);
-                        setHousingAsset(assetDeposit);
-                        setAssetSubStep(999); // 기타자산 입력 단계로
-                      }}
-                      onBack={() => {
-                        setAssetSubStep(0);
-                        setHousingType(null);
-                      }}
-                      initialValue={depositAmount}
-                    />
-                  )}
-                  {/* Monthly Rent Flow */}
-                  {assetInputMode === 'calculate' && housingType === 'monthly' && assetSubStep === 1 && (
-                    <MonthlyRentDepositInput
-                      onNext={(value) => {
-                        setDepositAmount(value);
-                        // formData.priorityRepaymentRegion 사용 (집 주소 기반 자동 계산)
-                        const priorityAmount = PRIORITY_REPAYMENT[formData.priorityRepaymentRegion];
-                        const assetDeposit = Math.max(0, value - priorityAmount);
-                        setHousingAsset(assetDeposit);
-                        setAssetSubStep(999); // 기타자산 입력 단계로
-                      }}
-                      onBack={() => {
-                        setAssetSubStep(0);
-                        setHousingType(null);
-                      }}
-                      initialValue={depositAmount}
-                    />
-                  )}
-                  {/* Free Housing Flow */}
-                  {assetInputMode === 'calculate' && housingType === 'free' && assetSubStep === 1 && (
-                    <SpouseHousingCheck
-                      onSelect={(isSpouse) => {
-                        setIsSpouseHousing(isSpouse);
-                        if (!isSpouse) {
-                          setHousingAsset(0);
-                          setAssetSubStep(999); // 기타자산 입력 단계로
-                        } else {
-                          setAssetSubStep(2);
-                        }
-                      }}
-                      onBack={() => {
-                        setAssetSubStep(0);
-                        setHousingType(null);
-                      }}
-                    />
-                  )}
-                  {assetInputMode === 'calculate' && housingType === 'free' && isSpouseHousing === true && assetSubStep === 2 && (
-                    <SpouseHousingJurisdictionInfo
-                      courtJurisdiction={formData.courtJurisdiction}
-                      onBack={() => {
-                        setAssetSubStep(1);
-                        setIsSpouseHousing(null);
-                      }}
-                      onNext={(isMainCourt) => {
-                        if (isMainCourt) {
-                          setHousingAsset(0);
-                          setAssetSubStep(999); // 기타자산 입력 단계로
-                        } else {
-                          setIsMainCourtJurisdiction(false);
-                          setAssetSubStep(3);
-                        }
-                      }}
-                    />
-                  )}
-                  {assetInputMode === 'calculate' && housingType === 'free' && isMainCourtJurisdiction === false && assetSubStep === 3 && (
-                    <MortgageCheck
-                      onSelect={(has) => {
-                        setHasMortgage(has);
-                        setAssetSubStep(4);
-                      }}
-                      onBack={() => {
-                        setAssetSubStep(2);
-                        setIsMainCourtJurisdiction(null);
-                      }}
-                    />
-                  )}
-                  {assetInputMode === 'calculate' && housingType === 'free' && hasMortgage === true && assetSubStep === 4 && (
-                    <MortgageAmountInput
-                      onNext={(value) => {
-                        setMortgageAmount(value);
-                        setAssetSubStep(5);
-                      }}
-                      onBack={() => {
-                        setAssetSubStep(3);
-                        setHasMortgage(null);
-                      }}
-                      initialValue={mortgageAmount}
-                    />
-                  )}
-                  {assetInputMode === 'calculate' && housingType === 'free' &&
-                   ((hasMortgage === false && assetSubStep === 4) || (hasMortgage === true && assetSubStep === 5)) && (
-                    <KBPriceInput
-                      onNext={(value) => {
-                        setKbPrice(value);
-                        const assetSpouse = value - mortgageAmount;
-                        setHousingAsset(Math.max(0, assetSpouse / 2));
-                        setAssetSubStep(999); // 기타자산 입력 단계로
-                      }}
-                      onBack={() => {
-                        if (hasMortgage) {
-                          setAssetSubStep(4);
-                        } else {
-                          setAssetSubStep(3);
-                        }
-                      }}
-                      initialValue={kbPrice}
-                    />
-                  )}
-                  {/* 기타자산 입력 단계 (주거형태 계산 완료 후) */}
-                  {assetInputMode === 'calculate' && assetSubStep === 999 && (
-                    <InputStep
-                      title="다른 재산도 있나요?"
-                      subtitle="예금, 주식, 자동차 등을 말해주세요"
-                      onNext={(value) => {
-                        setOtherAsset(value);
-                        setAssetSubStep(1000); // 결혼 여부 확인으로
-                      }}
-                      onBack={() => {
-                        // 각 주거형태의 마지막 단계로 돌아가기
-                        if (housingType === 'owned') {
-                          setAssetSubStep(hasMortgage ? 3 : 2);
-                        } else if (housingType === 'jeonse' || housingType === 'monthly') {
-                          setAssetSubStep(1);
-                        } else if (housingType === 'free') {
-                          if (isSpouseHousing === false) {
-                            setAssetSubStep(1);
-                          } else if (isMainCourtJurisdiction === true) {
-                            setAssetSubStep(2);
-                          } else {
-                            setAssetSubStep(hasMortgage ? 5 : 4);
-                          }
-                        }
-                      }}
-                      initialValue={otherAsset}
-                      minValue={0}
-                    />
-                  )}
-
-                  {/* 배우자 재산 - 결혼 여부 확인 */}
-                  {assetInputMode === 'calculate' && assetSubStep === 1000 && (
-                    <MarriageCheckForAsset
-                      onSelect={(isMarried) => {
-                        setIsMarriedForAsset(isMarried);
-                        if (isMarried) {
-                          setAssetSubStep(1001); // 배우자 재산 유무 확인으로
-                        } else {
-                          // 미혼: 바로 완료
-                          const totalAsset = housingAsset + otherAsset;
-                          handleNext("assetValue", totalAsset);
-                        }
-                      }}
-                      onBack={() => setAssetSubStep(999)}
-                    />
-                  )}
-
-                  {/* 배우자 재산 - 유무 확인 */}
-                  {assetInputMode === 'calculate' && assetSubStep === 1001 && (
-                    <SpouseAssetCheck
-                      onSelect={(hasAsset) => {
-                        setHasSpouseAsset(hasAsset);
-                        if (hasAsset) {
-                          setAssetSubStep(1002); // 배우자 재산 금액 입력으로
-                        } else {
-                          // 없음: 바로 완료
-                          const totalAsset = housingAsset + otherAsset;
-                          handleNext("assetValue", totalAsset);
-                        }
-                      }}
-                      onBack={() => setAssetSubStep(1000)}
-                    />
-                  )}
-
-                  {/* 배우자 재산 - 금액 입력 */}
-                  {assetInputMode === 'calculate' && assetSubStep === 1002 && (
-                    <SpouseAssetInput
-                      onNext={(value) => {
-                        setSpouseAsset(value);
-                        // 회생법원이 아닌 경우 배우자 재산의 50% 추가
-                        const spouseAssetContribution = isMainCourt ? 0 : Math.floor(value / 2);
-                        const totalAsset = housingAsset + otherAsset + spouseAssetContribution;
-                        handleNext("assetValue", totalAsset);
-                      }}
-                      onBack={() => setAssetSubStep(1001)}
-                      initialValue={spouseAsset}
-                      isMainCourt={isMainCourt}
-                    />
-                  )}
-                </>
+                <AssetIntegratedForm
+                  onNext={(totalAsset, isMarried) => {
+                    setIsMarriedForAsset(isMarried);
+                    handleNext("assetValue", totalAsset);
+                  }}
+                  onBack={handleBack}
+                  courtJurisdiction={formData.courtJurisdiction}
+                  priorityRepaymentRegion={formData.priorityRepaymentRegion}
+                />
               )}
               {currentStep === 5 && (
                 <>
@@ -880,22 +500,10 @@ export default function Home() {
                   formData={formData}
                   onRestart={handleRestart}
                   onBack={() => setCurrentStep(5)}
-                  assetInputMode={assetInputMode}
-                  housingType={housingType}
-                  hasMortgage={hasMortgage}
-                  mortgageAmount={mortgageAmount}
-                  kbPrice={kbPrice}
-                  depositAmount={depositAmount}
-                  isSpouseHousing={isSpouseHousing}
-                  housingAsset={housingAsset}
-                  otherAsset={otherAsset}
                   maritalStatus={maritalStatus}
                   childrenCount={childrenCount}
                   hasNoSpouseIncome={hasNoSpouseIncome}
                   isMarriedForAsset={isMarriedForAsset}
-                  hasSpouseAsset={hasSpouseAsset}
-                  spouseAsset={spouseAsset}
-                  isMainCourt={isMainCourt}
                 />
               )}
             </>
