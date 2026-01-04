@@ -827,7 +827,7 @@ export function ResultPage({
           </div>
           <div className="bg-white/80 rounded-xl p-3 border border-amber-100">
             <p className="text-xs text-gray-700 leading-relaxed italic">
-              "카드빚 8천만원이 <span className="font-bold text-amber-700">1천만원대로 탕감</span>됐어요. 전문가 상담 덕분입니다."
+              "카드빚 8천만원이 <span className="font-bold text-amber-700">1천만원대로 탕감</span>됐어요. 블랙스톤 덕분입니다."
             </p>
             <p className="text-[10px] text-gray-500 mt-2 text-right">- 박○○님 (인천지방법원)</p>
           </div>
