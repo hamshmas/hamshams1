@@ -45,7 +45,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
     const startX = Math.random() * 3;
     const startY = -2 + Math.random() * 2;
 
-    // 지정된 각도 + 약간의 변화
+    // 지정된 각도 + 약간의 변화 (-30도 ~ 15도 범위)
     const angleVariation = (Math.random() - 0.5) * 3; // ±1.5도 변화
     const angle = (angleDegree + angleVariation) * (Math.PI / 180);
     const speed = 3.5 + Math.random() * 1.5;
@@ -71,12 +71,12 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
 
     setShowEffects(true);
 
-    // 초기 컨페티 생성 (0도~45도 균등 분포)
+    // 초기 컨페티 생성 (-30도~15도 균등 분포)
     const initialConfetti: Confetti[] = [];
     const initialCount = reductionRate >= 80 ? 60 : reductionRate >= 60 ? 45 : 30;
     for (let i = 0; i < initialCount; i++) {
-      // 0도~45도를 균등하게 분배
-      const angleDegree = (i / initialCount) * 45;
+      // -30도~15도를 균등하게 분배 (45도 범위)
+      const angleDegree = -30 + (i / initialCount) * 45;
       initialConfetti.push(createConfettiAtAngle(angleDegree));
     }
     setConfetti(initialConfetti);
@@ -90,8 +90,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
       setIsBursting(isOn);
     }, 200);
 
-    // 지속적으로 새 컨페티 추가 (0도~45도 전체 영역에 균등 분포)
-    let angleIndex = 0;
+    // 지속적으로 새 컨페티 추가 (-30도~15도 전체 영역에 균등 분포)
     const spawnInterval = setInterval(() => {
       setIsBursting(currentBursting => {
         if (!currentBursting) return currentBursting;
@@ -99,13 +98,12 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
         const spawnCount = reductionRate >= 80 ? 12 : reductionRate >= 60 ? 9 : 6;
         const newConfetti: Confetti[] = [];
 
-        // 0도~45도를 spawnCount개로 나눠서 균등하게 생성
+        // -30도~15도를 spawnCount개로 나눠서 균등하게 생성
         for (let i = 0; i < spawnCount; i++) {
-          const angleDegree = (i / spawnCount) * 45;
+          const angleDegree = -30 + (i / spawnCount) * 45;
           newConfetti.push(createConfettiAtAngle(angleDegree));
         }
         setConfetti(prev => [...prev.slice(-200), ...newConfetti]);
-        angleIndex++;
 
         return currentBursting;
       });
