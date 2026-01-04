@@ -36,18 +36,19 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
     '#FFD700', '#FF69B4', '#00FF7F', '#87CEEB', '#DDA0DD'
   ];
 
-  // 삼각형 형태로 컨페티 생성 (0도~45도 사이로 꽉 차게)
-  const createConfetti = useCallback((waveProgress: number = 0): Confetti => {
+  // 특정 각도로 컨페티 생성 (균등 분포용)
+  const createConfettiAtAngle = useCallback((angleDegree: number): Confetti => {
     const types: ('square' | 'circle' | 'ribbon')[] = ['square', 'circle', 'ribbon', 'square', 'ribbon'];
     const type = types[Math.floor(Math.random() * types.length)];
 
     // 왼쪽 위 모서리에서 시작
-    const startX = Math.random() * 5; // 0-5% 범위
-    const startY = -3 + Math.random() * 3; // 약간 위에서
+    const startX = Math.random() * 3;
+    const startY = -2 + Math.random() * 2;
 
-    // 0도(오른쪽)에서 45도(대각선 아래) 사이로 꽉 차게 퍼짐
-    const angle = Math.random() * (Math.PI / 4); // 0 ~ π/4 (0도 ~ 45도)
-    const speed = 3 + Math.random() * 2;
+    // 지정된 각도 + 약간의 변화
+    const angleVariation = (Math.random() - 0.5) * 3; // ±1.5도 변화
+    const angle = (angleDegree + angleVariation) * (Math.PI / 180);
+    const speed = 3.5 + Math.random() * 1.5;
 
     return {
       id: Date.now() + Math.random() * 100000,
@@ -70,44 +71,45 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
 
     setShowEffects(true);
 
-    // 초기 컨페티 생성 (삼각형 형태로)
+    // 초기 컨페티 생성 (0도~45도 균등 분포)
     const initialConfetti: Confetti[] = [];
-    const initialCount = reductionRate >= 80 ? 50 : reductionRate >= 60 ? 35 : 25;
+    const initialCount = reductionRate >= 80 ? 60 : reductionRate >= 60 ? 45 : 30;
     for (let i = 0; i < initialCount; i++) {
-      const progress = i / initialCount; // 0~1 진행도
-      initialConfetti.push(createConfetti(progress));
+      // 0도~45도를 균등하게 분배
+      const angleDegree = (i / initialCount) * 45;
+      initialConfetti.push(createConfettiAtAngle(angleDegree));
     }
     setConfetti(initialConfetti);
 
-    // 간헐적 분출을 위한 타이머 (더 짧은 텀)
+    // 간헐적 분출을 위한 타이머
     let burstPhase = 0;
     const burstInterval = setInterval(() => {
       burstPhase++;
-      // 1.5초 분출, 0.6초 멈춤 패턴
-      const isOn = (burstPhase % 7) < 5; // 5틱 켜짐, 2틱 꺼짐 (300ms 간격)
+      // 1.2초 분출, 0.4초 멈춤 패턴
+      const isOn = (burstPhase % 8) < 6; // 6틱 켜짐, 2틱 꺼짐 (200ms 간격)
       setIsBursting(isOn);
-    }, 300);
+    }, 200);
 
-    // 지속적으로 새 컨페티 추가 (삼각형 웨이브 형태)
-    let waveTime = 0;
+    // 지속적으로 새 컨페티 추가 (0도~45도 전체 영역에 균등 분포)
+    let angleIndex = 0;
     const spawnInterval = setInterval(() => {
       setIsBursting(currentBursting => {
         if (!currentBursting) return currentBursting;
 
-        waveTime += 0.1;
-        const waveProgress = (Math.sin(waveTime) + 1) / 2; // 0~1 사이 진동
-
-        const spawnCount = reductionRate >= 80 ? 10 : reductionRate >= 60 ? 7 : 5;
+        const spawnCount = reductionRate >= 80 ? 12 : reductionRate >= 60 ? 9 : 6;
         const newConfetti: Confetti[] = [];
+
+        // 0도~45도를 spawnCount개로 나눠서 균등하게 생성
         for (let i = 0; i < spawnCount; i++) {
-          const individualProgress = waveProgress + (i / spawnCount) * 0.3;
-          newConfetti.push(createConfetti(Math.min(1, individualProgress)));
+          const angleDegree = (i / spawnCount) * 45;
+          newConfetti.push(createConfettiAtAngle(angleDegree));
         }
-        setConfetti(prev => [...prev.slice(-180), ...newConfetti]);
+        setConfetti(prev => [...prev.slice(-200), ...newConfetti]);
+        angleIndex++;
 
         return currentBursting;
       });
-    }, 80);
+    }, 60);
 
     // 애니메이션 업데이트
     const updateInterval = setInterval(() => {
@@ -133,7 +135,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [isActive, reductionRate, createConfetti]);
+  }, [isActive, reductionRate, createConfettiAtAngle]);
 
   if (!isActive || reductionRate < 40 || !showEffects) return null;
 
