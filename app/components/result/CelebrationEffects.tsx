@@ -48,7 +48,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
     // 지정된 각도 + 약간의 변화 (45도 ~ 90도 범위)
     const angleVariation = (Math.random() - 0.5) * 8; // ±4도 변화 (더 자연스럽게)
     const angle = (angleDegree + angleVariation) * (Math.PI / 180);
-    const speed = 2.0 + Math.random() * 1.0; // 더 느린 속도
+    const speed = 2.8 + Math.random() * 1.2; // 적당한 속도
 
     return {
       id: Date.now() + Math.random() * 100000,
@@ -73,7 +73,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
 
     // 초기 컨페티 생성 (45도~90도 균등 분포)
     const initialConfetti: Confetti[] = [];
-    const initialCount = reductionRate >= 80 ? 60 : reductionRate >= 60 ? 45 : 30;
+    const initialCount = reductionRate >= 80 ? 30 : reductionRate >= 60 ? 20 : 15;
     for (let i = 0; i < initialCount; i++) {
       // 45도~90도를 균등하게 분배 (45도 범위)
       const angleDegree = 45 + (i / initialCount) * 45;
@@ -95,7 +95,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
       setIsBursting(currentBursting => {
         if (!currentBursting) return currentBursting;
 
-        const spawnCount = reductionRate >= 80 ? 12 : reductionRate >= 60 ? 9 : 6;
+        const spawnCount = reductionRate >= 80 ? 5 : reductionRate >= 60 ? 4 : 3;
         const newConfetti: Confetti[] = [];
 
         // 45도~90도를 spawnCount개로 나눠서 균등하게 생성
@@ -103,23 +103,23 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
           const angleDegree = 45 + (i / spawnCount) * 45;
           newConfetti.push(createConfettiAtAngle(angleDegree));
         }
-        setConfetti(prev => [...prev.slice(-200), ...newConfetti]);
+        setConfetti(prev => [...prev.slice(-100), ...newConfetti]);
 
         return currentBursting;
       });
-    }, 60);
+    }, 80);
 
     // 애니메이션 업데이트
     const updateInterval = setInterval(() => {
       setConfetti(prev => prev
         .map(c => ({
           ...c,
-          x: c.x + c.vx * 0.35, // 더 느리게
-          y: c.y + c.vy * 0.35, // 더 느리게
-          vy: c.vy + 0.03, // 중력 약하게 (더 자연스럽게)
-          vx: c.vx * 0.995 + (Math.random() - 0.5) * 0.02, // 약간의 흔들림 추가
+          x: c.x + c.vx * 0.45, // 적당한 속도
+          y: c.y + c.vy * 0.45, // 적당한 속도
+          vy: c.vy + 0.04, // 중력
+          vx: c.vx * 0.995 + (Math.random() - 0.5) * 0.015, // 약간의 흔들림
           rotation: c.rotation + c.rotationSpeed * 0.8,
-          opacity: c.y > 40 ? Math.max(0, c.opacity - 0.05) : c.opacity, // 40%부터 천천히 페이드아웃
+          opacity: c.y > 40 ? Math.max(0, c.opacity - 0.06) : c.opacity, // 40%부터 페이드아웃
         }))
         .filter(c => c.y < 50 && c.opacity > 0 && c.x < 120) // 화면 절반(50%)까지만
       );

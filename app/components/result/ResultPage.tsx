@@ -326,7 +326,7 @@ export function ResultPage({
   const strokeDashoffset = circumference - (animatedRate / 100) * circumference;
 
   return (
-    <div className="space-y-4 animate-fadeIn">
+    <div className="space-y-3 animate-fadeIn">
       {/* 축하 효과 */}
       <CelebrationEffects
         reductionRate={result.reductionRate}
@@ -468,138 +468,113 @@ export function ResultPage({
           </div>
         </div>
       ) : (
-        // 단순화된 결과 화면
-        <div className="text-center mb-4 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-3xl p-6 shadow-xl border border-blue-200">
-          <p className="text-gray-600 text-sm mb-4">예상 탕감률</p>
+        // 단순화된 결과 화면 - 한 화면에 맞게 콤팩트하게
+        <div className="text-center bg-white rounded-2xl p-4 shadow-xl border-2 border-blue-300">
+          <p className="text-gray-800 text-xs font-medium mb-2">예상 탕감률</p>
 
-          {/* 원형 프로그레스 */}
+          {/* 원형 프로그레스 - 크기 축소 */}
           <div className="relative inline-block">
-            <svg className="w-44 h-44 transform -rotate-90" viewBox="0 0 120 120">
+            <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
               <defs>
                 <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: '#3B82F6', stopOpacity: 1 }} />
-                  <stop offset="100%" style={{ stopColor: '#6366F1', stopOpacity: 1 }} />
+                  <stop offset="0%" style={{ stopColor: '#2563EB', stopOpacity: 1 }} />
+                  <stop offset="100%" style={{ stopColor: '#4F46E5', stopOpacity: 1 }} />
                 </linearGradient>
               </defs>
-              <circle cx="60" cy="60" r="54" stroke="#e5e7eb" strokeWidth="10" fill="none" />
+              <circle cx="60" cy="60" r="54" stroke="#E5E7EB" strokeWidth="10" fill="none" />
               <circle
                 cx="60" cy="60" r="54" stroke="url(#goldGradient)" strokeWidth="10" fill="none"
                 strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="text-5xl font-black text-gray-900">
+              <div className="text-4xl font-black text-gray-900">
                 {animatedRate}%
               </div>
             </div>
           </div>
 
-          {/* 탕감액 */}
-          <div className="mt-4">
-            <p className="text-gray-500 text-sm">예상 탕감액</p>
-            <p className="text-2xl font-black text-blue-600">
-              {animatedAmount.toLocaleString()}원
-            </p>
-          </div>
-
-          {/* 월 상환액 */}
-          <div className="mt-4 bg-white rounded-xl p-4 shadow-sm">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600 text-sm">월 상환액</span>
-              <span className="text-xl font-bold text-gray-900">
+          {/* 탕감액 & 월 상환액을 한 줄에 */}
+          <div className="mt-3 flex gap-2">
+            <div className="flex-1 bg-blue-50 rounded-lg p-2.5">
+              <p className="text-gray-600 text-xs">탕감액</p>
+              <p className="text-lg font-bold text-blue-700">
+                {animatedAmount.toLocaleString()}원
+              </p>
+            </div>
+            <div className="flex-1 bg-gray-50 rounded-lg p-2.5">
+              <p className="text-gray-600 text-xs">월 상환액</p>
+              <p className="text-lg font-bold text-gray-900">
                 {Math.round(result.monthlyPayment).toLocaleString()}원
-              </span>
-            </div>
-            <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
-              <span className="text-gray-500 text-xs">변제 기간</span>
-              <span className="text-gray-700 font-semibold text-sm">
-                {result.repaymentPeriod}개월
-              </span>
+              </p>
             </div>
           </div>
 
-          {/* 상담 버튼 */}
-          <div className="mt-5 flex gap-2">
-            <button
-              onClick={handleConsultationClick}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl transition-all text-sm"
-            >
-              무료 상담받기
-            </button>
-            <button
-              onClick={() => setShowContactModal(true)}
-              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3.5 px-4 rounded-xl transition-all text-sm"
-            >
-              전화상담
-            </button>
-          </div>
+          {/* 변제 기간 */}
+          <p className="mt-2 text-xs text-gray-600">
+            변제 기간: <span className="font-semibold text-gray-800">{result.repaymentPeriod}개월</span>
+          </p>
         </div>
       )}
 
-      {/* 간단한 입력 정보 요약 */}
-      <div className="bg-gray-50 rounded-xl p-4">
-        <div className="grid grid-cols-2 gap-3 text-sm">
+      {/* 간단한 입력 정보 요약 - 콤팩트 */}
+      <div className="bg-gray-100 rounded-xl p-3">
+        <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="flex justify-between">
-            <span className="text-gray-500">총 채무</span>
-            <span className="font-semibold">{Math.round(formData.totalDebt).toLocaleString()}원</span>
+            <span className="text-gray-600">총 채무</span>
+            <span className="font-semibold text-gray-900">{Math.round(formData.totalDebt).toLocaleString()}원</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">월 소득</span>
-            <span className="font-semibold">{Math.round(formData.monthlyIncome).toLocaleString()}원</span>
+            <span className="text-gray-600">월 소득</span>
+            <span className="font-semibold text-gray-900">{Math.round(formData.monthlyIncome).toLocaleString()}원</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">청산가치</span>
-            <span className="font-semibold">{Math.round(formData.assetValue).toLocaleString()}원</span>
+            <span className="text-gray-600">청산가치</span>
+            <span className="font-semibold text-gray-900">{Math.round(formData.assetValue).toLocaleString()}원</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-gray-500">관할법원</span>
-            <span className="font-semibold">{getCourtName(formData.courtJurisdiction)}</span>
+            <span className="text-gray-600">관할법원</span>
+            <span className="font-semibold text-gray-900">{getCourtName(formData.courtJurisdiction)}</span>
           </div>
         </div>
       </div>
 
-      {/* 블랙스톤 법률사무소 상담 영역 - 간소화 */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 space-y-4">
-        <div className="text-center">
-          <p className="text-white font-bold text-lg">블랙스톤 법률사무소</p>
-          <p className="text-slate-400 text-xs mt-1">개인회생 전문 · 변호사 직접 상담</p>
-        </div>
-
-        {/* 신뢰 배지 */}
-        <div className="flex justify-center gap-2">
-          <div className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-full">
-            <span className="text-xs text-white/80 font-medium">상담료 0원</span>
+      {/* 블랙스톤 법률사무소 상담 영역 - 더 콤팩트하게 */}
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="text-white font-bold text-sm">블랙스톤 법률사무소</p>
+            <p className="text-slate-400 text-xs">개인회생 전문 · 상담료 0원</p>
           </div>
-          <div className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-full">
-            <span className="text-xs text-white/80 font-medium">비밀 보장</span>
+          <div className="flex gap-1">
+            <span className="text-xs bg-white/10 px-2 py-0.5 rounded-full text-white/80">비밀 보장</span>
           </div>
         </div>
 
         <div className="flex gap-2">
           <button
             onClick={handleConsultationClick}
-            className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold py-3.5 px-4 rounded-xl transition-all text-sm"
+            className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold py-3 px-3 rounded-lg transition-all text-sm"
           >
             카카오톡 상담
           </button>
           <button
             onClick={() => setShowContactModal(true)}
-            className="flex-1 bg-white hover:bg-gray-100 text-slate-900 font-bold py-3.5 px-4 rounded-xl transition-all text-sm"
+            className="flex-1 bg-white hover:bg-gray-100 text-slate-900 font-bold py-3 px-3 rounded-lg transition-all text-sm"
           >
             전화상담 신청
           </button>
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-2">
-          <button onClick={onBack} className="secondary-button text-sm py-2.5">
-            ← 이전
-          </button>
-          <button onClick={onRestart} className="secondary-button text-sm py-2.5">
-            처음부터 →
-          </button>
-        </div>
+      {/* 네비게이션 버튼 */}
+      <div className="grid grid-cols-2 gap-2">
+        <button onClick={onBack} className="secondary-button text-sm py-2">
+          ← 이전
+        </button>
+        <button onClick={onRestart} className="secondary-button text-sm py-2">
+          처음부터 →
+        </button>
       </div>
 
       <CopySuccessNotification isVisible={copySuccess} />
