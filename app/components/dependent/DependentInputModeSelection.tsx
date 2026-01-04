@@ -21,9 +21,9 @@ export function DependentInputModeSelection({
       <div className="space-y-3">
         <button
           onClick={() => onSelect('direct')}
-          className="w-full border-2 border-gray-200 hover:border-primary-500 bg-white hover:bg-primary-50 rounded-xl p-4 transition-all text-left"
+          className="w-full border-2 border-primary-300 bg-primary-50/50 hover:bg-primary-50 rounded-xl p-4 transition-all text-left"
         >
-          <p className="font-bold text-gray-900 text-sm mb-1">✍️ 직접 입력하기</p>
+          <p className="font-bold text-gray-900 text-sm mb-1">✍️ 직접 입력하기 (권장)</p>
           <p className="text-xs text-gray-600">
             부양가족 수를 알고 있다면 직접 입력하세요
           </p>
@@ -31,9 +31,9 @@ export function DependentInputModeSelection({
 
         <button
           onClick={() => onSelect('calculate')}
-          className="w-full border-2 border-primary-300 bg-primary-50/50 hover:bg-primary-50 rounded-xl p-4 transition-all text-left"
+          className="w-full border-2 border-gray-200 hover:border-primary-500 bg-white hover:bg-primary-50 rounded-xl p-4 transition-all text-left"
         >
-          <p className="font-bold text-gray-900 text-sm mb-1">🧮 계산하기 (권장)</p>
+          <p className="font-bold text-gray-900 text-sm mb-1">🧮 계산하기</p>
           <p className="text-xs text-gray-600">
             혼인 여부, 자녀 수 등을 입력하여 자동으로 계산합니다
           </p>

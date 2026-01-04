@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 interface CelebrationEffectsProps {
   reductionRate: number;
   isActive: boolean;
 }
 
-interface Particle {
+interface Confetti {
   id: number;
   x: number;
   y: number;
@@ -15,169 +15,150 @@ interface Particle {
   vy: number;
   color: string;
   size: number;
-  life: number;
-  maxLife: number;
-  type: 'circle' | 'star' | 'ribbon';
   rotation: number;
   rotationSpeed: number;
-}
-
-interface Firework {
-  id: number;
-  x: number;
-  y: number;
-  exploded: boolean;
-  particles: Particle[];
+  type: 'square' | 'circle' | 'ribbon';
+  opacity: number;
 }
 
 export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffectsProps) {
-  const [fireworks, setFireworks] = useState<Firework[]>([]);
+  const [confetti, setConfetti] = useState<Confetti[]>([]);
   const [showEffects, setShowEffects] = useState(false);
+  const animationRef = useRef<number | null>(null);
 
   // 화려한 색상 팔레트
   const colors = [
     '#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181',
     '#AA96DA', '#FCBAD3', '#A8D8EA', '#FF9F43', '#EE5A24',
     '#00D2D3', '#54A0FF', '#5F27CD', '#FF6B81', '#FFC312',
-    '#C4E538', '#12CBC4', '#FDA7DF', '#ED4C67', '#B53471'
+    '#C4E538', '#12CBC4', '#FDA7DF', '#ED4C67', '#B53471',
+    '#FFD700', '#FF69B4', '#00FF7F', '#87CEEB', '#DDA0DD'
   ];
 
-  const createParticles = useCallback((x: number, y: number, count: number): Particle[] => {
-    const particles: Particle[] = [];
-    const types: ('circle' | 'star' | 'ribbon')[] = ['circle', 'star', 'ribbon'];
+  // 새 컨페티 가루 생성
+  const createConfetti = useCallback((): Confetti => {
+    const types: ('square' | 'circle' | 'ribbon')[] = ['square', 'circle', 'ribbon', 'square', 'ribbon'];
+    const type = types[Math.floor(Math.random() * types.length)];
 
-    for (let i = 0; i < count; i++) {
-      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.5;
-      const velocity = 3 + Math.random() * 5;
-      const type = types[Math.floor(Math.random() * types.length)];
+    // 왼쪽 위 모서리 영역에서 시작 (0-10% x, -5% y 위쪽에서 시작)
+    const startX = Math.random() * 15;
+    const startY = -5 + Math.random() * 5;
 
-      particles.push({
-        id: Date.now() + i + Math.random() * 10000,
-        x,
-        y,
-        vx: Math.cos(angle) * velocity,
-        vy: Math.sin(angle) * velocity - 2, // 약간 위로
-        color: colors[Math.floor(Math.random() * colors.length)],
-        size: type === 'ribbon' ? 12 + Math.random() * 8 : 6 + Math.random() * 6,
-        life: 1,
-        maxLife: 1,
-        type,
-        rotation: Math.random() * 360,
-        rotationSpeed: (Math.random() - 0.5) * 20,
-      });
-    }
-    return particles;
+    // 오른쪽 아래 대각선 방향으로 (약간의 랜덤 퍼짐)
+    const baseAngle = Math.PI / 4; // 45도
+    const angleVariation = (Math.random() - 0.5) * (Math.PI / 6); // ±15도 변화
+    const angle = baseAngle + angleVariation;
+    const speed = 2 + Math.random() * 3;
+
+    return {
+      id: Date.now() + Math.random() * 100000,
+      x: startX,
+      y: startY,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed + 1, // 아래로 기본 속도 추가
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: type === 'ribbon' ? 15 + Math.random() * 10 : 6 + Math.random() * 6,
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 15,
+      type,
+      opacity: 0.9 + Math.random() * 0.1,
+    };
   }, []);
 
-  const launchFirework = useCallback((side: 'left' | 'right' | 'center') => {
-    let x: number;
-    if (side === 'left') {
-      x = 15 + Math.random() * 20;
-    } else if (side === 'right') {
-      x = 65 + Math.random() * 20;
-    } else {
-      x = 40 + Math.random() * 20;
-    }
-
-    const particleCount = reductionRate >= 80 ? 40 : reductionRate >= 60 ? 30 : 20;
-
-    const newFirework: Firework = {
-      id: Date.now() + Math.random() * 10000,
-      x,
-      y: 30 + Math.random() * 20,
-      exploded: true,
-      particles: createParticles(x, 30 + Math.random() * 20, particleCount),
-    };
-
-    setFireworks(prev => [...prev.slice(-5), newFirework]);
-  }, [createParticles, reductionRate]);
-
-  // 애니메이션 루프
+  // 컨페티 애니메이션
   useEffect(() => {
     if (!isActive || reductionRate < 40) return;
 
     setShowEffects(true);
 
-    // 초기 폭죽 발사
-    setTimeout(() => launchFirework('center'), 100);
-    setTimeout(() => launchFirework('left'), 300);
-    setTimeout(() => launchFirework('right'), 500);
+    // 초기 컨페티 생성
+    const initialConfetti: Confetti[] = [];
+    const initialCount = reductionRate >= 80 ? 60 : reductionRate >= 60 ? 45 : 30;
+    for (let i = 0; i < initialCount; i++) {
+      initialConfetti.push(createConfetti());
+    }
+    setConfetti(initialConfetti);
 
-    // 주기적으로 폭죽 발사
-    const launchInterval = setInterval(() => {
-      const sides: ('left' | 'right' | 'center')[] = ['left', 'right', 'center'];
-      launchFirework(sides[Math.floor(Math.random() * sides.length)]);
-    }, reductionRate >= 80 ? 1200 : 1800);
+    // 지속적으로 새 컨페티 추가
+    const spawnInterval = setInterval(() => {
+      const spawnCount = reductionRate >= 80 ? 8 : reductionRate >= 60 ? 6 : 4;
+      const newConfetti: Confetti[] = [];
+      for (let i = 0; i < spawnCount; i++) {
+        newConfetti.push(createConfetti());
+      }
+      setConfetti(prev => [...prev.slice(-150), ...newConfetti]); // 최대 150개 유지
+    }, 100);
 
-    // 파티클 업데이트
+    // 애니메이션 업데이트
     const updateInterval = setInterval(() => {
-      setFireworks(prev => prev.map(fw => ({
-        ...fw,
-        particles: fw.particles
-          .map(p => ({
-            ...p,
-            x: p.x + p.vx * 0.5,
-            y: p.y + p.vy * 0.5,
-            vy: p.vy + 0.15, // 중력
-            vx: p.vx * 0.98, // 공기 저항
-            life: p.life - 0.015,
-            rotation: p.rotation + p.rotationSpeed,
-          }))
-          .filter(p => p.life > 0)
-      })).filter(fw => fw.particles.length > 0));
-    }, 30);
+      setConfetti(prev => prev
+        .map(c => ({
+          ...c,
+          x: c.x + c.vx * 0.4,
+          y: c.y + c.vy * 0.4,
+          vy: c.vy + 0.08, // 중력
+          vx: c.vx * 0.995, // 약간의 공기저항
+          rotation: c.rotation + c.rotationSpeed,
+          opacity: c.y > 100 ? Math.max(0, c.opacity - 0.05) : c.opacity, // 화면 아래로 가면 페이드아웃
+        }))
+        .filter(c => c.y < 120 && c.opacity > 0) // 화면 밖으로 나가면 제거
+      );
+    }, 20);
 
     return () => {
-      clearInterval(launchInterval);
+      clearInterval(spawnInterval);
       clearInterval(updateInterval);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
     };
-  }, [isActive, reductionRate, launchFirework]);
+  }, [isActive, reductionRate, createConfetti]);
 
   if (!isActive || reductionRate < 40 || !showEffects) return null;
 
-  const renderParticle = (particle: Particle) => {
-    const opacity = Math.max(0, particle.life);
-    const scale = 0.5 + particle.life * 0.5;
-
-    if (particle.type === 'star') {
-      return (
-        <svg
-          width={particle.size * scale}
-          height={particle.size * scale}
-          viewBox="0 0 24 24"
-          fill={particle.color}
-          style={{ opacity, filter: `drop-shadow(0 0 ${particle.size}px ${particle.color})` }}
-        >
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-        </svg>
-      );
-    }
-
-    if (particle.type === 'ribbon') {
+  const renderConfetti = (c: Confetti) => {
+    if (c.type === 'ribbon') {
       return (
         <div
           style={{
-            width: particle.size * scale * 0.3,
-            height: particle.size * scale,
-            backgroundColor: particle.color,
-            opacity,
+            width: c.size * 0.25,
+            height: c.size,
+            backgroundColor: c.color,
+            opacity: c.opacity,
             borderRadius: '2px',
-            transform: `rotate(${particle.rotation}deg)`,
-            boxShadow: `0 0 ${particle.size}px ${particle.color}`,
+            transform: `rotate(${c.rotation}deg)`,
+            boxShadow: `0 0 4px ${c.color}40`,
           }}
         />
       );
     }
 
+    if (c.type === 'circle') {
+      return (
+        <div
+          style={{
+            width: c.size,
+            height: c.size,
+            backgroundColor: c.color,
+            opacity: c.opacity,
+            borderRadius: '50%',
+            boxShadow: `0 0 3px ${c.color}40`,
+          }}
+        />
+      );
+    }
+
+    // square
     return (
       <div
         style={{
-          width: particle.size * scale,
-          height: particle.size * scale,
-          backgroundColor: particle.color,
-          opacity,
-          borderRadius: '50%',
-          boxShadow: `0 0 ${particle.size * 2}px ${particle.color}`,
+          width: c.size,
+          height: c.size,
+          backgroundColor: c.color,
+          opacity: c.opacity,
+          borderRadius: '1px',
+          transform: `rotate(${c.rotation}deg)`,
+          boxShadow: `0 0 3px ${c.color}40`,
         }}
       />
     );
@@ -185,50 +166,29 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
 
   return (
     <div className="fixed inset-0 pointer-events-none z-40 overflow-hidden">
-      {/* 배경 글로우 */}
+      {/* 배경 글로우 - 왼쪽 위 모서리 */}
       <div
-        className="absolute inset-0 animate-pulse"
+        className="absolute inset-0"
         style={{
-          background: 'radial-gradient(circle at 50% 40%, rgba(255,215,0,0.15) 0%, transparent 50%)',
+          background: 'radial-gradient(circle at 0% 0%, rgba(255,215,0,0.15) 0%, transparent 40%)',
         }}
       />
 
-      {/* 폭죽 파티클 */}
-      {fireworks.map(fw => (
-        fw.particles.map(particle => (
-          <div
-            key={particle.id}
-            className="absolute"
-            style={{
-              left: `${particle.x}%`,
-              top: `${particle.y}%`,
-              transform: `translate(-50%, -50%) rotate(${particle.rotation}deg)`,
-              transition: 'none',
-            }}
-          >
-            {renderParticle(particle)}
-          </div>
-        ))
-      ))}
-
-      {/* 축하 이모지 (가끔씩) */}
-      {reductionRate >= 70 && fireworks.length > 0 && (
-        <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          {['🎉', '🎊', '✨'].map((emoji, i) => (
-            <span
-              key={i}
-              className="absolute text-3xl animate-bounce"
-              style={{
-                left: `${(i - 1) * 50}px`,
-                animationDelay: `${i * 0.2}s`,
-                opacity: 0.8,
-              }}
-            >
-              {emoji}
-            </span>
-          ))}
+      {/* 컨페티 가루 */}
+      {confetti.map(c => (
+        <div
+          key={c.id}
+          className="absolute"
+          style={{
+            left: `${c.x}%`,
+            top: `${c.y}%`,
+            transform: `translate(-50%, -50%)`,
+            transition: 'none',
+          }}
+        >
+          {renderConfetti(c)}
         </div>
-      )}
+      ))}
     </div>
   );
 }
