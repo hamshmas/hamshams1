@@ -31,7 +31,7 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
   };
 
   return (
-    <div className="space-y-4 animate-slideIn">
+    <div className="space-y-3 animate-slideIn">
       <div className="space-y-1">
         <h2 className="text-2xl font-extrabold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
           어디에 거주하시나요?
@@ -39,22 +39,22 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
         <p className="text-gray-600 text-sm">관할법원과 최우선변제금 계산에 사용됩니다</p>
       </div>
 
-      {/* 시/도 선택 그리드 */}
-      <div className="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-1">
+      {/* 시/도 선택 그리드 - 3열로 한 화면에 모두 표시 */}
+      <div className="grid grid-cols-3 gap-1.5">
         {SIDO_LIST.map((sido) => {
           const isSelected = selected === sido.value;
           return (
             <button
               key={sido.value}
               onClick={() => setSelected(sido.value)}
-              className={`p-3 rounded-xl text-left transition-all ${
+              className={`py-2.5 px-2 rounded-lg text-center transition-all ${
                 isSelected
-                  ? "bg-blue-500 text-white shadow-lg"
+                  ? "bg-blue-500 text-white shadow-md"
                   : "bg-gray-50 hover:bg-gray-100 text-gray-800"
               }`}
             >
-              <p className={`font-semibold text-sm ${isSelected ? "text-white" : "text-gray-900"}`}>
-                {sido.label}
+              <p className={`font-medium text-xs ${isSelected ? "text-white" : "text-gray-900"}`}>
+                {sido.label.replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('특별자치도', '').replace('도', '')}
               </p>
             </button>
           );
@@ -63,22 +63,22 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
 
       {/* 선택 결과 표시 */}
       {selectedSido && courtInfo && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2 animate-fadeIn">
-          <div className="flex items-center gap-2">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 space-y-1.5 animate-fadeIn">
+          <div className="flex items-center gap-2 text-sm">
             <span className="text-blue-600 font-bold">관할법원</span>
             <span className="text-gray-800">{courtInfo.name}</span>
             {isMainCourt && (
-              <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full">
+              <span className="bg-green-100 text-green-700 text-xs px-1.5 py-0.5 rounded-full">
                 회생법원
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-sm">
             <span className="text-blue-600 font-bold">최우선변제금</span>
             <span className="text-gray-800">{(priorityAmount / 10000).toLocaleString()}만원</span>
           </div>
           {isMainCourt && (
-            <p className="text-xs text-green-700 mt-1">
+            <p className="text-xs text-green-700">
               회생법원 관할이므로 배우자 재산이 청산가치에 포함되지 않습니다
             </p>
           )}
@@ -86,7 +86,7 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
       )}
 
       {/* 버튼 */}
-      <div className="grid grid-cols-2 gap-3 pt-2">
+      <div className="grid grid-cols-2 gap-3">
         {onBack && (
           <button
             onClick={onBack}
