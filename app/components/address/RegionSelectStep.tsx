@@ -40,7 +40,7 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
       </div>
 
       {/* 시/도 선택 그리드 */}
-      <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto">
+      <div className="grid grid-cols-2 gap-2 max-h-[400px] overflow-y-auto pr-1">
         {SIDO_LIST.map((sido) => {
           const isSelected = selected === sido.value;
           return (
