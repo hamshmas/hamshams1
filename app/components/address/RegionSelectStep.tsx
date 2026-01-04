@@ -54,7 +54,14 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
               }`}
             >
               <p className={`font-medium text-xs ${isSelected ? "text-white" : "text-gray-900"}`}>
-                {sido.label.replace('특별시', '').replace('광역시', '').replace('특별자치시', '').replace('특별자치도', '').replace('도', '')}
+                {sido.label
+                  .replace('특별시', '')
+                  .replace('광역시', '')
+                  .replace('특별자치시', '')
+                  .replace('특별자치도', '')
+                  .replace('도', '')
+                  .replace(' 북부', '(북)')
+                  .replace(' 남부', '(남)')}
               </p>
             </button>
           );

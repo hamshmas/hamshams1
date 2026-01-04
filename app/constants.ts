@@ -130,7 +130,8 @@ export const MAIN_COURT_REGIONS = [
 // 시/도 목록 (주소 입력 간소화용)
 export const SIDO_LIST = [
   { label: '서울특별시', value: 'seoul', court: 'seoul', region: '서울특별시' as const },
-  { label: '경기도', value: 'gyeonggi', court: 'suwon', region: '수도권과밀억제권역' as const },
+  { label: '경기 북부', value: 'gyeonggi-north', court: 'uijeongbu', region: '수도권과밀억제권역' as const },
+  { label: '경기 남부', value: 'gyeonggi-south', court: 'suwon', region: '수도권과밀억제권역' as const },
   { label: '인천광역시', value: 'incheon', court: 'incheon', region: '수도권과밀억제권역' as const },
   { label: '부산광역시', value: 'busan', court: 'busan', region: '광역시' as const },
   { label: '대구광역시', value: 'daegu', court: 'daegu', region: '광역시' as const },
