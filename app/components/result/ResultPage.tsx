@@ -460,154 +460,68 @@ export function ResultPage({
         </div>
       ) : (
         // 단순화된 결과 화면 - 한 화면에 맞게 콤팩트하게
-        <div className="text-center bg-white rounded-2xl p-4 shadow-xl border-2 border-blue-300">
-          <p className="text-gray-800 text-xs font-medium mb-2">예상 탕감률</p>
-
-          {/* 원형 프로그레스 - 크기 축소 */}
-          <div className="relative inline-block">
-            <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
-              <defs>
-                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: '#2563EB', stopOpacity: 1 }} />
-                  <stop offset="100%" style={{ stopColor: '#4F46E5', stopOpacity: 1 }} />
-                </linearGradient>
-              </defs>
-              <circle cx="60" cy="60" r="54" stroke="#E5E7EB" strokeWidth="10" fill="none" />
-              <circle
-                cx="60" cy="60" r="54" stroke="url(#goldGradient)" strokeWidth="10" fill="none"
-                strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="text-4xl font-black text-gray-900">
-                {animatedRate}%
+        <div className="text-center bg-white rounded-2xl p-3 shadow-xl border-2 border-blue-300">
+          {/* 원형 프로그레스 + 탕감률 */}
+          <div className="flex items-center justify-center gap-4">
+            <div className="relative">
+              <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 120 120">
+                <defs>
+                  <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: '#2563EB', stopOpacity: 1 }} />
+                    <stop offset="100%" style={{ stopColor: '#4F46E5', stopOpacity: 1 }} />
+                  </linearGradient>
+                </defs>
+                <circle cx="60" cy="60" r="54" stroke="#E5E7EB" strokeWidth="10" fill="none" />
+                <circle
+                  cx="60" cy="60" r="54" stroke="url(#goldGradient)" strokeWidth="10" fill="none"
+                  strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-2xl font-black text-gray-900">{animatedRate}%</div>
+                <div className="text-[10px] text-gray-500">탕감률</div>
               </div>
             </div>
-          </div>
-
-          {/* 탕감액 & 월 상환액을 한 줄에 */}
-          <div className="mt-3 flex gap-2">
-            <div className="flex-1 bg-blue-50 rounded-lg p-2.5">
-              <p className="text-gray-600 text-xs">탕감액</p>
-              <p className="text-lg font-bold text-blue-700">
-                {animatedAmount.toLocaleString()}원
-              </p>
-            </div>
-            <div className="flex-1 bg-gray-50 rounded-lg p-2.5">
-              <p className="text-gray-600 text-xs">월 상환액</p>
-              <p className="text-lg font-bold text-gray-900">
-                {Math.round(result.monthlyPayment).toLocaleString()}원
-              </p>
+            <div className="text-left">
+              <p className="text-xs text-gray-500">예상 탕감액</p>
+              <p className="text-xl font-bold text-blue-700">{animatedAmount.toLocaleString()}원</p>
+              <p className="text-xs text-gray-500 mt-1">월 상환액</p>
+              <p className="text-lg font-bold text-gray-900">{Math.round(result.monthlyPayment).toLocaleString()}원</p>
+              <p className="text-[10px] text-gray-400">({result.repaymentPeriod}개월)</p>
             </div>
           </div>
-
-          {/* 변제 기간 */}
-          <p className="mt-2 text-xs text-gray-600">
-            변제 기간: <span className="font-semibold text-gray-800">{result.repaymentPeriod}개월</span>
-          </p>
-
-          {/* Before/After 비교 섹션 */}
-          <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200">
-            <p className="text-xs font-semibold text-blue-700 mb-2">
-              {result.repaymentPeriod}개월 기준 비교
-            </p>
-            <div className="flex items-center justify-center gap-2">
-              <div className="text-center">
-                <p className="text-xs text-gray-500">회생 전</p>
-                <p className="text-sm font-bold text-gray-400 line-through">
-                  월 {Math.round(formData.totalDebt / result.repaymentPeriod).toLocaleString()}원
-                </p>
-              </div>
-              <div className="text-blue-500 font-bold text-lg">→</div>
-              <div className="text-center">
-                <p className="text-xs text-gray-500">회생 후</p>
-                <p className="text-sm font-bold text-blue-700">
-                  월 {Math.round(result.monthlyPayment).toLocaleString()}원
-                </p>
-              </div>
-            </div>
-            <p className="text-center mt-2 text-xs">
-              <span className="font-bold text-green-600">
-                매월 {Math.round((formData.totalDebt / result.repaymentPeriod) - result.monthlyPayment).toLocaleString()}원 절약
-              </span>
-              <span className="text-gray-500"> · {result.repaymentPeriod}개월간 총 </span>
-              <span className="font-bold text-blue-600">{Math.round(result.reductionAmount).toLocaleString()}원 탕감</span>
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* 손실 회피 메시지 - 긴급성 강조 */}
-      {!hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation && (
-        <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-3 border border-red-200">
-          <p className="text-xs font-semibold text-red-700 mb-2 flex items-center gap-1">
-            <span>⏰</span> 매일 미루면 발생하는 추가 이자
-          </p>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div>
-              <p className="text-xs text-gray-500">하루</p>
-              <p className="text-sm font-bold text-red-600">
-                +{Math.round(formData.totalDebt * 0.20 / 365).toLocaleString()}원
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">1주일</p>
-              <p className="text-sm font-bold text-red-600">
-                +{Math.round(formData.totalDebt * 0.20 / 365 * 7).toLocaleString()}원
-              </p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-500">1개월</p>
-              <p className="text-sm font-bold text-red-600">
-                +{Math.round(formData.totalDebt * 0.20 / 12).toLocaleString()}원
-              </p>
-            </div>
-          </div>
-          <p className="text-xs text-gray-600 mt-2 text-center">
-            빨리 신청할수록 더 많이 탕감받습니다
-          </p>
         </div>
       )}
 
       {/* 블랙스톤 법률사무소 상담 영역 - 전문성 강화 + 단일 CTA */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4">
-        <div className="flex items-center justify-between mb-2">
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-3">
+        <div className="flex items-center justify-between mb-1">
           <div>
             <p className="text-white font-bold text-sm">블랙스톤 법률사무소</p>
-            <p className="text-slate-400 text-xs">개인회생 전문 15년 · 누적 5,000건+</p>
+            <p className="text-slate-400 text-[11px]">개인회생 전문 15년 · 누적 5,000건+ · 인가율 98%</p>
           </div>
-          <div className="flex gap-1">
-            <span className="text-xs bg-green-500/20 px-2 py-0.5 rounded-full text-green-400">인가율 98%</span>
-          </div>
-        </div>
-
-        {/* 신뢰 배지 */}
-        <div className="flex gap-2 mb-3 text-xs text-slate-400">
-          <span>✓ 상담료 무료</span>
-          <span>✓ 비밀 보장</span>
-          <span>✓ 즉시 응답</span>
         </div>
 
         {/* 단일 CTA 집중 */}
         <button
           onClick={handleConsultationClick}
-          className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3.5 px-4 rounded-xl transition-all text-base shadow-lg animate-cta-pulse"
+          className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3 px-4 rounded-xl transition-all text-base shadow-lg animate-cta-pulse mt-2"
         >
           지금 바로 무료 상담받기
         </button>
 
         {/* 보조 옵션 */}
-        <p className="text-center text-slate-500 text-xs mt-2">
-          또는 전화상담 <button onClick={() => setShowContactModal(true)} className="text-slate-300 underline">02-6101-3100</button>
+        <p className="text-center text-slate-500 text-xs mt-1.5">
+          또는 전화 <button onClick={() => setShowContactModal(true)} className="text-slate-300 underline">02-6101-3100</button>
         </p>
       </div>
 
       {/* 네비게이션 버튼 */}
       <div className="grid grid-cols-2 gap-2">
-        <button onClick={onBack} className="secondary-button text-sm py-2">
+        <button onClick={onBack} className="secondary-button text-sm py-1.5">
           ← 이전
         </button>
-        <button onClick={onRestart} className="secondary-button text-sm py-2">
+        <button onClick={onRestart} className="secondary-button text-sm py-1.5">
           처음부터 →
         </button>
       </div>
