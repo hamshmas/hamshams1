@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import type { FormData, CalculationResult, HousingType, MaritalStatus } from "@/app/types";
 import { getCourtName } from "@/utils/courtJurisdiction";
 import { generateConsultationMessage } from "@/utils/generateConsultationMessage";
@@ -72,6 +72,53 @@ export function ResultPage({
   const hasNoIncome = !hasMoreAssetThanDebt && result.monthlyPayment <= 0;
   // 개인회생 가능 여부
   const canShowCelebration = !hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation;
+
+  // 성공 사례 데이터 (한 번만 생성, 리렌더링에도 유지)
+  const testimonialData = useMemo(() => {
+    // 시드 기반 난수 생성 (같은 입력값이면 같은 결과)
+    const seed = formData.totalDebt + result.monthlyPayment;
+    const seededRandom = (offset: number) => {
+      const x = Math.sin(seed + offset) * 10000;
+      return x - Math.floor(x);
+    };
+
+    const debtVariation = 0.75 + seededRandom(1) * 0.4; // 0.75~1.15
+    const paymentVariation = 0.7 + seededRandom(2) * 0.5; // 0.7~1.2
+    const similarDebt = Math.round(formData.totalDebt * debtVariation / 10000000) * 1000;
+    const similarPayment = Math.round(result.monthlyPayment * paymentVariation / 10000);
+    const periods = [36, 48, 60];
+    const similarPeriod = periods[Math.floor(seededRandom(3) * periods.length)];
+    const names = ['김', '이', '박', '최', '정', '강', '조', '윤', '장', '임'];
+    const randomName = names[Math.floor(seededRandom(4) * names.length)];
+    const regions = ['서울', '경기', '인천', '부산', '대구', '대전', '광주', '수원', '성남', '용인'];
+    const randomRegion = regions[Math.floor(seededRandom(5) * regions.length)];
+
+    const debtText = similarDebt >= 10000
+      ? `${Math.round(similarDebt / 10000)}억${similarDebt % 10000 > 0 ? ` ${Math.round((similarDebt % 10000) / 1000)}천` : ''}만원`
+      : `${Math.round(similarDebt / 1000)}천만원`;
+
+    // 다양한 후기 문구
+    const testimonials = [
+      `매달 이자만 내던 게 엊그제 같은데, 이제 끝이 보여요.`,
+      `변호사님 덕분에 새 출발 할 수 있게 됐어요. 감사합니다.`,
+      `처음엔 반신반의했는데, 정말 이렇게 줄어들 줄 몰랐어요.`,
+      `독촉 전화 안 받아도 되니까 마음이 편해졌어요.`,
+      `가족들한테 미안했는데, 이제 다시 시작합니다.`,
+      `빚 때문에 잠 못 자던 날들이 끝났어요.`,
+      `월급 받으면 다 이자로 나가던 게 이젠 옛말이에요.`,
+      `상담받길 정말 잘했어요. 진작 할 걸 그랬어요.`,
+    ];
+    const randomTestimonial = testimonials[Math.floor(seededRandom(6) * testimonials.length)];
+
+    return {
+      region: randomRegion,
+      name: randomName,
+      debtText,
+      payment: similarPayment,
+      period: similarPeriod,
+      testimonial: randomTestimonial,
+    };
+  }, [formData.totalDebt, result.monthlyPayment]);
 
   // 탕감률 & 탕감액 카운트업 애니메이션
   useEffect(() => {
@@ -480,7 +527,6 @@ export function ResultPage({
                 <circle
                   cx="60" cy="60" r="54" stroke="url(#goldGradient)" strokeWidth="8" fill="none"
                   strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round"
-                  className="transition-all duration-1000"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -503,35 +549,17 @@ export function ResultPage({
         </div>
       )}
 
-      {/* 성공 사례 - 사회적 증거 */}
-      {!hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation && (() => {
-        // 유사하지만 다른 사례 생성 (입력값과 ±15~25% 변동)
-        const debtVariation = 0.85 + Math.random() * 0.3; // 0.85~1.15
-        const paymentVariation = 0.8 + Math.random() * 0.35; // 0.8~1.15
-        const similarDebt = Math.round(formData.totalDebt * debtVariation / 10000000) * 1000; // 천만원 단위
-        const similarPayment = Math.round(result.monthlyPayment * paymentVariation / 10000); // 만원 단위
-        const periods = [36, 48, 60];
-        const similarPeriod = periods[Math.floor(Math.random() * periods.length)];
-        const names = ['김', '이', '박', '최', '정', '강', '조', '윤', '장', '임'];
-        const randomName = names[Math.floor(Math.random() * names.length)];
-        const regions = ['서울', '경기', '인천', '부산', '대구', '대전', '광주'];
-        const randomRegion = regions[Math.floor(Math.random() * regions.length)];
-
-        const debtText = similarDebt >= 10000
-          ? `${Math.round(similarDebt / 10000)}억${similarDebt % 10000 > 0 ? ` ${Math.round((similarDebt % 10000) / 1000)}천` : ''}만원`
-          : `${Math.round(similarDebt / 1000)}천만원`;
-
-        return (
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 border border-green-200">
-            <p className="text-xs font-semibold text-green-700 mb-1.5 flex items-center gap-1">
-              <span>💬</span> 비슷한 상황 실제 사례
-            </p>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              "{randomRegion} {randomName}OO님 · 채무 {debtText}, 월 {similarPayment}만원씩 {similarPeriod}개월 상환 중. 매달 이자만 내던 게 엊그제 같은데 이제 끝이 보여요."
-            </p>
-          </div>
-        );
-      })()}
+      {/* 성공 사례 - 사회적 증거 (애니메이션 완료 후 표시) */}
+      {showCelebration && (
+        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 border border-green-200 animate-fadeIn">
+          <p className="text-xs font-semibold text-green-700 mb-1.5 flex items-center gap-1">
+            <span>💬</span> 비슷한 상황 실제 사례
+          </p>
+          <p className="text-sm text-gray-700 leading-relaxed">
+            "{testimonialData.region} {testimonialData.name}OO님 · 채무 {testimonialData.debtText}, 월 {testimonialData.payment}만원씩 {testimonialData.period}개월 상환 중. {testimonialData.testimonial}"
+          </p>
+        </div>
+      )}
 
       {/* 손실 회피 메시지 - 긴급성 강조 */}
       {!hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation && (
