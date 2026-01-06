@@ -326,13 +326,14 @@ export function ResultPage({
   const strokeDashoffset = circumference - (animatedRate / 100) * circumference;
 
   return (
-    <div className="space-y-3 animate-fadeIn">
-      {/* 축하 효과 */}
+    <>
+      {/* 축하 효과 - 레이아웃 외부에 배치 */}
       <CelebrationEffects
         reductionRate={result.reductionRate}
         isActive={showCelebration}
       />
 
+      <div className="space-y-3 animate-fadeIn">
       {hasMoreAssetThanDebt ? (
         // 토스 스타일: 희망 제시 메시지
         <div className="text-center mb-4 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl p-8 shadow-2xl border-2 border-blue-200">
@@ -538,6 +539,7 @@ export function ResultPage({
         onSubmit={handleContactSubmit}
         onPhoneConsultation={handlePhoneConsultation}
       />
-    </div>
+      </div>
+    </>
   );
 }
