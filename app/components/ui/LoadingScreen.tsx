@@ -22,11 +22,11 @@ export function LoadingScreen() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // 진행률 애니메이션 (2초 동안 0~100%)
+    // 진행률 애니메이션 (8초 동안 0~100%)
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) return 100;
-        return prev + 2;
+        return prev + 0.5;
       });
     }, 40);
 
