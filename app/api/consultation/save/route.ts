@@ -1,6 +1,85 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin, isSupabaseConfigured } from '@/app/config/supabase';
 
+interface ConsultationData {
+  name: string;
+  phone: string;
+  formData: {
+    totalDebt: number;
+    monthlyIncome: number;
+    assetValue: number;
+    dependents: number;
+    homeAddress?: string;
+    workAddress?: string;
+  };
+  calculationResult: {
+    reductionRate: number;
+    reductionAmount: number;
+    repaymentAmount: number;
+    monthlyPayment: number;
+    repaymentPeriod?: number;
+  };
+}
+
+// Google Sheets에 데이터 추가
+async function addToGoogleSheets(data: ConsultationData) {
+  const sheetsWebhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+
+  console.log('[GoogleSheets] Attempting to add data...');
+  console.log('[GoogleSheets] Webhook URL exists:', !!sheetsWebhookUrl);
+
+  if (!sheetsWebhookUrl) {
+    console.log('[GoogleSheets] Webhook URL not configured, skipping');
+    return;
+  }
+
+  try {
+    const now = new Date();
+    const timestamp = now.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+
+    const rowData = {
+      timestamp,
+      name: data.name,
+      phone: data.phone,
+      totalDebt: data.formData.totalDebt,
+      monthlyIncome: data.formData.monthlyIncome,
+      assetValue: data.formData.assetValue,
+      dependents: data.formData.dependents,
+      homeAddress: data.formData.homeAddress || '',
+      reductionRate: data.calculationResult.reductionRate,
+      reductionAmount: data.calculationResult.reductionAmount,
+      repaymentAmount: data.calculationResult.repaymentAmount,
+      monthlyPayment: data.calculationResult.monthlyPayment,
+      repaymentPeriod: data.calculationResult.repaymentPeriod || '',
+    };
+
+    console.log('[GoogleSheets] Sending data to webhook...');
+    console.log('[GoogleSheets] Row data:', JSON.stringify(rowData));
+
+    // Google Apps Script는 리다이렉트를 사용하므로 follow 필요
+    const response = await fetch(sheetsWebhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(rowData),
+      redirect: 'follow',
+    });
+
+    const responseText = await response.text();
+    console.log('[GoogleSheets] Response status:', response.status);
+    console.log('[GoogleSheets] Response body:', responseText);
+    console.log('[GoogleSheets] Response URL:', response.url);
+
+    // 302 리다이렉트도 성공으로 간주
+    if (response.status === 302 || response.ok) {
+      console.log('[GoogleSheets] Data added successfully');
+    } else {
+      console.error('[GoogleSheets] Failed to add data:', response.status, responseText);
+    }
+  } catch (error) {
+    console.error('[GoogleSheets] Error adding data:', error);
+  }
+}
+
 // Google Chat으로 알림 전송
 async function sendGoogleChatNotification(data: {
   name: string;
@@ -119,10 +198,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Google Chat으로 알림 전송
-    console.log('[Consultation] DB saved, now sending Google Chat notification...');
-    await sendGoogleChatNotification({ name, phone, formData, calculationResult });
-    console.log('[Consultation] Google Chat notification process completed');
+    // Google Chat으로 알림 전송 & Google Sheets에 데이터 추가 (병렬 처리)
+    console.log('[Consultation] DB saved, now sending notifications...');
+    await Promise.all([
+      sendGoogleChatNotification({ name, phone, formData, calculationResult }),
+      addToGoogleSheets({ name, phone, formData, calculationResult }),
+    ]);
+    console.log('[Consultation] All notifications completed');
 
     return NextResponse.json({
       success: true,
