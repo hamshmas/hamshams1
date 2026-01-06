@@ -596,7 +596,7 @@ export function ResultPage({
         <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-white font-bold text-sm">블랙스톤 법률사무소</p>
-            <p className="text-slate-400 text-xs">개인회생 전문 12년 · 누적 3,000건+</p>
+            <p className="text-slate-400 text-xs">개인회생 전문 15년 · 누적 5,000건+</p>
           </div>
           <div className="flex gap-1">
             <span className="text-xs bg-green-500/20 px-2 py-0.5 rounded-full text-green-400">인가율 98%</span>
