@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface WelcomeScreenProps {
   onStart: () => void;
@@ -11,9 +11,31 @@ interface Stats {
   dailyMaxRate: number | null;
 }
 
+// 채무자에게 희망과 격려를 주는 명언 리스트
+const MOTIVATIONAL_QUOTES = [
+  { text: "이 또한 지나가리라", author: "페르시아 속담" },
+  { text: "삶이 있는 한 희망은 있다", author: "키케로" },
+  { text: "세상은 고통으로 가득하지만 그것을 극복하는 사람들로도 가득하다", author: "헬렌 켈러" },
+  { text: "불가능해 보이는 것도 끝나고 나면 가능했던 것이 된다", author: "넬슨 만델라" },
+  { text: "최고에 도달하려면 최저에서 시작하라", author: "P.시루스" },
+  { text: "가장 아름다운 전망은 가장 힘든 등반 끝에 있다", author: "" },
+  { text: "오늘은 당신의 남은 인생 중 첫 번째 날이다", author: "" },
+  { text: "실패란 넘어지는 것이 아니라, 넘어진 자리에 머무는 것이다", author: "" },
+  { text: "두려움은 앉아있을 때 생기고, 행동할 때 극복된다", author: "헨리 링크" },
+  { text: "항상 맑으면 사막이 된다. 비가 내려야 비옥해진다", author: "스페인 속담" },
+  { text: "아직 늦지 않았다. 한 번 더 일어서라", author: "" },
+  { text: "어둠이 깊을수록 새벽은 가깝다", author: "" },
+];
+
 export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [stats, setStats] = useState<Stats>({ userCount: 1300, dailyMaxRate: null });
+
+  // 랜덤 명언 선택 (컴포넌트 마운트 시 한 번만)
+  const randomQuote = useMemo(() => {
+    const randomIndex = Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length);
+    return MOTIVATIONAL_QUOTES[randomIndex];
+  }, []);
 
   useEffect(() => {
     // Fade in animation on mount
@@ -85,6 +107,18 @@ export function WelcomeScreen({ onStart }: WelcomeScreenProps) {
               <br />
               예상 탕감률을 확인하고 새로운 출발을 준비하세요.
             </p>
+          </div>
+
+          {/* 격려 명언 */}
+          <div className="mt-6 px-6 py-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl max-w-lg mx-auto">
+            <p className="text-gray-700 text-base md:text-lg italic leading-relaxed">
+              "{randomQuote.text}"
+            </p>
+            {randomQuote.author && (
+              <p className="text-sm text-gray-500 mt-2 text-right">
+                — {randomQuote.author}
+              </p>
+            )}
           </div>
         </div>
 
