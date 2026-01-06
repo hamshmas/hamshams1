@@ -51,50 +51,52 @@ export function MaritalStatusSelection({ onSelect, onBack, excludeMarried = fals
     : allOptions;
 
   return (
-    <div className="space-y-6 animate-fadeInUp">
-      <div className="text-center space-y-3">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-600 rounded-3xl shadow-lg shadow-pink-500/30 mb-2">
-          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-        </div>
-        <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+    <div className="flex-1 flex flex-col animate-fadeIn">
+      {/* 질문 영역 */}
+      <div className="mb-8">
+        <h2 className="text-[26px] font-bold text-gray-900 leading-tight mb-2">
           현재 혼인 상태는?
         </h2>
-        <p className="text-base text-gray-600 leading-relaxed">
+        <p className="text-[15px] text-gray-500 leading-relaxed">
           부양가족 계산을 위해 필요합니다
         </p>
       </div>
 
-      <div className="space-y-3">
-        {options.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => onSelect(option.value)}
-            className="group w-full bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-primary-400 rounded-2xl p-5 text-left transition-all duration-300 hover:shadow-lg active:scale-95"
-          >
-            <div className="flex items-center gap-4">
-              <div className={`w-12 h-12 bg-gradient-to-br ${option.gradient} rounded-2xl flex items-center justify-center shadow-lg ${option.shadow}`}>
-                {option.icon}
+      {/* 선택 영역 */}
+      <div className="flex-1">
+        <div className="space-y-3">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => onSelect(option.value)}
+              className="group w-full bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-blue-400 rounded-xl p-4 text-left transition-all duration-300 hover:shadow-lg active:scale-[0.98]"
+            >
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 bg-gradient-to-br ${option.gradient} rounded-xl flex items-center justify-center shadow-lg ${option.shadow}`}>
+                  {option.icon}
+                </div>
+                <div className="flex-1">
+                  <p className="font-bold text-gray-900 text-base">{option.label}</p>
+                  <p className="text-sm text-gray-600 mt-0.5">{option.desc}</p>
+                </div>
+                <svg className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
-              <div className="flex-1">
-                <p className="font-bold text-gray-900 text-base">{option.label}</p>
-                <p className="text-sm text-gray-600 mt-0.5">{option.desc}</p>
-              </div>
-              <svg className="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </button>
-        ))}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <button
-        onClick={onBack}
-        className="w-full py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-      >
-        ← 이전
-      </button>
+      {/* 하단 버튼 */}
+      <div className="mt-auto pt-6">
+        <button
+          onClick={onBack}
+          className="w-full py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+        >
+          ← 이전
+        </button>
+      </div>
     </div>
   );
 }
