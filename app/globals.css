@@ -166,6 +166,17 @@ body {
   }
 }
 
+@keyframes cta-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 6px 25px rgba(251, 191, 36, 0.7), 0 0 40px rgba(245, 158, 11, 0.5);
+  }
+}
+
 .animate-confetti-fall {
   animation: confetti-fall ease-out forwards;
 }
@@ -184,6 +195,10 @@ body {
 
 .animate-bounce-glow {
   animation: bounce-glow 1.5s ease-in-out infinite;
+}
+
+.animate-cta-pulse {
+  animation: cta-pulse 1.5s ease-in-out infinite;
 }
 
 @layer components {

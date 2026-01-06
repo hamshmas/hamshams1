@@ -591,7 +591,7 @@ export function ResultPage({
         {/* 단일 CTA 집중 */}
         <button
           onClick={handleConsultationClick}
-          className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3.5 px-4 rounded-xl transition-all text-base shadow-lg"
+          className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3.5 px-4 rounded-xl transition-all text-base shadow-lg animate-cta-pulse"
         >
           지금 바로 무료 상담받기
         </button>
