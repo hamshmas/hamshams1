@@ -494,6 +494,35 @@ export function ResultPage({
         </div>
       )}
 
+      {/* 손실 회피 메시지 - 긴급성 강조 */}
+      {!hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation && (
+        <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-2.5 border border-red-200">
+          <p className="text-[11px] font-semibold text-red-700 mb-1.5 flex items-center gap-1">
+            <span>⏰</span> 매일 미루면 발생하는 추가 이자
+          </p>
+          <div className="grid grid-cols-3 gap-1 text-center">
+            <div>
+              <p className="text-[10px] text-gray-500">하루</p>
+              <p className="text-xs font-bold text-red-600">
+                +{Math.round(formData.totalDebt * 0.20 / 365).toLocaleString()}원
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] text-gray-500">1주일</p>
+              <p className="text-xs font-bold text-red-600">
+                +{Math.round(formData.totalDebt * 0.20 / 365 * 7).toLocaleString()}원
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] text-gray-500">1개월</p>
+              <p className="text-xs font-bold text-red-600">
+                +{Math.round(formData.totalDebt * 0.20 / 12).toLocaleString()}원
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 블랙스톤 법률사무소 상담 영역 - 전문성 강화 + 단일 CTA */}
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-3">
         <div className="flex items-center justify-between mb-1">
