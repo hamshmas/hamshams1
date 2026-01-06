@@ -104,8 +104,8 @@ export default function Home() {
       hasAnimatedRef.current = true;
 
       // 카운트업 애니메이션 실행 (이용자 수 + 탕감율 동시 애니메이션)
-      const duration = 1200;
-      const steps = 30;
+      const duration = 400;
+      const steps = 15;
       const stepDuration = duration / steps;
 
       for (let i = 1; i <= steps; i++) {
