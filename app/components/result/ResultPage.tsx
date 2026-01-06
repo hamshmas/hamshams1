@@ -537,28 +537,6 @@ export function ResultPage({
         </div>
       )}
 
-      {/* 간단한 입력 정보 요약 - 콤팩트 */}
-      <div className="bg-gray-100 rounded-xl p-3">
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="flex justify-between">
-            <span className="text-gray-600">총 채무</span>
-            <span className="font-semibold text-gray-900">{Math.round(formData.totalDebt).toLocaleString()}원</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">월 소득</span>
-            <span className="font-semibold text-gray-900">{Math.round(formData.monthlyIncome).toLocaleString()}원</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">청산가치</span>
-            <span className="font-semibold text-gray-900">{Math.round(formData.assetValue).toLocaleString()}원</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">관할법원</span>
-            <span className="font-semibold text-gray-900">{getCourtName(formData.courtJurisdiction)}</span>
-          </div>
-        </div>
-      </div>
-
       {/* 손실 회피 메시지 - 긴급성 강조 */}
       {!hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation && (
         <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-3 border border-red-200">
