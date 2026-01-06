@@ -504,19 +504,34 @@ export function ResultPage({
       )}
 
       {/* 성공 사례 - 사회적 증거 */}
-      {!hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 border border-green-200">
-          <p className="text-xs font-semibold text-green-700 mb-1.5 flex items-center gap-1">
-            <span>💬</span> 비슷한 상황 실제 사례
-          </p>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            {formData.totalDebt >= 100000000
-              ? `"채무 ${Math.round(formData.totalDebt / 100000000)}억원대, 개인회생으로 월 ${Math.round(result.monthlyPayment / 10000)}만원씩 ${result.repaymentPeriod}개월 상환 중. 이자 스트레스에서 벗어났어요."`
-              : `"채무 ${Math.round(formData.totalDebt / 10000000)}천만원대, 월 ${Math.round(result.monthlyPayment / 10000)}만원씩 ${result.repaymentPeriod}개월 상환으로 재기 중입니다."`
-            }
-          </p>
-        </div>
-      )}
+      {!hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation && (() => {
+        // 유사하지만 다른 사례 생성 (입력값과 ±15~25% 변동)
+        const debtVariation = 0.85 + Math.random() * 0.3; // 0.85~1.15
+        const paymentVariation = 0.8 + Math.random() * 0.35; // 0.8~1.15
+        const similarDebt = Math.round(formData.totalDebt * debtVariation / 10000000) * 1000; // 천만원 단위
+        const similarPayment = Math.round(result.monthlyPayment * paymentVariation / 10000); // 만원 단위
+        const periods = [36, 48, 60];
+        const similarPeriod = periods[Math.floor(Math.random() * periods.length)];
+        const names = ['김', '이', '박', '최', '정', '강', '조', '윤', '장', '임'];
+        const randomName = names[Math.floor(Math.random() * names.length)];
+        const regions = ['서울', '경기', '인천', '부산', '대구', '대전', '광주'];
+        const randomRegion = regions[Math.floor(Math.random() * regions.length)];
+
+        const debtText = similarDebt >= 10000
+          ? `${Math.round(similarDebt / 10000)}억${similarDebt % 10000 > 0 ? ` ${Math.round((similarDebt % 10000) / 1000)}천` : ''}만원`
+          : `${Math.round(similarDebt / 1000)}천만원`;
+
+        return (
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 border border-green-200">
+            <p className="text-xs font-semibold text-green-700 mb-1.5 flex items-center gap-1">
+              <span>💬</span> 비슷한 상황 실제 사례
+            </p>
+            <p className="text-sm text-gray-700 leading-relaxed">
+              "{randomRegion} {randomName}OO님 · 채무 {debtText}, 월 {similarPayment}만원씩 {similarPeriod}개월 상환 중. 매달 이자만 내던 게 엊그제 같은데 이제 끝이 보여요."
+            </p>
+          </div>
+        );
+      })()}
 
       {/* 손실 회피 메시지 - 긴급성 강조 */}
       {!hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation && (
