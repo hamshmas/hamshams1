@@ -85,7 +85,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
 
     // 초기 컨페티 생성 (45도~90도 균등 분포)
     const initialConfetti: Confetti[] = [];
-    const initialCount = reductionRate >= 80 ? 30 : reductionRate >= 60 ? 20 : 15;
+    const initialCount = reductionRate >= 80 ? 36 : reductionRate >= 60 ? 24 : 18;
     for (let i = 0; i < initialCount; i++) {
       // 45도~90도를 균등하게 분배 (45도 범위)
       const angleDegree = 45 + (i / initialCount) * 45;
@@ -107,7 +107,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
       setIsBursting(currentBursting => {
         if (!currentBursting) return currentBursting;
 
-        const spawnCount = reductionRate >= 80 ? 5 : reductionRate >= 60 ? 4 : 3;
+        const spawnCount = reductionRate >= 80 ? 6 : reductionRate >= 60 ? 5 : 4;
         const newConfetti: Confetti[] = [];
 
         // 45도~90도를 spawnCount개로 나눠서 균등하게 생성
