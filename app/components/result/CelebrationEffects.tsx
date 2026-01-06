@@ -17,7 +17,7 @@ interface Confetti {
   size: number;
   rotation: number;
   rotationSpeed: number;
-  type: 'square' | 'circle' | 'ribbon';
+  type: 'square' | 'circle' | 'ribbon' | 'smallCircle';
   opacity: number;
 }
 
@@ -38,7 +38,9 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
 
   // 특정 각도로 컨페티 생성 (균등 분포용)
   const createConfettiAtAngle = useCallback((angleDegree: number): Confetti => {
-    const types: ('square' | 'circle' | 'ribbon')[] = ['square', 'circle', 'ribbon', 'square', 'ribbon'];
+    const types: ('square' | 'circle' | 'ribbon' | 'smallCircle')[] = [
+      'square', 'circle', 'ribbon', 'square', 'ribbon', 'smallCircle', 'smallCircle', 'circle'
+    ];
     const type = types[Math.floor(Math.random() * types.length)];
 
     // 왼쪽 위 모서리에서 시작
@@ -50,6 +52,16 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
     const angle = (angleDegree + angleVariation) * (Math.PI / 180);
     const speed = 2.8 + Math.random() * 1.2; // 적당한 속도
 
+    // 타입별 크기 설정
+    let size: number;
+    if (type === 'ribbon') {
+      size = 15 + Math.random() * 10;
+    } else if (type === 'smallCircle') {
+      size = 3 + Math.random() * 3; // 작은 동그라미: 3~6px
+    } else {
+      size = 6 + Math.random() * 6;
+    }
+
     return {
       id: Date.now() + Math.random() * 100000,
       x: startX,
@@ -57,7 +69,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       color: colors[Math.floor(Math.random() * colors.length)],
-      size: type === 'ribbon' ? 15 + Math.random() * 10 : 6 + Math.random() * 6,
+      size,
       rotation: Math.random() * 360,
       rotationSpeed: (Math.random() - 0.5) * 15,
       type,
@@ -154,7 +166,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
       );
     }
 
-    if (c.type === 'circle') {
+    if (c.type === 'circle' || c.type === 'smallCircle') {
       return (
         <div
           style={{
@@ -163,7 +175,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
             backgroundColor: c.color,
             opacity: c.opacity,
             borderRadius: '50%',
-            boxShadow: `0 0 3px ${c.color}40`,
+            boxShadow: c.type === 'smallCircle' ? `0 0 2px ${c.color}60` : `0 0 3px ${c.color}40`,
           }}
         />
       );
