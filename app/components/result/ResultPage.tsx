@@ -514,6 +514,35 @@ export function ResultPage({
           <p className="mt-2 text-xs text-gray-600">
             변제 기간: <span className="font-semibold text-gray-800">{result.repaymentPeriod}개월</span>
           </p>
+
+          {/* Before/After 비교 섹션 */}
+          <div className="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 border border-blue-200">
+            <p className="text-xs font-semibold text-blue-700 mb-2">
+              {result.repaymentPeriod}개월 기준 비교
+            </p>
+            <div className="flex items-center justify-center gap-2">
+              <div className="text-center">
+                <p className="text-xs text-gray-500">회생 전</p>
+                <p className="text-sm font-bold text-gray-400 line-through">
+                  월 {Math.round(formData.totalDebt / result.repaymentPeriod).toLocaleString()}원
+                </p>
+              </div>
+              <div className="text-blue-500 font-bold text-lg">→</div>
+              <div className="text-center">
+                <p className="text-xs text-gray-500">회생 후</p>
+                <p className="text-sm font-bold text-blue-700">
+                  월 {Math.round(result.monthlyPayment).toLocaleString()}원
+                </p>
+              </div>
+            </div>
+            <p className="text-center mt-2 text-xs">
+              <span className="font-bold text-green-600">
+                매월 {Math.round((formData.totalDebt / result.repaymentPeriod) - result.monthlyPayment).toLocaleString()}원 절약
+              </span>
+              <span className="text-gray-500"> · {result.repaymentPeriod}개월간 총 </span>
+              <span className="font-bold text-blue-600">{Math.round(result.reductionAmount).toLocaleString()}원 탕감</span>
+            </p>
+          </div>
         </div>
       )}
 

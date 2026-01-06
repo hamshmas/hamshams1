@@ -559,7 +559,7 @@ export default function Home() {
               }}
               className="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-semibold py-4 rounded-xl transition-colors text-[17px]"
             >
-              시작하기
+              내 탕감률 확인하기
             </button>
           </div>
         </div>
