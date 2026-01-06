@@ -160,6 +160,9 @@ export default function Home() {
       setIsLoading(true);
 
       try {
+        // 최소 2초 로딩 시간 보장 (CTA 메시지 노출)
+        const minLoadingTime = new Promise(resolve => setTimeout(resolve, 2000));
+
         const response = await fetch('/api/calculate', {
           method: 'POST',
           headers: {
@@ -173,6 +176,10 @@ export default function Home() {
         }
 
         const calculationResult = await response.json();
+
+        // 최소 로딩 시간 대기
+        await minLoadingTime;
+
         setResult(calculationResult);
         setCurrentStep(6);
       } catch (error) {
