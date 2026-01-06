@@ -86,8 +86,8 @@ export function ResultPage({
     const paymentVariation = 0.7 + seededRandom(2) * 0.5; // 0.7~1.2
     const similarDebt = Math.round(formData.totalDebt * debtVariation / 10000000) * 1000;
     const similarPayment = Math.round(result.monthlyPayment * paymentVariation / 10000);
-    const periods = [36, 48, 60];
-    const similarPeriod = periods[Math.floor(seededRandom(3) * periods.length)];
+    // 상환기간은 실제 계산 결과와 동일하게
+    const similarPeriod = result.repaymentPeriod;
     const names = ['김', '이', '박', '최', '정', '강', '조', '윤', '장', '임'];
     const randomName = names[Math.floor(seededRandom(4) * names.length)];
     const regions = ['서울', '경기', '인천', '부산', '대구', '대전', '광주', '수원', '성남', '용인'];
@@ -549,8 +549,8 @@ export function ResultPage({
         </div>
       )}
 
-      {/* 성공 사례 - 사회적 증거 (애니메이션 완료 후 표시) */}
-      {showCelebration && (
+      {/* 성공 사례 - 사회적 증거 (결과 로드 시 바로 표시) */}
+      {canShowCelebration && (
         <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 border border-green-200 animate-fadeIn">
           <p className="text-xs font-semibold text-green-700 mb-1.5 flex items-center gap-1">
             <span>💬</span> 비슷한 상황 실제 사례
