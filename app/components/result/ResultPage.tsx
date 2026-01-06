@@ -369,20 +369,17 @@ export function ResultPage({
             </div>
           </div>
 
-          {/* 상단 상담 버튼 */}
-          <div className="mt-6 flex gap-2 max-w-sm mx-auto">
+          {/* 상단 상담 버튼 - 단일 CTA */}
+          <div className="mt-6 max-w-sm mx-auto">
             <button
               onClick={handleConsultationClick}
-              className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
+              className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg text-base"
             >
-              💬 무료 상담받기
+              지금 바로 무료 상담받기
             </button>
-            <button
-              onClick={() => setShowContactModal(true)}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
-            >
-              📞 전화상담
-            </button>
+            <p className="text-center text-gray-500 text-xs mt-2">
+              또는 <button onClick={() => setShowContactModal(true)} className="text-blue-600 underline">전화상담 신청</button>
+            </p>
           </div>
         </div>
       ) : hasNoIncome ? (
@@ -410,20 +407,17 @@ export function ResultPage({
             </p>
           </div>
 
-          {/* 상단 상담 버튼 */}
-          <div className="mt-6 flex gap-2 max-w-sm mx-auto">
+          {/* 상단 상담 버튼 - 단일 CTA */}
+          <div className="mt-6 max-w-sm mx-auto">
             <button
               onClick={handleConsultationClick}
-              className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
+              className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg text-base"
             >
-              💬 무료 상담받기
+              지금 바로 무료 상담받기
             </button>
-            <button
-              onClick={() => setShowContactModal(true)}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
-            >
-              📞 전화상담
-            </button>
+            <p className="text-center text-gray-500 text-xs mt-2">
+              또는 <button onClick={() => setShowContactModal(true)} className="text-blue-600 underline">전화상담 신청</button>
+            </p>
           </div>
         </div>
       ) : result.liquidationValueViolation ? (
@@ -451,20 +445,17 @@ export function ResultPage({
             </p>
           </div>
 
-          {/* 상단 상담 버튼 */}
-          <div className="mt-6 flex gap-2 max-w-sm mx-auto">
+          {/* 상단 상담 버튼 - 단일 CTA */}
+          <div className="mt-6 max-w-sm mx-auto">
             <button
               onClick={handleConsultationClick}
-              className="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
+              className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg text-base"
             >
-              💬 무료 상담받기
+              지금 바로 무료 상담받기
             </button>
-            <button
-              onClick={() => setShowContactModal(true)}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg text-sm"
-            >
-              📞 전화상담
-            </button>
+            <p className="text-center text-gray-500 text-xs mt-2">
+              또는 <button onClick={() => setShowContactModal(true)} className="text-blue-600 underline">전화상담 신청</button>
+            </p>
           </div>
         </div>
       ) : (
@@ -568,32 +559,69 @@ export function ResultPage({
         </div>
       </div>
 
-      {/* 블랙스톤 법률사무소 상담 영역 - 더 콤팩트하게 */}
+      {/* 손실 회피 메시지 - 긴급성 강조 */}
+      {!hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation && (
+        <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-3 border border-red-200">
+          <p className="text-xs font-semibold text-red-700 mb-2 flex items-center gap-1">
+            <span>⏰</span> 매일 미루면 발생하는 추가 이자
+          </p>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div>
+              <p className="text-xs text-gray-500">하루</p>
+              <p className="text-sm font-bold text-red-600">
+                +{Math.round(formData.totalDebt * 0.20 / 365).toLocaleString()}원
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">1주일</p>
+              <p className="text-sm font-bold text-red-600">
+                +{Math.round(formData.totalDebt * 0.20 / 365 * 7).toLocaleString()}원
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-500">1개월</p>
+              <p className="text-sm font-bold text-red-600">
+                +{Math.round(formData.totalDebt * 0.20 / 12).toLocaleString()}원
+              </p>
+            </div>
+          </div>
+          <p className="text-xs text-gray-600 mt-2 text-center">
+            빨리 신청할수록 더 많이 탕감받습니다
+          </p>
+        </div>
+      )}
+
+      {/* 블랙스톤 법률사무소 상담 영역 - 전문성 강화 + 단일 CTA */}
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-white font-bold text-sm">블랙스톤 법률사무소</p>
-            <p className="text-slate-400 text-xs">개인회생 전문 · 상담료 0원</p>
+            <p className="text-slate-400 text-xs">개인회생 전문 12년 · 누적 3,000건+</p>
           </div>
           <div className="flex gap-1">
-            <span className="text-xs bg-white/10 px-2 py-0.5 rounded-full text-white/80">비밀 보장</span>
+            <span className="text-xs bg-green-500/20 px-2 py-0.5 rounded-full text-green-400">인가율 98%</span>
           </div>
         </div>
 
-        <div className="flex gap-2">
-          <button
-            onClick={handleConsultationClick}
-            className="flex-1 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-black font-bold py-3 px-3 rounded-lg transition-all text-sm"
-          >
-            카카오톡 상담
-          </button>
-          <button
-            onClick={() => setShowContactModal(true)}
-            className="flex-1 bg-white hover:bg-gray-100 text-slate-900 font-bold py-3 px-3 rounded-lg transition-all text-sm"
-          >
-            전화상담 신청
-          </button>
+        {/* 신뢰 배지 */}
+        <div className="flex gap-2 mb-3 text-xs text-slate-400">
+          <span>✓ 상담료 무료</span>
+          <span>✓ 비밀 보장</span>
+          <span>✓ 즉시 응답</span>
         </div>
+
+        {/* 단일 CTA 집중 */}
+        <button
+          onClick={handleConsultationClick}
+          className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3.5 px-4 rounded-xl transition-all text-base shadow-lg"
+        >
+          지금 바로 무료 상담받기
+        </button>
+
+        {/* 보조 옵션 */}
+        <p className="text-center text-slate-500 text-xs mt-2">
+          또는 전화상담 <button onClick={() => setShowContactModal(true)} className="text-slate-300 underline">02-6101-3100</button>
+        </p>
       </div>
 
       {/* 네비게이션 버튼 */}
