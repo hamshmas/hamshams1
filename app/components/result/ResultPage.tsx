@@ -312,10 +312,8 @@ export function ResultPage({
       console.error('[Consultation] 상담 신청 저장 오류:', error);
     }
 
-    // 카카오톡 채널 열기 (UTM 유입 정보 포함)
-    const utmSource = sessionStorage.getItem('utm_source');
-    const kakaoUrl = getKakaoUrlWithRef(utmSource || undefined);
-    window.open(kakaoUrl, "_blank", "noopener,noreferrer");
+    // 카카오톡 채널 열기
+    window.open(getKakaoUrlWithRef(), "_blank", "noopener,noreferrer");
   };
   const getColorByRate = (rate: number) => {
     if (rate >= 70) return { text: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', stroke: '#16a34a' };

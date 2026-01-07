@@ -70,23 +70,6 @@ export default function Home() {
   const [displayDailyMaxRate, setDisplayDailyMaxRate] = useState(0); // 화면에 표시되는 탕감율 (애니메이션)
   const hasAnimatedRef = useRef(false); // 애니메이션 완료 여부
   const [showUpdateHistory, setShowUpdateHistory] = useState(false); // 업데이트 이력 모달
-  const [utmSource, setUtmSource] = useState<string | null>(null); // UTM 유입 소스
-
-  // UTM 파라미터 저장 (페이지 로드 시)
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const source = params.get('utm_source');
-    if (source) {
-      sessionStorage.setItem('utm_source', source);
-      setUtmSource(source);
-    } else {
-      // sessionStorage에서 기존 값 복원
-      const savedSource = sessionStorage.getItem('utm_source');
-      if (savedSource) {
-        setUtmSource(savedSource);
-      }
-    }
-  }, []);
 
   // 랜덤 명언 선택 (컴포넌트 마운트 시 한 번만)
   const randomQuote = useMemo(() => {
@@ -593,7 +576,7 @@ export default function Home() {
       {currentStep >= 1 && (
         <div className="fixed right-3 bottom-1/4 z-50 flex flex-col gap-3">
           <a
-            href={getKakaoUrlWithRef(utmSource || undefined)}
+            href={getKakaoUrlWithRef()}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-full shadow-lg transition-all hover:scale-105"
