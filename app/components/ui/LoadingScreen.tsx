@@ -22,13 +22,13 @@ export function LoadingScreen() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    // 진행률 애니메이션 (3초 동안 0~100%)
+    // 진행률 애니메이션 (2초 동안 0~100%)
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 100) return 100;
         return prev + 1;
       });
-    }, 30);
+    }, 20);
 
     // 로딩 단계 변경 (0.5초마다)
     const stepInterval = setInterval(() => {
