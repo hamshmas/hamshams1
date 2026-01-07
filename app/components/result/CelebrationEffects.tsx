@@ -21,43 +21,42 @@ interface Confetti {
   opacity: number;
 }
 
+// 색상 팔레트 (컴포넌트 외부에 상수로)
+const COLORS = [
+  '#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181',
+  '#AA96DA', '#FCBAD3', '#A8D8EA', '#FF9F43', '#EE5A24',
+  '#00D2D3', '#54A0FF', '#5F27CD', '#FF6B81', '#FFC312',
+  '#C4E538', '#12CBC4', '#FDA7DF', '#ED4C67', '#B53471',
+  '#FFD700', '#FF69B4', '#00FF7F', '#87CEEB', '#DDA0DD'
+];
+
 export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffectsProps) {
   const [confetti, setConfetti] = useState<Confetti[]>([]);
   const [showEffects, setShowEffects] = useState(false);
-  const [isBursting, setIsBursting] = useState(true);
+  const confettiRef = useRef<Confetti[]>([]);
   const animationRef = useRef<number | null>(null);
+  const lastSpawnTime = useRef(0);
+  const lastRenderTime = useRef(0);
+  const burstPhase = useRef(0);
 
-  // 화려한 색상 팔레트
-  const colors = [
-    '#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181',
-    '#AA96DA', '#FCBAD3', '#A8D8EA', '#FF9F43', '#EE5A24',
-    '#00D2D3', '#54A0FF', '#5F27CD', '#FF6B81', '#FFC312',
-    '#C4E538', '#12CBC4', '#FDA7DF', '#ED4C67', '#B53471',
-    '#FFD700', '#FF69B4', '#00FF7F', '#87CEEB', '#DDA0DD'
-  ];
-
-  // 특정 각도로 컨페티 생성 (균등 분포용)
+  // 특정 각도로 컨페티 생성
   const createConfettiAtAngle = useCallback((angleDegree: number): Confetti => {
     const types: ('square' | 'circle' | 'ribbon' | 'smallCircle')[] = [
       'square', 'circle', 'ribbon', 'square', 'ribbon', 'smallCircle', 'smallCircle', 'circle'
     ];
     const type = types[Math.floor(Math.random() * types.length)];
 
-    // 왼쪽 위 모서리에서 시작
     const startX = Math.random() * 3;
     const startY = -2 + Math.random() * 2;
-
-    // 지정된 각도 + 약간의 변화 (45도 ~ 90도 범위)
-    const angleVariation = (Math.random() - 0.5) * 8; // ±4도 변화 (더 자연스럽게)
+    const angleVariation = (Math.random() - 0.5) * 8;
     const angle = (angleDegree + angleVariation) * (Math.PI / 180);
-    const speed = 2.8 + Math.random() * 1.2; // 적당한 속도
+    const speed = 2.8 + Math.random() * 1.2;
 
-    // 타입별 크기 설정
     let size: number;
     if (type === 'ribbon') {
       size = 15 + Math.random() * 10;
     } else if (type === 'smallCircle') {
-      size = 3 + Math.random() * 3; // 작은 동그라미: 3~6px
+      size = 3 + Math.random() * 3;
     } else {
       size = 6 + Math.random() * 6;
     }
@@ -68,7 +67,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
       y: startY,
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
-      color: colors[Math.floor(Math.random() * colors.length)],
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
       size,
       rotation: Math.random() * 360,
       rotationSpeed: (Math.random() - 0.5) * 15,
@@ -77,70 +76,74 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
     };
   }, []);
 
-  // 컨페티 애니메이션
+  // requestAnimationFrame 기반 애니메이션
   useEffect(() => {
     if (!isActive || reductionRate < 40) return;
 
     setShowEffects(true);
 
-    // 초기 컨페티 생성 (45도~90도 균등 분포)
+    // 초기 컨페티 생성
     const initialConfetti: Confetti[] = [];
     const initialCount = reductionRate >= 80 ? 36 : reductionRate >= 60 ? 24 : 18;
     for (let i = 0; i < initialCount; i++) {
-      // 45도~90도를 균등하게 분배 (45도 범위)
       const angleDegree = 45 + (i / initialCount) * 45;
       initialConfetti.push(createConfettiAtAngle(angleDegree));
     }
+    confettiRef.current = initialConfetti;
     setConfetti(initialConfetti);
 
-    // 간헐적 분출을 위한 타이머
-    let burstPhase = 0;
-    const burstInterval = setInterval(() => {
-      burstPhase++;
-      // 1.2초 분출, 0.4초 멈춤 패턴
-      const isOn = (burstPhase % 8) < 6; // 6틱 켜짐, 2틱 꺼짐 (200ms 간격)
-      setIsBursting(isOn);
-    }, 200);
+    let lastTime = performance.now();
+    const spawnCount = reductionRate >= 80 ? 6 : reductionRate >= 60 ? 5 : 4;
 
-    // 지속적으로 새 컨페티 추가 (45도~90도 전체 영역에 균등 분포)
-    const spawnInterval = setInterval(() => {
-      setIsBursting(currentBursting => {
-        if (!currentBursting) return currentBursting;
+    const animate = (currentTime: number) => {
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
 
-        const spawnCount = reductionRate >= 80 ? 6 : reductionRate >= 60 ? 5 : 4;
-        const newConfetti: Confetti[] = [];
+      // 물리 업데이트 (deltaTime 기반)
+      const dt = deltaTime / 16.67; // 60fps 기준 정규화
 
-        // 45도~90도를 spawnCount개로 나눠서 균등하게 생성
-        for (let i = 0; i < spawnCount; i++) {
-          const angleDegree = 45 + (i / spawnCount) * 45;
-          newConfetti.push(createConfettiAtAngle(angleDegree));
-        }
-        setConfetti(prev => [...prev.slice(-100), ...newConfetti]);
-
-        return currentBursting;
-      });
-    }, 80);
-
-    // 애니메이션 업데이트
-    const updateInterval = setInterval(() => {
-      setConfetti(prev => prev
+      confettiRef.current = confettiRef.current
         .map(c => ({
           ...c,
-          x: c.x + c.vx * 0.45, // 적당한 속도
-          y: c.y + c.vy * 0.45, // 적당한 속도
-          vy: c.vy + 0.04, // 중력
-          vx: c.vx * 0.995 + (Math.random() - 0.5) * 0.015, // 약간의 흔들림
-          rotation: c.rotation + c.rotationSpeed * 0.8,
-          opacity: c.y > 40 ? Math.max(0, c.opacity - 0.06) : c.opacity, // 40%부터 페이드아웃
+          x: c.x + c.vx * 0.45 * dt,
+          y: c.y + c.vy * 0.45 * dt,
+          vy: c.vy + 0.04 * dt,
+          vx: c.vx * Math.pow(0.995, dt),
+          rotation: c.rotation + c.rotationSpeed * 0.8 * dt,
+          opacity: c.y > 40 ? Math.max(0, c.opacity - 0.03 * dt) : c.opacity,
         }))
-        .filter(c => c.y < 50 && c.opacity > 0 && c.x < 120) // 화면 절반(50%)까지만
-      );
-    }, 20);
+        .filter(c => c.y < 50 && c.opacity > 0 && c.x < 120);
+
+      // 새 컨페티 생성 (80ms 간격)
+      if (currentTime - lastSpawnTime.current > 80) {
+        lastSpawnTime.current = currentTime;
+        burstPhase.current++;
+
+        // 1.2초 분출, 0.4초 멈춤 패턴
+        const isBursting = (burstPhase.current % 8) < 6;
+
+        if (isBursting) {
+          const newConfetti: Confetti[] = [];
+          for (let i = 0; i < spawnCount; i++) {
+            const angleDegree = 45 + (i / spawnCount) * 45;
+            newConfetti.push(createConfettiAtAngle(angleDegree));
+          }
+          confettiRef.current = [...confettiRef.current.slice(-100), ...newConfetti];
+        }
+      }
+
+      // 렌더링 업데이트 (30fps로 제한하여 성능 최적화)
+      if (currentTime - lastRenderTime.current > 33) { // ~30fps
+        lastRenderTime.current = currentTime;
+        setConfetti([...confettiRef.current]);
+      }
+
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
 
     return () => {
-      clearInterval(burstInterval);
-      clearInterval(spawnInterval);
-      clearInterval(updateInterval);
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
@@ -215,8 +218,8 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
           style={{
             left: `${c.x}%`,
             top: `${c.y}%`,
-            transform: `translate(-50%, -50%)`,
-            transition: 'none',
+            transform: `translate3d(-50%, -50%, 0)`,
+            willChange: 'transform, opacity',
           }}
         >
           {renderConfetti(c)}
