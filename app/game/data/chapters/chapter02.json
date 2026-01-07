@@ -1,0 +1,96 @@
+{
+  "id": "chapter02",
+  "title": "방문추심",
+  "subtitle": "문 앞의 공포",
+  "scenes": [
+    {
+      "id": "ch02_intro",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "worried" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "다음 날 오후..." },
+        { "speaker": null, "text": "초인종이 울린다." },
+        { "speaker": "나", "text": "누... 누구지?" }
+      ],
+      "choices": [
+        {
+          "id": "open",
+          "text": "문을 연다",
+          "nextScene": "ch02_open_door",
+          "effects": [{ "type": "stress", "value": 5 }]
+        },
+        {
+          "id": "ignore",
+          "text": "숨어서 무시한다",
+          "nextScene": "ch02_hide",
+          "effects": [{ "type": "stress", "value": 10 }]
+        }
+      ]
+    },
+    {
+      "id": "ch02_open_door",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "scared" },
+        { "characterId": "collector", "position": "right", "expression": "angry" }
+      ],
+      "dialogues": [
+        { "speaker": "추심원", "text": "안녕하세요. OO캐피탈입니다." },
+        { "speaker": "추심원", "text": "연락이 안 돼서 직접 방문했습니다." },
+        { "speaker": "나", "text": "저... 지금 상황이 어려워서..." },
+        { "speaker": "추심원", "text": "상황은 알겠는데, 이자라도 갚으셔야죠.", "effects": [{ "type": "screen", "value": "shake" }] },
+        { "speaker": "추심원", "text": "언제까지 갚으실 수 있습니까?" },
+        { "speaker": "나", "text": "그게... 정말 방법이 없어서..." }
+      ],
+      "nextScene": "ch02_collector_talk"
+    },
+    {
+      "id": "ch02_hide",
+      "background": "home-dark",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "scared" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "숨을 죽이고 조용히 있는다." },
+        { "speaker": null, "text": "쿵쿵쿵!", "effects": [{ "type": "screen", "value": "shake" }] },
+        { "speaker": "추심원", "text": "계신 거 알아요! 문 열어주세요!" },
+        { "speaker": null, "text": "심장이 터질 것 같다.", "effects": [{ "type": "stress", "value": 15 }] },
+        { "speaker": "추심원", "text": "안 열면 계속 올 겁니다!" },
+        { "speaker": null, "text": "한참 후에야 발소리가 멀어졌다." },
+        { "speaker": "나", "text": "이렇게 숨어 사는 게... 삶인가..." }
+      ],
+      "nextScene": "ch02_end"
+    },
+    {
+      "id": "ch02_collector_talk",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "desperate" },
+        { "characterId": "collector", "position": "right", "expression": "normal" }
+      ],
+      "dialogues": [
+        { "speaker": "추심원", "text": "솔직히 말씀드리면..." },
+        { "speaker": "추심원", "text": "이 정도 금액이면 개인회생을 알아보시는 게 나을 수도 있어요." },
+        { "speaker": "나", "text": "개인회생요...?" },
+        { "speaker": "추심원", "text": "법원을 통해 빚을 조정받는 제도예요." },
+        { "speaker": "추심원", "text": "저희도 솔직히 못 받을 돈 받으려고 이러는 거 아닙니다." },
+        { "speaker": "나", "text": "그런 게 있었어요...?" },
+        { "speaker": "추심원", "text": "알아보세요. 도움이 될 겁니다." }
+      ],
+      "nextScene": "ch02_end"
+    },
+    {
+      "id": "ch02_end",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "hopeful" }
+      ],
+      "dialogues": [
+        { "speaker": "나", "text": "개인회생... 한번 알아봐야겠다." },
+        { "speaker": null, "text": "처음으로 희망의 빛이 보이는 것 같았다." }
+      ]
+    }
+  ]
+}

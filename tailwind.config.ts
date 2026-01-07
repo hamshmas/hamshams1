@@ -11,6 +11,16 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        // 게임용 픽셀 색상
+        'pixel-bg': '#1a1a2e',
+        'pixel-dark': '#16213e',
+        'pixel-darker': '#0f0f23',
+        'pixel-primary': '#4a5568',
+        'pixel-primary-hover': '#2d3748',
+        'pixel-accent': '#ffd93d',
+        'pixel-danger': '#e74c3c',
+        'pixel-success': '#27ae60',
+        'pixel-hope': '#3498db',
         primary: {
           50: '#f0f9ff',
           100: '#e0f2fe',

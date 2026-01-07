@@ -1,0 +1,94 @@
+{
+  "id": "chapter03",
+  "title": "해결책 탐색",
+  "subtitle": "희망의 빛",
+  "scenes": [
+    {
+      "id": "ch03_intro",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "determined" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "그날 밤, 컴퓨터 앞에 앉았다." },
+        { "speaker": "나", "text": "개인회생... 이게 뭔지 제대로 알아보자." }
+      ],
+      "nextScene": "ch03_search"
+    },
+    {
+      "id": "ch03_search",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "normal" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "'개인회생이란 무엇인가?'" },
+        { "speaker": null, "text": "정기적인 수입이 있는 채무자가..." },
+        { "speaker": null, "text": "법원의 허가를 받아 3~5년간 변제 후..." },
+        { "speaker": null, "text": "나머지 빚을 면제받는 제도." },
+        { "speaker": "나", "text": "그러니까... 전부 다 갚지 않아도 된다는 거야?" },
+        { "speaker": null, "text": "'최대 90%까지 빚 탕감 가능'" },
+        { "speaker": "나", "text": "90%...?! 이거 진짜야?", "effects": [{ "type": "stress", "value": -10 }] }
+      ],
+      "nextScene": "ch03_requirements"
+    },
+    {
+      "id": "ch03_requirements",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "hopeful" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "'개인회생 자격 요건'" },
+        { "speaker": null, "text": "1. 정기적인 수입이 있을 것" },
+        { "speaker": "나", "text": "나... 직장 다니고 있어. 체크!" },
+        { "speaker": null, "text": "2. 총 채무가 무담보 10억, 담보 15억 이하일 것" },
+        { "speaker": "나", "text": "내 빚은 5천만원이니까... 체크!" },
+        { "speaker": null, "text": "3. 과거 5년 내 면책받은 적이 없을 것" },
+        { "speaker": "나", "text": "처음이니까... 체크!" },
+        { "speaker": "나", "text": "나... 자격이 되는 것 같아!" }
+      ],
+      "choices": [
+        {
+          "id": "lawyer",
+          "text": "변호사를 찾아본다",
+          "nextScene": "ch03_end_lawyer",
+          "effects": [{ "type": "stress", "value": -5 }]
+        },
+        {
+          "id": "self",
+          "text": "혼자 해볼까 고민한다",
+          "nextScene": "ch03_end_self"
+        }
+      ]
+    },
+    {
+      "id": "ch03_end_lawyer",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "determined" }
+      ],
+      "dialogues": [
+        { "speaker": "나", "text": "이건 전문가의 도움이 필요할 것 같아." },
+        { "speaker": "나", "text": "잘못하면 기각될 수도 있다고 하니까..." },
+        { "speaker": null, "text": "검색창에 '개인회생 변호사'를 입력했다." },
+        { "speaker": "나", "text": "내일 상담 예약을 해봐야겠다." }
+      ]
+    },
+    {
+      "id": "ch03_end_self",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "worried" }
+      ],
+      "dialogues": [
+        { "speaker": "나", "text": "비용이 부담되는데... 혼자 할 수 있을까?" },
+        { "speaker": null, "text": "하지만 글을 읽어보니..." },
+        { "speaker": null, "text": "'서류 작성 실수로 기각되는 경우가 많습니다'" },
+        { "speaker": null, "text": "'전문가의 도움을 받으시길 권장합니다'" },
+        { "speaker": "나", "text": "역시... 전문가를 찾아봐야겠다." },
+        { "speaker": null, "text": "검색창에 '개인회생 변호사'를 입력했다." }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "id": "chapter08",
+  "title": "개시결정",
+  "subtitle": "인정받은 권리",
+  "scenes": [
+    {
+      "id": "ch08_intro",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "normal" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "보정서류 제출 후 3주가 지났다." },
+        { "speaker": null, "text": "두근거리는 마음으로 매일을 보냈다." },
+        { "speaker": "나", "text": "제발... 좋은 결과가 있길..." }
+      ],
+      "nextScene": "ch08_call"
+    },
+    {
+      "id": "ch08_call",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "worried" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "법률사무소에서 전화가 왔다." },
+        { "speaker": "김변호사", "text": "축하드려요!" },
+        { "speaker": "나", "text": "네?!" },
+        { "speaker": "김변호사", "text": "개시결정이 났습니다!", "effects": [{ "type": "screen", "value": "flash" }] },
+        { "speaker": "나", "text": "개... 개시결정이요?!", "effects": [{ "type": "stress", "value": -20 }] }
+      ],
+      "nextScene": "ch08_explain"
+    },
+    {
+      "id": "ch08_explain",
+      "background": "hope",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "happy", "animation": "bounce" },
+        { "characterId": "lawyer", "position": "right", "expression": "encouraging" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "네! 법원에서 회생절차 개시를 결정했어요." },
+        { "speaker": "김변호사", "text": "이제 공식적으로 개인회생 절차가 시작된 거예요." },
+        { "speaker": "나", "text": "그러면... 정말 되는 거예요?" },
+        { "speaker": "김변호사", "text": "큰 고비는 넘겼어요." },
+        { "speaker": "김변호사", "text": "다음은 채권자집회만 남았습니다." },
+        { "speaker": "나", "text": "채권자집회요?" }
+      ],
+      "nextScene": "ch08_next"
+    },
+    {
+      "id": "ch08_next",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "normal" },
+        { "characterId": "lawyer", "position": "right", "expression": "explaining" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "법원에 직접 가셔서 판사님 질문에 답하는 자리예요." },
+        { "speaker": "나", "text": "법원에... 직접요?" },
+        { "speaker": "김변호사", "text": "걱정 마세요. 제가 함께 갑니다." },
+        { "speaker": "김변호사", "text": "간단한 질문만 받으실 거예요." },
+        { "speaker": "나", "text": "알겠습니다. 준비해야 할 게 있을까요?" },
+        { "speaker": "김변호사", "text": "성실하게 답변만 하시면 됩니다.", "effects": [{ "type": "stress", "value": -5 }] }
+      ]
+    }
+  ]
+}

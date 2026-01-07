@@ -1,0 +1,285 @@
+/* 픽셀 아트 스타일 */
+
+/* 픽셀 색상 팔레트 */
+:root {
+  --pixel-bg: #1a1a2e;
+  --pixel-dark: #16213e;
+  --pixel-darker: #0f0f23;
+  --pixel-primary: #4a5568;
+  --pixel-primary-hover: #2d3748;
+  --pixel-accent: #ffd93d;
+  --pixel-accent-dim: #b8860b;
+  --pixel-danger: #e74c3c;
+  --pixel-success: #27ae60;
+  --pixel-hope: #3498db;
+  --pixel-text: #e2e8f0;
+  --pixel-text-dim: #a0aec0;
+}
+
+/* 픽셀 렌더링 */
+.pixel-render {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+}
+
+/* 픽셀 텍스트 */
+.pixel-text {
+  font-family: 'DungGeunMo', 'Galmuri11', monospace;
+  letter-spacing: 0.05em;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* 픽셀 테두리 */
+.pixel-border {
+  border: 4px solid #fff;
+  box-shadow:
+    inset -4px -4px 0 #666,
+    inset 4px 4px 0 #fff,
+    4px 4px 0 #000;
+}
+
+/* 픽셀 테두리 (다크) */
+.pixel-border-dark {
+  border: 4px solid #444;
+  box-shadow:
+    inset -4px -4px 0 #222,
+    inset 4px 4px 0 #666,
+    4px 4px 0 #000;
+}
+
+/* 픽셀 버튼 */
+.pixel-button {
+  font-family: 'DungGeunMo', monospace;
+  background: linear-gradient(180deg, #4a5568 0%, #2d3748 100%);
+  border: 4px solid #fff;
+  box-shadow:
+    inset -4px -4px 0 #1a202c,
+    inset 4px 4px 0 #718096,
+    4px 4px 0 #000;
+  padding: 12px 24px;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.1s;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.pixel-button:hover {
+  background: linear-gradient(180deg, #5a6578 0%, #3d4758 100%);
+}
+
+.pixel-button:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 4px 4px 0 #1a202c,
+    inset -4px -4px 0 #718096,
+    2px 2px 0 #000;
+}
+
+/* 대화 박스 */
+.dialogue-box {
+  background: linear-gradient(180deg, rgba(22, 33, 62, 0.95) 0%, rgba(15, 15, 35, 0.98) 100%);
+  border: 4px solid #ffd93d;
+  box-shadow:
+    inset -4px -4px 0 #b8860b,
+    inset 4px 4px 0 #ffe066,
+    6px 6px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* 배경 스타일 */
+.game-bg-home {
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+}
+
+.game-bg-office {
+  background: linear-gradient(180deg, #2d3748 0%, #1a202c 100%);
+}
+
+.game-bg-court {
+  background: linear-gradient(180deg, #4a3728 0%, #2d1f14 100%);
+}
+
+.game-bg-lawfirm {
+  background: linear-gradient(180deg, #1e3a5f 0%, #0d1b2a 100%);
+}
+
+/* 화면 효과 */
+.screen-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-10px); }
+  20% { transform: translateX(10px); }
+  30% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  50% { transform: translateX(-5px); }
+  60% { transform: translateX(5px); }
+  70% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+  90% { transform: translateX(-2px); }
+}
+
+.screen-flash {
+  animation: flash 0.3s ease-out;
+}
+
+@keyframes flash {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* 타이핑 커서 */
+.typing-cursor {
+  animation: blink 0.7s infinite;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* 페이드 인/아웃 */
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.fade-out {
+  animation: fadeOut 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* 슬라이드 업 */
+.slide-up {
+  animation: slideUp 0.5s ease-out forwards;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 슬라이드 인 (좌측에서) */
+.slide-in-left {
+  animation: slideInLeft 0.3s ease-out forwards;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 펄스 효과 */
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* 바운스 효과 */
+.bounce-arrow {
+  animation: bounceArrow 0.8s infinite;
+}
+
+@keyframes bounceArrow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
+}
+
+/* 스트레스 게이지 색상 */
+.stress-low {
+  background: linear-gradient(90deg, #27ae60 0%, #2ecc71 100%);
+}
+
+.stress-medium {
+  background: linear-gradient(90deg, #f39c12 0%, #f1c40f 100%);
+}
+
+.stress-high {
+  background: linear-gradient(90deg, #e74c3c 0%, #c0392b 100%);
+}
+
+/* 이모지 캐릭터 스타일 */
+.character-emoji {
+  font-size: 80px;
+  text-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
+}
+
+.character-shake {
+  animation: characterShake 0.3s ease-in-out;
+}
+
+@keyframes characterShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* 선택지 호버 효과 */
+.choice-option {
+  transition: all 0.2s ease;
+}
+
+.choice-option:hover {
+  transform: translateX(10px);
+  background: linear-gradient(90deg, rgba(255, 217, 61, 0.2) 0%, transparent 100%);
+}
+
+/* CRT 효과 (선택적) */
+.crt-effect::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.1) 4px
+  );
+  pointer-events: none;
+}
+
+/* 챕터 전환 오버레이 */
+.chapter-overlay {
+  background: radial-gradient(ellipse at center, #1a1a2e 0%, #000 100%);
+}
+
+/* 진행 바 */
+.progress-bar {
+  background: linear-gradient(90deg, #ffd93d 0%, #f1c40f 50%, #ffd93d 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}

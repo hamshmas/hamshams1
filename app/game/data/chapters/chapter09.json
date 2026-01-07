@@ -1,0 +1,124 @@
+{
+  "id": "chapter09",
+  "title": "채권자집회",
+  "subtitle": "마지막 관문",
+  "scenes": [
+    {
+      "id": "ch09_intro",
+      "background": "court",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "worried" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "드디어 채권자집회 날이 밝았다." },
+        { "speaker": null, "text": "법원 건물 앞에 섰다." },
+        { "speaker": "나", "text": "심장이 터질 것 같아...", "effects": [{ "type": "stress", "value": 10 }] }
+      ],
+      "nextScene": "ch09_enter"
+    },
+    {
+      "id": "ch09_enter",
+      "background": "court",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "worried" },
+        { "characterId": "lawyer", "position": "right", "expression": "reassuring" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "괜찮아요. 제가 옆에 있잖아요." },
+        { "speaker": "김변호사", "text": "평소처럼만 하시면 됩니다." },
+        { "speaker": "나", "text": "네... 알겠습니다." },
+        { "speaker": null, "text": "법정에 들어섰다." }
+      ],
+      "nextScene": "ch09_meeting"
+    },
+    {
+      "id": "ch09_meeting",
+      "background": "court",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "scared" },
+        { "characterId": "judge", "position": "right", "expression": "stern" }
+      ],
+      "dialogues": [
+        { "speaker": "판사", "text": "신청인 되시죠?" },
+        { "speaker": "나", "text": "네, 맞습니다." },
+        { "speaker": "판사", "text": "현재 직업과 월 소득이 어떻게 되시나요?" }
+      ],
+      "choices": [
+        {
+          "id": "honest_answer",
+          "text": "솔직하게 답변한다",
+          "nextScene": "ch09_answer_honest",
+          "effects": [{ "type": "stress", "value": -10 }]
+        },
+        {
+          "id": "nervous_answer",
+          "text": "긴장해서 더듬거린다",
+          "nextScene": "ch09_answer_nervous",
+          "effects": [{ "type": "stress", "value": 5 }]
+        }
+      ]
+    },
+    {
+      "id": "ch09_answer_honest",
+      "background": "court",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "determined" },
+        { "characterId": "judge", "position": "right", "expression": "normal" }
+      ],
+      "dialogues": [
+        { "speaker": "나", "text": "OO회사에 재직 중이고, 월 급여는 250만원입니다." },
+        { "speaker": "판사", "text": "변제계획대로 납부 가능하시겠습니까?" },
+        { "speaker": "나", "text": "네, 성실히 이행하겠습니다." },
+        { "speaker": "판사", "text": "알겠습니다." }
+      ],
+      "nextScene": "ch09_result"
+    },
+    {
+      "id": "ch09_answer_nervous",
+      "background": "court",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "scared" },
+        { "characterId": "judge", "position": "right", "expression": "normal" }
+      ],
+      "dialogues": [
+        { "speaker": "나", "text": "저... 그게... 회사에 다니고 있고..." },
+        { "speaker": "김변호사", "text": "OO회사 재직 중이며 월 250만원을 받고 있습니다." },
+        { "speaker": "판사", "text": "변제계획대로 납부 가능하시겠습니까?" },
+        { "speaker": "나", "text": "네... 네! 열심히 하겠습니다." },
+        { "speaker": "판사", "text": "알겠습니다." }
+      ],
+      "nextScene": "ch09_result"
+    },
+    {
+      "id": "ch09_result",
+      "background": "court",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "hopeful" },
+        { "characterId": "judge", "position": "right", "expression": "approving" }
+      ],
+      "dialogues": [
+        { "speaker": "판사", "text": "채권자 측 이의 없으시죠?" },
+        { "speaker": null, "text": "채권자들이 고개를 끄덕였다." },
+        { "speaker": "판사", "text": "그럼 변제계획 인가 여부는 추후 결정문으로 통지하겠습니다." },
+        { "speaker": "판사", "text": "오늘 집회는 여기서 마치겠습니다." },
+        { "speaker": "나", "text": "끝났다..." }
+      ],
+      "nextScene": "ch09_end"
+    },
+    {
+      "id": "ch09_end",
+      "background": "court",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "relieved" },
+        { "characterId": "lawyer", "position": "right", "expression": "encouraging" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "잘하셨어요!" },
+        { "speaker": "김변호사", "text": "큰 문제 없이 진행됐어요." },
+        { "speaker": "나", "text": "정말요? 인가될까요?" },
+        { "speaker": "김변호사", "text": "충분히 가능성 있어요. 이제 결과만 기다리면 됩니다.", "effects": [{ "type": "stress", "value": -15 }] },
+        { "speaker": "나", "text": "드디어... 거의 다 왔어..." }
+      ]
+    }
+  ]
+}

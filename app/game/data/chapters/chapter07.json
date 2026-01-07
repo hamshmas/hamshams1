@@ -1,0 +1,95 @@
+{
+  "id": "chapter07",
+  "title": "보정명령",
+  "subtitle": "시련의 시간",
+  "scenes": [
+    {
+      "id": "ch07_intro",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "normal" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "금지명령 이후 한 달이 지났다." },
+        { "speaker": null, "text": "변호사님에게서 연락이 왔다." },
+        { "speaker": "김변호사", "text": "법원에서 보정명령이 나왔어요." }
+      ],
+      "nextScene": "ch07_explain"
+    },
+    {
+      "id": "ch07_explain",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "worried" }
+      ],
+      "dialogues": [
+        { "speaker": "나", "text": "보정명령이요? 뭔가 잘못된 건가요?", "effects": [{ "type": "stress", "value": 10 }] },
+        { "speaker": "김변호사", "text": "아니에요. 법원에서 추가 서류를 요청하는 거예요." },
+        { "speaker": "김변호사", "text": "개인회생 절차에서 흔히 있는 일이에요." },
+        { "speaker": "나", "text": "다행이다... 뭘 준비하면 되나요?" },
+        { "speaker": "김변호사", "text": "최근 3개월 급여명세서랑..." },
+        { "speaker": "김변호사", "text": "지출 내역 증빙이 필요해요." }
+      ],
+      "choices": [
+        {
+          "id": "quick",
+          "text": "바로 준비하겠습니다",
+          "nextScene": "ch07_prepare",
+          "effects": [{ "type": "stress", "value": -5 }]
+        },
+        {
+          "id": "worry",
+          "text": "제대로 준비할 수 있을까요...",
+          "nextScene": "ch07_worry",
+          "effects": [{ "type": "stress", "value": 5 }]
+        }
+      ]
+    },
+    {
+      "id": "ch07_prepare",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "determined" }
+      ],
+      "dialogues": [
+        { "speaker": "나", "text": "알겠습니다. 바로 준비할게요!" },
+        { "speaker": "김변호사", "text": "좋아요. 기한이 2주니까 서두르세요." },
+        { "speaker": null, "text": "회사에서 급여명세서를 발급받았다." },
+        { "speaker": null, "text": "카드 내역도 정리했다." },
+        { "speaker": "나", "text": "생각보다 할 만하네." }
+      ],
+      "nextScene": "ch07_submit"
+    },
+    {
+      "id": "ch07_worry",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "worried" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "걱정 마세요. 제가 도와드릴게요." },
+        { "speaker": "김변호사", "text": "필요한 서류 목록을 문자로 보내드릴게요." },
+        { "speaker": "나", "text": "감사합니다..." },
+        { "speaker": null, "text": "변호사님의 안내대로 서류를 준비했다." },
+        { "speaker": "나", "text": "역시 전문가와 함께하니 든든하다." }
+      ],
+      "nextScene": "ch07_submit"
+    },
+    {
+      "id": "ch07_submit",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "hopeful" },
+        { "characterId": "lawyer", "position": "right", "expression": "reassuring" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "서류 잘 준비하셨네요." },
+        { "speaker": "김변호사", "text": "오늘 바로 법원에 제출하겠습니다." },
+        { "speaker": "나", "text": "이제 어떻게 되나요?" },
+        { "speaker": "김변호사", "text": "보정이 완료되면 개시결정을 기다리면 돼요." },
+        { "speaker": "김변호사", "text": "곧 좋은 소식이 있을 거예요.", "effects": [{ "type": "stress", "value": -10 }] },
+        { "speaker": "나", "text": "기다릴게요!" }
+      ]
+    }
+  ]
+}

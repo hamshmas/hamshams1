@@ -1,0 +1,71 @@
+{
+  "id": "chapter05",
+  "title": "계약",
+  "subtitle": "새로운 시작",
+  "scenes": [
+    {
+      "id": "ch05_intro",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "determined" },
+        { "characterId": "lawyer", "position": "right", "expression": "normal" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "다시 법률사무소를 찾았다." },
+        { "speaker": "나", "text": "결심했어요. 개인회생 진행하겠습니다." },
+        { "speaker": "김변호사", "text": "잘 결정하셨어요. 바로 시작합시다." }
+      ],
+      "nextScene": "ch05_documents"
+    },
+    {
+      "id": "ch05_documents",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "normal" },
+        { "characterId": "lawyer", "position": "right", "expression": "explaining" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "먼저 필요한 서류를 말씀드릴게요." },
+        { "speaker": "김변호사", "text": "주민등록등본, 가족관계증명서..." },
+        { "speaker": "김변호사", "text": "재직증명서, 급여명세서..." },
+        { "speaker": "김변호사", "text": "채무 관련 서류들도 필요합니다." },
+        { "speaker": "나", "text": "종류가 많네요..." },
+        { "speaker": "김변호사", "text": "걱정 마세요. 하나씩 준비하시면 됩니다." },
+        { "speaker": "김변호사", "text": "체크리스트를 드릴게요." }
+      ],
+      "nextScene": "ch05_sign"
+    },
+    {
+      "id": "ch05_sign",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "hopeful" },
+        { "characterId": "lawyer", "position": "right", "expression": "reassuring" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "그럼 위임계약서에 서명해 주세요." },
+        { "speaker": null, "text": "펜을 들었다." },
+        { "speaker": "나", "text": "이 서명 하나로... 새로운 시작이 되는 거죠?" },
+        { "speaker": "김변호사", "text": "네. 이제부터 함께 해결해 나가는 겁니다." },
+        { "speaker": null, "text": "서명을 했다.", "effects": [{ "type": "stress", "value": -15 }] },
+        { "speaker": "나", "text": "됐다... 드디어 시작이다." }
+      ],
+      "nextScene": "ch05_end"
+    },
+    {
+      "id": "ch05_end",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "relieved" },
+        { "characterId": "lawyer", "position": "right", "expression": "encouraging" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "서류 준비되는 대로 연락주세요." },
+        { "speaker": "김변호사", "text": "최대한 빨리 신청서를 제출하겠습니다." },
+        { "speaker": "나", "text": "네! 열심히 준비할게요!" },
+        { "speaker": null, "text": "사무소를 나서는 발걸음이 가벼웠다." },
+        { "speaker": "나", "text": "드디어 뭔가 시작됐어..." }
+      ]
+    }
+  ]
+}

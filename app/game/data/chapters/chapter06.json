@@ -1,0 +1,66 @@
+{
+  "id": "chapter06",
+  "title": "금지명령",
+  "subtitle": "잠시의 평화",
+  "scenes": [
+    {
+      "id": "ch06_intro",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "worried" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "서류를 모두 제출하고 2주가 지났다." },
+        { "speaker": null, "text": "그 사이에도 독촉 전화는 계속됐다." },
+        { "speaker": "나", "text": "변호사님이 곧 좋은 소식이 있을 거라고 했는데..." }
+      ],
+      "nextScene": "ch06_call"
+    },
+    {
+      "id": "ch06_call",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "normal" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "전화가 울렸다. 법률사무소다!" },
+        { "speaker": "김변호사", "text": "좋은 소식이에요!" },
+        { "speaker": "김변호사", "text": "금지명령이 떨어졌습니다!" },
+        { "speaker": "나", "text": "금지명령이요?!", "effects": [{ "type": "stress", "value": -20 }] },
+        { "speaker": "김변호사", "text": "네! 이제부터 채권자들이 추심을 못 합니다." },
+        { "speaker": "김변호사", "text": "전화도, 방문도, 법적 조치도 금지예요." },
+        { "speaker": "나", "text": "정말요...? 정말이에요?!", "effects": [{ "type": "screen", "value": "flash" }] }
+      ],
+      "nextScene": "ch06_relief"
+    },
+    {
+      "id": "ch06_relief",
+      "background": "hope",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "happy", "animation": "bounce" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "이제 마음 편히 다음 단계를 준비하시면 됩니다." },
+        { "speaker": "나", "text": "감사합니다... 정말 감사합니다!" },
+        { "speaker": null, "text": "전화를 끊고 한참을 멍하니 있었다." },
+        { "speaker": "나", "text": "드디어... 전화벨 소리에 떨지 않아도 되는 거야..." },
+        { "speaker": null, "text": "눈물이 났다." },
+        { "speaker": "나", "text": "이제 진짜 희망이 보여..." }
+      ],
+      "nextScene": "ch06_end"
+    },
+    {
+      "id": "ch06_end",
+      "background": "home",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "relieved" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "그날 밤, 오랜만에 푹 잤다." },
+        { "speaker": null, "text": "악몽 없이..." },
+        { "speaker": null, "text": "전화벨 소리 없이..." },
+        { "speaker": "나", "text": "평화롭다..." }
+      ]
+    }
+  ]
+}

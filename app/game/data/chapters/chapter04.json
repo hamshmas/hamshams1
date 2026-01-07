@@ -1,0 +1,157 @@
+{
+  "id": "chapter04",
+  "title": "변호사 상담",
+  "subtitle": "첫 걸음",
+  "scenes": [
+    {
+      "id": "ch04_intro",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "center", "expression": "worried" }
+      ],
+      "dialogues": [
+        { "speaker": null, "text": "며칠 후, 법률사무소 앞..." },
+        { "speaker": "나", "text": "긴장된다... 들어가보자." },
+        { "speaker": null, "text": "문을 열고 들어갔다." }
+      ],
+      "nextScene": "ch04_meet_lawyer"
+    },
+    {
+      "id": "ch04_meet_lawyer",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "worried" },
+        { "characterId": "lawyer", "position": "right", "expression": "normal" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "안녕하세요. 어서 오세요." },
+        { "speaker": "김변호사", "text": "개인회생 상담으로 예약하셨죠?" },
+        { "speaker": "나", "text": "네... 빚 때문에 정말 힘들어서요." },
+        { "speaker": "김변호사", "text": "많이 힘드셨겠어요. 우선 상황을 말씀해 주세요." }
+      ],
+      "choices": [
+        {
+          "id": "honest",
+          "text": "솔직하게 모든 상황을 설명한다",
+          "nextScene": "ch04_honest",
+          "effects": [{ "type": "stress", "value": -10 }, { "type": "flag", "value": true, "key": "was_honest" }]
+        },
+        {
+          "id": "hide",
+          "text": "일부 빚은 숨기고 말한다",
+          "nextScene": "ch04_hide",
+          "effects": [{ "type": "stress", "value": 5 }]
+        }
+      ]
+    },
+    {
+      "id": "ch04_honest",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "desperate" },
+        { "characterId": "lawyer", "position": "right", "expression": "reassuring" }
+      ],
+      "dialogues": [
+        { "speaker": "나", "text": "사실... 카드빚이 3천만원, 대출이 2천만원 있어요." },
+        { "speaker": "나", "text": "이자가 계속 불어나서 이제 감당이 안 됩니다." },
+        { "speaker": "김변호사", "text": "솔직하게 말씀해 주셔서 감사합니다." },
+        { "speaker": "김변호사", "text": "이 정도면 개인회생으로 충분히 해결 가능합니다.", "effects": [{ "type": "stress", "value": -5 }] }
+      ],
+      "nextScene": "ch04_explain"
+    },
+    {
+      "id": "ch04_hide",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "worried" },
+        { "characterId": "lawyer", "position": "right", "expression": "serious" }
+      ],
+      "dialogues": [
+        { "speaker": "나", "text": "카드빚이 좀 있는데... 3천만원 정도요." },
+        { "speaker": "김변호사", "text": "다른 빚은 없으신가요?" },
+        { "speaker": "나", "text": "아... 대출도 조금..." },
+        { "speaker": "김변호사", "text": "정확히 말씀해 주셔야 해요." },
+        { "speaker": "김변호사", "text": "숨기시면 나중에 문제가 될 수 있습니다." },
+        { "speaker": "나", "text": "죄송해요... 대출이 2천만원 더 있어요.", "effects": [{ "type": "stress", "value": 5 }] },
+        { "speaker": "김변호사", "text": "괜찮아요. 이제 정확히 알았으니 진행해 봅시다." }
+      ],
+      "nextScene": "ch04_explain"
+    },
+    {
+      "id": "ch04_explain",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "hopeful" },
+        { "characterId": "lawyer", "position": "right", "expression": "explaining" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "개인회생 절차를 간단히 설명드릴게요." },
+        { "speaker": "김변호사", "text": "먼저 법원에 신청서를 제출합니다." },
+        { "speaker": "김변호사", "text": "그러면 금지명령이 내려져 추심이 멈춥니다." },
+        { "speaker": "나", "text": "추심이 멈춰요?!", "effects": [{ "type": "stress", "value": -10 }] },
+        { "speaker": "김변호사", "text": "네. 그리고 법원 심사를 거쳐 변제계획이 인가되면..." },
+        { "speaker": "김변호사", "text": "3년간 정해진 금액만 갚으시면 됩니다." },
+        { "speaker": "나", "text": "정말요? 그럼 나머지는요?" },
+        { "speaker": "김변호사", "text": "면제됩니다. 법적으로 갚을 의무가 사라지는 거예요." }
+      ],
+      "nextScene": "ch04_cost"
+    },
+    {
+      "id": "ch04_cost",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "worried" },
+        { "characterId": "lawyer", "position": "right", "expression": "normal" }
+      ],
+      "dialogues": [
+        { "speaker": "나", "text": "그런데... 비용이 얼마나 들까요?" },
+        { "speaker": "김변호사", "text": "변호사 비용은 분할 납부 가능합니다." },
+        { "speaker": "김변호사", "text": "월급에서 조금씩 내시면 돼요." },
+        { "speaker": "나", "text": "다행이다... 일시불은 어려웠을 텐데." },
+        { "speaker": "김변호사", "text": "어떠세요? 진행해 볼까요?" }
+      ],
+      "choices": [
+        {
+          "id": "proceed",
+          "text": "네, 진행하겠습니다",
+          "nextScene": "ch04_end_proceed",
+          "effects": [{ "type": "stress", "value": -10 }]
+        },
+        {
+          "id": "think",
+          "text": "조금 더 생각해 볼게요",
+          "nextScene": "ch04_end_think"
+        }
+      ]
+    },
+    {
+      "id": "ch04_end_proceed",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "determined" },
+        { "characterId": "lawyer", "position": "right", "expression": "reassuring" }
+      ],
+      "dialogues": [
+        { "speaker": "나", "text": "더 이상 미룰 수 없어요. 진행할게요." },
+        { "speaker": "김변호사", "text": "좋은 결정이에요. 함께 잘 해결해 봅시다." },
+        { "speaker": "김변호사", "text": "필요한 서류 목록을 드릴게요." },
+        { "speaker": "나", "text": "감사합니다. 열심히 준비할게요!" }
+      ]
+    },
+    {
+      "id": "ch04_end_think",
+      "background": "lawfirm",
+      "characters": [
+        { "characterId": "protagonist", "position": "left", "expression": "worried" },
+        { "characterId": "lawyer", "position": "right", "expression": "normal" }
+      ],
+      "dialogues": [
+        { "speaker": "김변호사", "text": "물론이죠. 중요한 결정이니까요." },
+        { "speaker": "김변호사", "text": "다만 이자는 계속 불어나고 있다는 점..." },
+        { "speaker": "김변호사", "text": "기억해 주세요." },
+        { "speaker": null, "text": "집으로 돌아와 밤새 고민했다." },
+        { "speaker": "나", "text": "더 미룰 수 없어... 내일 연락해야겠다.", "effects": [{ "type": "stress", "value": 5 }] }
+      ]
+    }
+  ]
+}
