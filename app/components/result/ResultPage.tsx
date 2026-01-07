@@ -465,10 +465,10 @@ export function ResultPage({
           <p className="text-base font-bold text-blue-600 mb-4">
             🎉 개인회생으로 새 출발이 가능해요!
           </p>
-          <div className="flex items-center justify-center gap-6">
-            {/* 원형 프로그레스 */}
-            <div className="relative">
-              <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
+          <div className="flex items-center justify-center gap-4">
+            {/* 원형 프로그레스 - 고정 크기 */}
+            <div className="relative flex-shrink-0 w-28 h-28">
+              <svg className="w-28 h-28" viewBox="0 0 120 120" style={{ transform: 'rotate(-90deg)' }}>
                 <defs>
                   <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" style={{ stopColor: '#2563EB', stopOpacity: 1 }} />
@@ -479,23 +479,24 @@ export function ResultPage({
                 <circle
                   cx="60" cy="60" r="54" stroke="url(#goldGradient)" strokeWidth="8" fill="none"
                   strokeDasharray={circumference} strokeDashoffset={strokeDashoffset} strokeLinecap="round"
+                  style={{ transition: 'none' }}
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-4xl font-black text-gray-900">{animatedRate}%</div>
-                <div className="text-sm text-gray-500 font-medium">탕감률</div>
+                <div className="text-3xl font-black text-gray-900 tabular-nums">{animatedRate}%</div>
+                <div className="text-xs text-gray-500 font-medium">탕감률</div>
               </div>
             </div>
-            {/* 금액 정보 */}
-            <div className="text-left min-w-[140px]">
-              <p className="text-sm text-gray-500 font-medium">예상 탕감액</p>
-              <p className="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tabular-nums whitespace-nowrap">
+            {/* 금액 정보 - 고정 크기 */}
+            <div className="text-left flex-shrink-0" style={{ minWidth: '130px' }}>
+              <p className="text-xs text-gray-500 font-medium">예상 탕감액</p>
+              <p className="text-xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tabular-nums whitespace-nowrap">
                 {animatedAmount.toLocaleString()}원
               </p>
-              <div className="mt-3 pt-3 border-t border-gray-200">
-                <p className="text-sm text-gray-500">월 상환액</p>
-                <p className="text-xl font-bold text-gray-900 tabular-nums whitespace-nowrap">{Math.round(result.monthlyPayment).toLocaleString()}원</p>
-                <p className="text-sm text-gray-400">({result.repaymentPeriod}개월)</p>
+              <div className="mt-2 pt-2 border-t border-gray-200">
+                <p className="text-xs text-gray-500">월 상환액</p>
+                <p className="text-lg font-bold text-gray-900 tabular-nums whitespace-nowrap">{Math.round(result.monthlyPayment).toLocaleString()}원</p>
+                <p className="text-xs text-gray-400">({result.repaymentPeriod}개월)</p>
               </div>
             </div>
           </div>
