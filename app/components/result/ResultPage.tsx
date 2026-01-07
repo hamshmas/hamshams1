@@ -487,14 +487,14 @@ export function ResultPage({
               </div>
             </div>
             {/* 금액 정보 */}
-            <div className="text-left">
+            <div className="text-left min-w-[140px]">
               <p className="text-sm text-gray-500 font-medium">예상 탕감액</p>
-              <p className="text-3xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <p className="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tabular-nums whitespace-nowrap">
                 {animatedAmount.toLocaleString()}원
               </p>
               <div className="mt-3 pt-3 border-t border-gray-200">
                 <p className="text-sm text-gray-500">월 상환액</p>
-                <p className="text-2xl font-bold text-gray-900">{Math.round(result.monthlyPayment).toLocaleString()}원</p>
+                <p className="text-xl font-bold text-gray-900 tabular-nums whitespace-nowrap">{Math.round(result.monthlyPayment).toLocaleString()}원</p>
                 <p className="text-sm text-gray-400">({result.repaymentPeriod}개월)</p>
               </div>
             </div>
