@@ -22,7 +22,9 @@
       "Bash(npm install:*)",
       "Bash(npm audit fix:*)",
       "Bash(gh auth status:*)",
-      "Bash(git remote set-url:*)"
+      "Bash(git remote set-url:*)",
+      "Bash(node test-referer.js:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

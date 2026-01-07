@@ -18,7 +18,7 @@ import { IncomeTypeSelection } from "@/app/components/income";
 import { useDependentCalculation } from "@/app/hooks/useDependentCalculation";
 import { getCourtName } from "@/utils/courtJurisdiction";
 import type { IncomeType } from "@/app/types";
-import { getKakaoUrlWithRef } from "@/app/config/consultation";
+import { KAKAO_CONSULTATION_URL } from "@/app/config/consultation";
 
 const LAST_UPDATED = "2025.01.06";
 const PHONE_NUMBER = "02-6101-3100";
@@ -576,9 +576,9 @@ export default function Home() {
       {currentStep >= 1 && (
         <div className="fixed right-3 bottom-1/4 z-50 flex flex-col gap-3">
           <a
-            href={getKakaoUrlWithRef()}
+            href={KAKAO_CONSULTATION_URL}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener"
             className="flex items-center gap-2 px-4 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-full shadow-lg transition-all hover:scale-105"
           >
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
