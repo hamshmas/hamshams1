@@ -160,8 +160,8 @@ export default function Home() {
       setIsLoading(true);
 
       try {
-        // 최소 5.5초 로딩 시간 보장 (CTA 메시지 노출)
-        const minLoadingTime = new Promise(resolve => setTimeout(resolve, 5500));
+        // 최소 3초 로딩 시간 보장 (CTA 메시지 노출)
+        const minLoadingTime = new Promise(resolve => setTimeout(resolve, 3000));
 
         const response = await fetch('/api/calculate', {
           method: 'POST',

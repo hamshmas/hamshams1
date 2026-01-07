@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { FormData, CalculationResult, HousingType, MaritalStatus } from "@/app/types";
 import { getCourtName } from "@/utils/courtJurisdiction";
 import { generateConsultationMessage } from "@/utils/generateConsultationMessage";
@@ -72,53 +72,6 @@ export function ResultPage({
   const hasNoIncome = !hasMoreAssetThanDebt && result.monthlyPayment <= 0;
   // 개인회생 가능 여부
   const canShowCelebration = !hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation;
-
-  // 성공 사례 데이터 (한 번만 생성, 리렌더링에도 유지)
-  const testimonialData = useMemo(() => {
-    // 시드 기반 난수 생성 (같은 입력값이면 같은 결과)
-    const seed = formData.totalDebt + result.monthlyPayment;
-    const seededRandom = (offset: number) => {
-      const x = Math.sin(seed + offset) * 10000;
-      return x - Math.floor(x);
-    };
-
-    const debtVariation = 0.75 + seededRandom(1) * 0.4; // 0.75~1.15
-    const paymentVariation = 0.7 + seededRandom(2) * 0.5; // 0.7~1.2
-    const similarDebt = Math.round(formData.totalDebt * debtVariation / 10000000) * 1000;
-    const similarPayment = Math.round(result.monthlyPayment * paymentVariation / 10000);
-    // 상환기간은 실제 계산 결과와 동일하게
-    const similarPeriod = result.repaymentPeriod;
-    const names = ['김', '이', '박', '최', '정', '강', '조', '윤', '장', '임'];
-    const randomName = names[Math.floor(seededRandom(4) * names.length)];
-    const regions = ['서울', '경기', '인천', '부산', '대구', '대전', '광주', '수원', '성남', '용인'];
-    const randomRegion = regions[Math.floor(seededRandom(5) * regions.length)];
-
-    const debtText = similarDebt >= 10000
-      ? `${Math.round(similarDebt / 10000)}억${similarDebt % 10000 > 0 ? ` ${Math.round((similarDebt % 10000) / 1000)}천` : ''}만원`
-      : `${Math.round(similarDebt / 1000)}천만원`;
-
-    // 다양한 후기 문구
-    const testimonials = [
-      `매달 이자만 내던 게 엊그제 같은데, 이제 끝이 보여요.`,
-      `변호사님 덕분에 새 출발 할 수 있게 됐어요. 감사합니다.`,
-      `처음엔 반신반의했는데, 정말 이렇게 줄어들 줄 몰랐어요.`,
-      `독촉 전화 안 받아도 되니까 마음이 편해졌어요.`,
-      `가족들한테 미안했는데, 이제 다시 시작합니다.`,
-      `빚 때문에 잠 못 자던 날들이 끝났어요.`,
-      `월급 받으면 다 이자로 나가던 게 이젠 옛말이에요.`,
-      `상담받길 정말 잘했어요. 진작 할 걸 그랬어요.`,
-    ];
-    const randomTestimonial = testimonials[Math.floor(seededRandom(6) * testimonials.length)];
-
-    return {
-      region: randomRegion,
-      name: randomName,
-      debtText,
-      payment: similarPayment,
-      period: similarPeriod,
-      testimonial: randomTestimonial,
-    };
-  }, [formData.totalDebt, result.monthlyPayment]);
 
   // 탕감률 & 탕감액 카운트업 애니메이션
   useEffect(() => {
@@ -507,16 +460,15 @@ export function ResultPage({
           </div>
         </div>
       ) : (
-        // 개선된 결과 화면 - 시각적 임팩트 강화
-        <div className="text-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-4 shadow-xl border-2 border-blue-200">
-          {/* 상단 축하 메시지 */}
-          <p className="text-xs font-semibold text-blue-600 mb-2">
+        // 간소화된 결과 화면 - 큰 글씨 + 핵심만
+        <div className="text-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-2xl p-5 shadow-xl border-2 border-blue-200">
+          <p className="text-base font-bold text-blue-600 mb-4">
             🎉 개인회생으로 새 출발이 가능해요!
           </p>
-          {/* 원형 프로그레스 + 탕감률 */}
-          <div className="flex items-center justify-center gap-5">
+          <div className="flex items-center justify-center gap-6">
+            {/* 원형 프로그레스 */}
             <div className="relative">
-              <svg className="w-28 h-28 transform -rotate-90" viewBox="0 0 120 120">
+              <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 120 120">
                 <defs>
                   <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" style={{ stopColor: '#2563EB', stopOpacity: 1 }} />
@@ -530,112 +482,65 @@ export function ResultPage({
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-3xl font-black text-gray-900">{animatedRate}%</div>
-                <div className="text-xs text-gray-500 font-medium">탕감률</div>
+                <div className="text-4xl font-black text-gray-900">{animatedRate}%</div>
+                <div className="text-sm text-gray-500 font-medium">탕감률</div>
               </div>
             </div>
+            {/* 금액 정보 */}
             <div className="text-left">
-              <p className="text-xs text-gray-500 font-medium">예상 탕감액</p>
-              <p className="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              <p className="text-sm text-gray-500 font-medium">예상 탕감액</p>
+              <p className="text-3xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 {animatedAmount.toLocaleString()}원
               </p>
-              <div className="mt-2 pt-2 border-t border-gray-200">
-                <p className="text-xs text-gray-500">월 상환액</p>
-                <p className="text-lg font-bold text-gray-900">{Math.round(result.monthlyPayment).toLocaleString()}원</p>
-                <p className="text-xs text-gray-400">({result.repaymentPeriod}개월)</p>
+              <div className="mt-3 pt-3 border-t border-gray-200">
+                <p className="text-sm text-gray-500">월 상환액</p>
+                <p className="text-2xl font-bold text-gray-900">{Math.round(result.monthlyPayment).toLocaleString()}원</p>
+                <p className="text-sm text-gray-400">({result.repaymentPeriod}개월)</p>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 성공 사례 - 사회적 증거 (결과 로드 시 바로 표시) */}
+      {/* 긴급성 메시지 (한 줄로 간소화) */}
       {canShowCelebration && (
-        <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 border border-green-200 animate-fadeIn">
-          <p className="text-xs font-semibold text-green-700 mb-1.5 flex items-center gap-1">
-            <span>💬</span> 비슷한 상황 실제 사례
-          </p>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            "{testimonialData.region} {testimonialData.name}OO님 · 채무 {testimonialData.debtText}, 월 {testimonialData.payment}만원씩 {testimonialData.period}개월 상환 중. {testimonialData.testimonial}"
+        <div className="bg-red-50 rounded-xl px-4 py-3 border border-red-200 text-center">
+          <p className="text-base font-bold text-red-600">
+            ⏰ 하루 미룰 때마다 +{Math.round(formData.totalDebt * 0.20 / 365).toLocaleString()}원 이자 발생
           </p>
         </div>
       )}
 
-      {/* 손실 회피 메시지 - 긴급성 강조 */}
-      {!hasMoreAssetThanDebt && !hasNoIncome && !result.liquidationValueViolation && (
-        <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-3 border border-red-200">
-          <p className="text-xs font-bold text-red-700 mb-2 flex items-center gap-1">
-            <span>⏰</span> 매일 미루면 발생하는 추가 이자
-          </p>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-white/60 rounded-lg py-1.5 px-1">
-              <p className="text-xs text-gray-500">하루</p>
-              <p className="text-sm font-black text-red-600">
-                +{Math.round(formData.totalDebt * 0.20 / 365).toLocaleString()}원
-              </p>
-            </div>
-            <div className="bg-white/60 rounded-lg py-1.5 px-1">
-              <p className="text-xs text-gray-500">1주일</p>
-              <p className="text-sm font-black text-red-600">
-                +{Math.round(formData.totalDebt * 0.20 / 365 * 7).toLocaleString()}원
-              </p>
-            </div>
-            <div className="bg-white/60 rounded-lg py-1.5 px-1">
-              <p className="text-xs text-gray-500">1개월</p>
-              <p className="text-sm font-black text-red-600">
-                +{Math.round(formData.totalDebt * 0.20 / 12).toLocaleString()}원
-              </p>
-            </div>
-          </div>
-          <p className="text-xs text-gray-600 mt-2 text-center">
-            💡 빨리 신청할수록 더 많이 탕감받습니다
-          </p>
-        </div>
-      )}
-
-      {/* 블랙스톤 법률사무소 상담 영역 - 전문성 강화 + 단일 CTA */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-3">
-        {/* 상담 가능 상태 인디케이터 */}
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <span className="relative flex h-2.5 w-2.5">
+      {/* 블랙스톤 CTA - 간소화 */}
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl p-4">
+        <div className="flex items-center justify-center gap-2 mb-3">
+          <span className="relative flex h-3 w-3">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
           </span>
-          <span className="text-green-400 text-xs font-medium">지금 상담 가능</span>
-          <span className="text-slate-500 text-xs">· 평균 3분 내 응답</span>
+          <span className="text-green-400 text-sm font-bold">지금 상담 가능</span>
         </div>
 
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <p className="text-white font-bold text-sm">블랙스톤 법률사무소</p>
-            <p className="text-slate-400 text-[11px]">개인회생 전문 15년 · 누적 5,000건+ · 인가율 98%</p>
-          </div>
-        </div>
+        <p className="text-white font-bold text-base text-center mb-1">블랙스톤 법률사무소</p>
+        <p className="text-slate-400 text-sm text-center mb-4">개인회생 전문 · 인가율 98%</p>
 
-        {/* 단일 CTA 집중 */}
         <button
           onClick={handleConsultationClick}
-          className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-3 px-4 rounded-xl transition-all text-base shadow-lg animate-cta-pulse"
+          className="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-black font-bold py-4 px-4 rounded-xl transition-all text-lg shadow-lg animate-cta-pulse"
         >
           지금 바로 무료 상담받기
         </button>
 
-        {/* 안심 문구 + 보조 옵션 */}
-        <div className="flex items-center justify-center gap-2 mt-2 text-xs">
-          <span className="text-slate-400">✓ 강압적 권유 없음</span>
-          <span className="text-slate-600">|</span>
-          <span className="text-slate-400">전화 <button onClick={() => setShowContactModal(true)} className="text-slate-300 underline">02-6101-3100</button></span>
-        </div>
+        <p className="text-slate-400 text-sm text-center mt-3">
+          전화상담 <button onClick={() => setShowContactModal(true)} className="text-white underline font-medium">02-6101-3100</button>
+        </p>
       </div>
 
-      {/* 네비게이션 버튼 */}
-      <div className="grid grid-cols-2 gap-2">
-        <button onClick={onBack} className="secondary-button text-sm py-1.5">
-          ← 이전
-        </button>
-        <button onClick={onRestart} className="secondary-button text-sm py-1.5">
-          처음부터 →
-        </button>
+      {/* 네비게이션 - 간소화 */}
+      <div className="flex justify-center gap-4 text-sm text-gray-500">
+        <button onClick={onBack} className="hover:text-gray-700">← 이전</button>
+        <span>|</span>
+        <button onClick={onRestart} className="hover:text-gray-700">처음부터</button>
       </div>
 
       <CopySuccessNotification isVisible={copySuccess} />
