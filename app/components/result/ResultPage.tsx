@@ -5,7 +5,7 @@ import type { FormData, CalculationResult, HousingType, MaritalStatus } from "@/
 import { getCourtName } from "@/utils/courtJurisdiction";
 import { generateConsultationMessage } from "@/utils/generateConsultationMessage";
 import { ConsultationModal, CopySuccessNotification } from "@/app/components/consultation";
-import { KAKAO_CONSULTATION_URL, COPY_SUCCESS_NOTIFICATION_DURATION } from "@/app/config/consultation";
+import { getKakaoUrlWithRef, COPY_SUCCESS_NOTIFICATION_DURATION } from "@/app/config/consultation";
 import { supabase } from "@/lib/supabase";
 import { CelebrationEffects } from "./CelebrationEffects";
 
@@ -312,8 +312,10 @@ export function ResultPage({
       console.error('[Consultation] 상담 신청 저장 오류:', error);
     }
 
-    // 카카오톡 채널 열기
-    window.open(KAKAO_CONSULTATION_URL, "_blank", "noopener,noreferrer");
+    // 카카오톡 채널 열기 (UTM 유입 정보 포함)
+    const utmSource = sessionStorage.getItem('utm_source');
+    const kakaoUrl = getKakaoUrlWithRef(utmSource || undefined);
+    window.open(kakaoUrl, "_blank", "noopener,noreferrer");
   };
   const getColorByRate = (rate: number) => {
     if (rate >= 70) return { text: 'text-green-600', bg: 'bg-green-50', border: 'border-green-200', stroke: '#16a34a' };
