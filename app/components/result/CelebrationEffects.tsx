@@ -84,7 +84,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
 
     // 초기 컨페티 생성
     const initialConfetti: Confetti[] = [];
-    const initialCount = reductionRate >= 80 ? 36 : reductionRate >= 60 ? 24 : 18;
+    const initialCount = reductionRate >= 80 ? 47 : reductionRate >= 60 ? 31 : 23;
     for (let i = 0; i < initialCount; i++) {
       const angleDegree = 45 + (i / initialCount) * 45;
       initialConfetti.push(createConfettiAtAngle(angleDegree));
@@ -93,7 +93,7 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
     setConfetti(initialConfetti);
 
     let lastTime = performance.now();
-    const spawnCount = reductionRate >= 80 ? 6 : reductionRate >= 60 ? 5 : 4;
+    const spawnCount = reductionRate >= 80 ? 8 : reductionRate >= 60 ? 7 : 5;
 
     const animate = (currentTime: number) => {
       const deltaTime = currentTime - lastTime;
@@ -105,12 +105,12 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
       confettiRef.current = confettiRef.current
         .map(c => ({
           ...c,
-          x: c.x + c.vx * 0.45 * dt,
-          y: c.y + c.vy * 0.45 * dt,
-          vy: c.vy + 0.04 * dt,
+          x: c.x + c.vx * 0.315 * dt,
+          y: c.y + c.vy * 0.315 * dt,
+          vy: c.vy + 0.028 * dt,
           vx: c.vx * Math.pow(0.995, dt),
           rotation: c.rotation + c.rotationSpeed * 0.8 * dt,
-          opacity: c.y > 40 ? Math.max(0, c.opacity - 0.03 * dt) : c.opacity,
+          opacity: c.y > 40 ? Math.max(0, c.opacity - 0.02 * dt) : c.opacity,
         }))
         .filter(c => c.y < 50 && c.opacity > 0 && c.x < 120);
 
