@@ -132,8 +132,8 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
         }
       }
 
-      // 렌더링 업데이트 (30fps로 제한하여 성능 최적화)
-      if (currentTime - lastRenderTime.current > 33) { // ~30fps
+      // 렌더링 업데이트 (45fps로 부드럽게)
+      if (currentTime - lastRenderTime.current > 22) { // ~45fps
         lastRenderTime.current = currentTime;
         setConfetti([...confettiRef.current]);
       }
