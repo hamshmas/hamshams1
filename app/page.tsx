@@ -6,7 +6,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { FormData, CalculationResult, CourtCode } from "@/app/types";
 import { AssetIntegratedForm } from "@/app/components/asset/AssetIntegratedForm";
 import { InputStep } from "@/app/components/steps";
@@ -35,15 +35,6 @@ const UPDATE_HISTORY = [
   { date: "2025.01.01", content: "소액 입력 시 단위 확인 기능 추가" },
 ];
 
-// 채무자에게 희망과 격려를 주는 명언 리스트
-const MOTIVATIONAL_QUOTES = [
-  { text: "이 또한 지나갑니다", author: "페르시아 속담" },
-  { text: "밤이 가장 어두울 때가 새벽이 가장 가까울 때입니다", author: "토마스 풀러" },
-  { text: "인생에서 가장 큰 영광은 넘어지지 않는 것이 아니라 넘어질 때마다 일어서는 것입니다", author: "공자" },
-  { text: "가난은 부끄러운 것이 아닙니다. 가난을 부끄러워하는 것이 부끄러운 것입니다", author: "벤자민 프랭클린" },
-  { text: "역경은 진리로 향하는 첫 번째 길입니다", author: "바이런" },
-];
-
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(0); // 0: 웰컴, 1: 주소, 2~6: 입력 단계
   const [isLoading, setIsLoading] = useState(false);
@@ -63,12 +54,6 @@ export default function Home() {
   const [displayDailyMaxRate, setDisplayDailyMaxRate] = useState(0); // 화면에 표시되는 탕감율 (애니메이션)
   const hasAnimatedRef = useRef(false); // 애니메이션 완료 여부
   const [showUpdateHistory, setShowUpdateHistory] = useState(false); // 업데이트 이력 모달
-
-  // 랜덤 명언 선택 (컴포넌트 마운트 시 한 번만)
-  const randomQuote = useMemo(() => {
-    const randomIndex = Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length);
-    return MOTIVATIONAL_QUOTES[randomIndex];
-  }, []);
 
   // 사용자 수 조회 및 애니메이션
   useEffect(() => {
@@ -297,17 +282,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* 격려 명언 */}
-                <div className="mt-6 px-4 py-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
-                  <p className="text-gray-700 text-sm italic leading-relaxed text-center">
-                    &ldquo;{randomQuote.text}&rdquo;
-                  </p>
-                  {randomQuote.author && (
-                    <p className="text-xs text-gray-500 mt-1 text-right">
-                      — {randomQuote.author}
-                    </p>
-                  )}
-                </div>
               </div>
 
               {/* 하단 통계 영역 */}
