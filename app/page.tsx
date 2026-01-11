@@ -458,8 +458,8 @@ export default function Home() {
                   {/* 직접 입력 모드 */}
                   {dependentInputMode === 'direct' && (
                     <InputStep
-                      title="함께 사는 가족이 몇 명이에요?"
-                      subtitle="본인도 포함해주세요 · 가족 수에 따라 생활비가 달라져요"
+                      title="본인 포함, 함께 사는 가족은 몇 명이에요?"
+                      subtitle="혼자 살면 1명, 배우자와 둘이면 2명"
                       onNext={(value) => handleNext("dependents", value)}
                       onBack={() => {
                         setDependentInputMode(null);
