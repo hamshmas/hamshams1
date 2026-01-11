@@ -523,7 +523,18 @@ export function ResultPage({
         </div>
 
         <p className="text-white font-bold text-base text-center mb-1">블랙스톤 법률사무소</p>
-        <p className="text-slate-400 text-sm text-center mb-4">개인회생 전문 · 인가율 98%</p>
+        <p className="text-slate-400 text-sm text-center mb-3">개인회생 전문 · 인가율 98%</p>
+
+        {/* 무료 상담 시 확인 가능한 혜택 */}
+        <div className="bg-slate-800/50 rounded-lg p-3 mb-4">
+          <p className="text-slate-300 text-xs font-semibold mb-2">무료 상담 시 확인 가능</p>
+          <ul className="text-slate-400 text-xs space-y-1">
+            <li>• 내 상황에 맞는 정확한 탕감률</li>
+            <li>• 기각 위험 요소 사전 점검</li>
+            <li>• 압류/독촉 즉시 해결 방법</li>
+            <li>• 개인회생, 워크아웃 병행 전략</li>
+          </ul>
+        </div>
 
         <button
           onClick={handleConsultationClick}
