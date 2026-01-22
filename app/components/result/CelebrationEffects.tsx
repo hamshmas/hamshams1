@@ -108,12 +108,12 @@ export function CelebrationEffects({ reductionRate, isActive }: CelebrationEffec
       confettiRef.current = confettiRef.current
         .map(c => ({
           ...c,
-          x: c.x + c.vx * 0.264 * dt,
-          y: c.y + c.vy * 0.264 * dt,
-          vy: c.vy + 0.0216 * dt,
-          vx: c.vx * Math.pow(0.998, dt),
-          rotation: c.rotation + c.rotationSpeed * 0.6 * dt,
-          opacity: c.y > 50 ? Math.max(0, c.opacity - 0.014 * dt) : c.opacity,
+          x: c.x + c.vx * 0.396 * dt,
+          y: c.y + c.vy * 0.396 * dt,
+          vy: c.vy + 0.0324 * dt,
+          vx: c.vx * Math.pow(0.997, dt),
+          rotation: c.rotation + c.rotationSpeed * 0.9 * dt,
+          opacity: c.y > 50 ? Math.max(0, c.opacity - 0.02 * dt) : c.opacity,
         }))
         .filter(c => c.y < 110 && c.opacity > 0 && c.x > -10 && c.x < 120);
 
