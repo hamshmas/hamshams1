@@ -32,7 +32,6 @@ export function DependentIntegratedForm({
   );
   const showSpouseIncome = maritalStatus === "married" && isMainCourt;
 
-  // 자산 단계에서 기혼 선택 시 자동 설정
   useEffect(() => {
     if (isMarriedForAsset === true) {
       setMaritalStatus("married");
@@ -47,7 +46,7 @@ export function DependentIntegratedForm({
       if (isMainCourt && hasNoSpouseIncome) return children + 1;
       return children / 2 + 1;
     }
-    return children + 1; // 미혼/이혼
+    return children + 1;
   };
 
   const isValid =
@@ -59,208 +58,217 @@ export function DependentIntegratedForm({
 
   return (
     <div className="flex-1 flex flex-col animate-fadeIn">
-      {/* 제목 */}
-      <div className="mb-6">
-        <h2 className="text-[26px] font-bold text-gray-900 leading-tight mb-2">
+      {/* 제목 - Apple 스타일 */}
+      <div className="mb-8">
+        <h2 className="text-[28px] font-bold text-apple-gray-800 leading-tight tracking-tight mb-3">
           부양가족 수를 입력해주세요
         </h2>
-        <p className="text-[15px] text-gray-500">마지막 단계예요!</p>
+        <p className="text-[15px] text-apple-gray-500">마지막 단계예요!</p>
       </div>
 
-      {/* 입력 모드 선택 */}
-      <div className="space-y-3 mb-6">
-        <label className="text-sm font-semibold text-gray-700">입력 방식</label>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => setInputMode("direct")}
-            className={`p-4 rounded-xl text-center transition-all border-2 ${
-              inputMode === "direct"
-                ? "bg-blue-50 border-blue-500 text-blue-700"
-                : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <p className="font-semibold">직접 입력</p>
-            <p className="text-xs text-gray-500 mt-1">숫자를 알고 있어요</p>
-          </button>
-          <button
-            onClick={() => setInputMode("calculate")}
-            className={`p-4 rounded-xl text-center transition-all border-2 ${
-              inputMode === "calculate"
-                ? "bg-blue-50 border-blue-500 text-blue-700"
-                : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <p className="font-semibold">자동 계산</p>
-            <p className="text-xs text-gray-500 mt-1">잘 모르겠어요</p>
-          </button>
-        </div>
-      </div>
-
-      {/* 직접 입력 모드 */}
-      {inputMode === "direct" && (
-        <div className="space-y-3 animate-fadeIn">
-          <label className="text-sm font-semibold text-gray-700">
-            본인 포함 함께 사는 가족 수
-          </label>
-          <div className="flex items-baseline border-b-2 border-gray-200 focus-within:border-blue-500 pb-2">
-            <input
-              type="number"
-              inputMode="numeric"
-              value={directValue}
-              onChange={(e) => setDirectValue(e.target.value)}
-              className="flex-1 text-[32px] font-bold text-gray-900 outline-none bg-transparent placeholder:text-gray-300"
-              placeholder="1"
-              min="1"
-              autoFocus
-            />
-            <span className="text-[20px] font-medium text-gray-400 ml-2">
-              명
-            </span>
+      <div className="flex-1 space-y-6">
+        {/* 입력 모드 선택 - Apple 스타일 */}
+        <div className="space-y-3">
+          <label className="text-[14px] font-semibold text-apple-gray-600">입력 방식</label>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => setInputMode("direct")}
+              className={`p-4 rounded-apple-lg text-center transition-all duration-200 ${
+                inputMode === "direct"
+                  ? "bg-apple-blue-50 border-2 border-apple-blue-500"
+                  : "bg-apple-gray-50 border-2 border-transparent hover:bg-apple-gray-100"
+              }`}
+            >
+              <p className={`font-semibold text-[15px] ${
+                inputMode === "direct" ? "text-apple-blue-500" : "text-apple-gray-800"
+              }`}>직접 입력</p>
+              <p className="text-[13px] text-apple-gray-400 mt-1">숫자를 알고 있어요</p>
+            </button>
+            <button
+              onClick={() => setInputMode("calculate")}
+              className={`p-4 rounded-apple-lg text-center transition-all duration-200 ${
+                inputMode === "calculate"
+                  ? "bg-apple-blue-50 border-2 border-apple-blue-500"
+                  : "bg-apple-gray-50 border-2 border-transparent hover:bg-apple-gray-100"
+              }`}
+            >
+              <p className={`font-semibold text-[15px] ${
+                inputMode === "calculate" ? "text-apple-blue-500" : "text-apple-gray-800"
+              }`}>자동 계산</p>
+              <p className="text-[13px] text-apple-gray-400 mt-1">잘 모르겠어요</p>
+            </button>
           </div>
-          <p className="text-sm text-gray-500">
-            혼자 살면 1명, 배우자와 둘이면 2명
-          </p>
         </div>
-      )}
 
-      {/* 자동 계산 모드 */}
-      {inputMode === "calculate" && (
-        <div className="space-y-5 animate-fadeIn">
-          {/* 혼인 상태 (자산에서 기혼 선택 안한 경우만) */}
-          {isMarriedForAsset !== true && (
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-gray-700">
-                혼인 상태
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {(["single", "married", "divorced"] as MaritalStatus[]).map(
-                  (status) => (
+        {/* 직접 입력 모드 - Apple 스타일 */}
+        {inputMode === "direct" && (
+          <div className="space-y-3 animate-fadeIn">
+            <label className="text-[14px] font-semibold text-apple-gray-600">
+              본인 포함 함께 사는 가족 수
+            </label>
+            <div className="flex items-baseline border-b-2 border-apple-gray-200 focus-within:border-apple-blue-500 transition-all duration-200 pb-3">
+              <input
+                type="number"
+                inputMode="numeric"
+                value={directValue}
+                onChange={(e) => setDirectValue(e.target.value)}
+                className="flex-1 text-[36px] font-bold text-apple-gray-800 outline-none bg-transparent placeholder:text-apple-gray-300 tracking-tight"
+                placeholder="1"
+                min="1"
+                autoFocus
+              />
+              <span className="text-[18px] font-medium text-apple-gray-400 ml-2">
+                명
+              </span>
+            </div>
+            <p className="text-[13px] text-apple-gray-400">
+              혼자 살면 1명, 배우자와 둘이면 2명
+            </p>
+          </div>
+        )}
+
+        {/* 자동 계산 모드 - Apple 스타일 */}
+        {inputMode === "calculate" && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* 혼인 상태 */}
+            {isMarriedForAsset !== true && (
+              <div className="space-y-3">
+                <label className="text-[14px] font-semibold text-apple-gray-600">
+                  혼인 상태
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(["single", "married", "divorced"] as MaritalStatus[]).map(
+                    (status) => (
+                      <button
+                        key={status}
+                        onClick={() => {
+                          setMaritalStatus(status);
+                          setHasNoSpouseIncome(null);
+                        }}
+                        className={`p-3 rounded-apple text-[14px] font-semibold transition-all duration-200 ${
+                          maritalStatus === status
+                            ? "bg-apple-blue-500 text-white shadow-apple-sm"
+                            : "bg-apple-gray-100 text-apple-gray-700 hover:bg-apple-gray-200"
+                        }`}
+                      >
+                        {status === "single"
+                          ? "미혼"
+                          : status === "married"
+                            ? "기혼"
+                            : "이혼"}
+                      </button>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* 자녀 수 */}
+            {(maritalStatus || isMarriedForAsset === true) && (
+              <div className="space-y-3 animate-fadeIn">
+                <label className="text-[14px] font-semibold text-apple-gray-600">
+                  미성년 자녀 수
+                </label>
+                <div className="flex items-baseline border-b-2 border-apple-gray-200 focus-within:border-apple-blue-500 transition-all duration-200 pb-3">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    value={childrenCount}
+                    onChange={(e) => setChildrenCount(e.target.value)}
+                    className="flex-1 text-[36px] font-bold text-apple-gray-800 outline-none bg-transparent placeholder:text-apple-gray-300 tracking-tight"
+                    placeholder="0"
+                    min="0"
+                    autoFocus
+                  />
+                  <span className="text-[18px] font-medium text-apple-gray-400 ml-2">
+                    명
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  {[0, 1, 2, 3].map((num) => (
                     <button
-                      key={status}
-                      onClick={() => {
-                        setMaritalStatus(status);
-                        // 상태 변경 시 배우자 소득 초기화
-                        setHasNoSpouseIncome(null);
-                      }}
-                      className={`p-3 rounded-xl text-sm font-semibold transition-all border-2 ${
-                        maritalStatus === status
-                          ? "bg-blue-50 border-blue-500 text-blue-700"
-                          : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                      key={num}
+                      onClick={() => setChildrenCount(String(num))}
+                      className={`px-4 py-2 rounded-apple text-[14px] font-medium transition-all duration-200 ${
+                        childrenCount === String(num)
+                          ? "bg-apple-blue-500 text-white"
+                          : "bg-apple-gray-100 text-apple-gray-700 hover:bg-apple-gray-200"
                       }`}
                     >
-                      {status === "single"
-                        ? "미혼"
-                        : status === "married"
-                          ? "기혼"
-                          : "이혼"}
+                      {num}명
                     </button>
-                  )
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* 자녀 수 */}
-          {(maritalStatus || isMarriedForAsset === true) && (
-            <div className="space-y-3 animate-fadeIn">
-              <label className="text-sm font-semibold text-gray-700">
-                미성년 자녀 수
-              </label>
-              <div className="flex items-baseline border-b-2 border-gray-200 focus-within:border-blue-500 pb-2">
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  value={childrenCount}
-                  onChange={(e) => setChildrenCount(e.target.value)}
-                  className="flex-1 text-[32px] font-bold text-gray-900 outline-none bg-transparent placeholder:text-gray-300"
-                  placeholder="0"
-                  min="0"
-                  autoFocus
-                />
-                <span className="text-[20px] font-medium text-gray-400 ml-2">
-                  명
-                </span>
-              </div>
-              <div className="flex gap-2">
-                {[0, 1, 2, 3].map((num) => (
+            {/* 배우자 소득 */}
+            {showSpouseIncome && childrenCount !== "" && (
+              <div className="space-y-3 animate-fadeIn">
+                <label className="text-[14px] font-semibold text-apple-gray-600">
+                  배우자 소득 유무
+                </label>
+                <div className="grid grid-cols-2 gap-3">
                   <button
-                    key={num}
-                    onClick={() => setChildrenCount(String(num))}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      childrenCount === String(num)
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    onClick={() => setHasNoSpouseIncome(true)}
+                    className={`p-4 rounded-apple-lg text-center transition-all duration-200 ${
+                      hasNoSpouseIncome === true
+                        ? "bg-apple-blue-50 border-2 border-apple-blue-500"
+                        : "bg-apple-gray-50 border-2 border-transparent hover:bg-apple-gray-100"
                     }`}
                   >
-                    {num}명
+                    <p className={`font-semibold text-[15px] ${
+                      hasNoSpouseIncome === true ? "text-apple-blue-500" : "text-apple-gray-800"
+                    }`}>소득 없음</p>
                   </button>
-                ))}
+                  <button
+                    onClick={() => setHasNoSpouseIncome(false)}
+                    className={`p-4 rounded-apple-lg text-center transition-all duration-200 ${
+                      hasNoSpouseIncome === false
+                        ? "bg-apple-blue-50 border-2 border-apple-blue-500"
+                        : "bg-apple-gray-50 border-2 border-transparent hover:bg-apple-gray-100"
+                    }`}
+                  >
+                    <p className={`font-semibold text-[15px] ${
+                      hasNoSpouseIncome === false ? "text-apple-blue-500" : "text-apple-gray-800"
+                    }`}>소득 있음</p>
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        )}
 
-          {/* 배우자 소득 (기혼 + 주요법원만) */}
-          {showSpouseIncome && childrenCount !== "" && (
-            <div className="space-y-3 animate-fadeIn">
-              <label className="text-sm font-semibold text-gray-700">
-                배우자 소득 유무
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => setHasNoSpouseIncome(true)}
-                  className={`p-4 rounded-xl text-center transition-all border-2 ${
-                    hasNoSpouseIncome === true
-                      ? "bg-blue-50 border-blue-500 text-blue-700"
-                      : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  <p className="font-semibold">소득 없음</p>
-                </button>
-                <button
-                  onClick={() => setHasNoSpouseIncome(false)}
-                  className={`p-4 rounded-xl text-center transition-all border-2 ${
-                    hasNoSpouseIncome === false
-                      ? "bg-blue-50 border-blue-500 text-blue-700"
-                      : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  <p className="font-semibold">소득 있음</p>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+        {/* 결과 미리보기 - Apple 스타일 */}
+        {isValid && (
+          <div className="bg-apple-blue-50 border border-apple-blue-100 rounded-apple-lg p-4 animate-fadeIn">
+            <p className="text-[13px] text-apple-gray-500 mb-1">산정 부양가족 수</p>
+            <p className="text-[24px] font-bold text-apple-blue-500 tracking-tight">
+              {calculateDependents()}명
+            </p>
+          </div>
+        )}
+      </div>
 
-      {/* 결과 미리보기 */}
-      {isValid && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-6 animate-fadeIn">
-          <p className="text-sm text-gray-600">산정 부양가족 수</p>
-          <p className="text-2xl font-bold text-blue-600">
-            {calculateDependents()}명
-          </p>
-        </div>
-      )}
-
-      {/* 버튼 */}
+      {/* 버튼 - Apple 스타일 */}
       <div className="mt-auto pt-6">
         <div className="grid grid-cols-2 gap-3">
           <button
             onClick={onBack}
-            className="py-4 rounded-xl text-[17px] font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all"
+            className="py-4 rounded-apple-lg text-[17px] font-semibold bg-apple-gray-100 hover:bg-apple-gray-200 text-apple-gray-700 transition-all duration-200 active:scale-[0.98]"
           >
-            ← 이전
+            이전
           </button>
           <button
             onClick={() => onNext(calculateDependents())}
             disabled={!isValid}
-            className={`py-4 rounded-xl text-[17px] font-semibold transition-all ${
+            className={`py-4 rounded-apple-lg text-[17px] font-semibold transition-all duration-200 ${
               isValid
-                ? "bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                ? "bg-apple-blue-500 hover:bg-apple-blue-600 active:bg-apple-blue-700 active:scale-[0.98] text-white shadow-apple-button"
+                : "bg-apple-gray-100 text-apple-gray-400 cursor-not-allowed"
             }`}
           >
-            결과 확인 →
+            결과 확인
           </button>
         </div>
       </div>

@@ -21,7 +21,6 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
   const homeSido = SIDO_LIST.find(s => s.value === homeRegion);
   const workSido = SIDO_LIST.find(s => s.value === workRegion);
 
-  // 더 유리한 법원 선택 (회생법원 우선)
   const getBetterCourt = () => {
     if (!homeSido) return null;
     if (!workSido) return homeSido;
@@ -29,20 +28,17 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
     const homeIsMain = MAIN_COURTS.includes(homeSido.court);
     const workIsMain = MAIN_COURTS.includes(workSido.court);
 
-    // 회생법원이 있으면 회생법원 우선
     if (homeIsMain && !workIsMain) return homeSido;
     if (!homeIsMain && workIsMain) return workSido;
 
-    // 둘 다 회생법원이거나 둘 다 아니면 집 주소 기준
     return homeSido;
   };
 
   const selectedSido = getBetterCourt();
   const courtInfo = selectedSido ? COURT_DETAILS[selectedSido.court] : null;
-  const priorityAmount = homeSido ? PRIORITY_REPAYMENT[homeSido.region] : 0; // 최우선변제금은 항상 집 주소 기준
+  const priorityAmount = homeSido ? PRIORITY_REPAYMENT[homeSido.region] : 0;
   const isMainCourt = selectedSido ? MAIN_COURTS.includes(selectedSido.court) : false;
 
-  // 직장 법원이 더 유리한지 체크
   const workIsBetter = workSido && homeSido &&
     MAIN_COURTS.includes(workSido.court) &&
     !MAIN_COURTS.includes(homeSido.court);
@@ -52,34 +48,35 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
     onNext({
       selectedRegion: homeSido.label,
       courtJurisdiction: selectedSido.court as CourtCode,
-      priorityRepaymentRegion: homeSido.region as RegionType, // 최우선변제금은 집 주소 기준
+      priorityRepaymentRegion: homeSido.region as RegionType,
     });
   };
 
   return (
-    <div className="space-y-3 animate-slideIn">
-      <div className="space-y-1">
-        <h2 className="text-2xl font-extrabold bg-gradient-to-r from-primary-500 to-accent-500 bg-clip-text text-transparent">
+    <div className="flex-1 flex flex-col animate-fadeIn">
+      {/* 제목 - Apple 스타일 */}
+      <div className="mb-8">
+        <h2 className="text-[28px] font-bold text-apple-gray-800 leading-tight tracking-tight mb-3">
           어디에 거주하시나요?
         </h2>
-        <p className="text-gray-600 text-sm">관할법원과 최우선변제금 계산에 사용됩니다</p>
+        <p className="text-[15px] text-apple-gray-500">관할법원과 최우선변제금 계산에 사용됩니다</p>
       </div>
 
-      {/* 집 주소 선택 그리드 */}
-      <div className="grid grid-cols-3 gap-1.5">
+      {/* 집 주소 선택 그리드 - Apple 스타일 */}
+      <div className="grid grid-cols-3 gap-2 mb-4">
         {SIDO_LIST.map((sido) => {
           const isSelected = homeRegion === sido.value;
           return (
             <button
               key={sido.value}
               onClick={() => setHomeRegion(sido.value)}
-              className={`py-2.5 px-2 rounded-lg text-center transition-all ${
+              className={`py-3 px-2 rounded-apple text-center transition-all duration-200 ${
                 isSelected
-                  ? "bg-blue-500 text-white shadow-md"
-                  : "bg-gray-50 hover:bg-gray-100 text-gray-800"
+                  ? "bg-apple-blue-500 text-white shadow-apple-sm"
+                  : "bg-apple-gray-100 hover:bg-apple-gray-200 text-apple-gray-800"
               }`}
             >
-              <p className={`font-medium text-xs ${isSelected ? "text-white" : "text-gray-900"}`}>
+              <p className={`font-medium text-[13px] ${isSelected ? "text-white" : "text-apple-gray-800"}`}>
                 {sido.label}
               </p>
             </button>
@@ -87,45 +84,45 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
         })}
       </div>
 
-      {/* 직장 주소 입력 토글 */}
+      {/* 직장 주소 입력 토글 - Apple 스타일 */}
       {homeRegion && !showWorkInput && (
         <button
           onClick={() => setShowWorkInput(true)}
-          className="w-full py-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
+          className="w-full py-3 text-[14px] text-apple-blue-500 hover:text-apple-blue-600 font-medium transition-colors"
         >
-          + 직장 주소도 입력하기 (선택)
+          직장 주소도 입력하기 (선택)
         </button>
       )}
 
-      {/* 직장 주소 선택 */}
+      {/* 직장 주소 선택 - Apple 스타일 */}
       {showWorkInput && (
-        <div className="space-y-2 animate-fadeIn">
+        <div className="space-y-3 animate-fadeIn mt-2">
           <div className="flex items-center justify-between">
-            <label className="text-sm font-semibold text-gray-700">직장 지역</label>
+            <label className="text-[14px] font-semibold text-apple-gray-600">직장 지역</label>
             <button
               onClick={() => {
                 setShowWorkInput(false);
                 setWorkRegion(null);
               }}
-              className="text-xs text-gray-500 hover:text-gray-700"
+              className="text-[13px] text-apple-gray-400 hover:text-apple-gray-600 transition-colors"
             >
-              ✕ 취소
+              취소
             </button>
           </div>
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="grid grid-cols-3 gap-2">
             {SIDO_LIST.map((sido) => {
               const isSelected = workRegion === sido.value;
               return (
                 <button
                   key={sido.value}
                   onClick={() => setWorkRegion(sido.value)}
-                  className={`py-2 px-2 rounded-lg text-center transition-all ${
+                  className={`py-2.5 px-2 rounded-apple text-center transition-all duration-200 ${
                     isSelected
-                      ? "bg-purple-500 text-white shadow-md"
-                      : "bg-gray-50 hover:bg-gray-100 text-gray-800"
+                      ? "bg-apple-blue-500 text-white shadow-apple-sm"
+                      : "bg-apple-gray-100 hover:bg-apple-gray-200 text-apple-gray-800"
                   }`}
                 >
-                  <p className={`font-medium text-xs ${isSelected ? "text-white" : "text-gray-900"}`}>
+                  <p className={`font-medium text-[12px] ${isSelected ? "text-white" : "text-apple-gray-800"}`}>
                     {sido.label}
                   </p>
                 </button>
@@ -135,58 +132,60 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
         </div>
       )}
 
-      {/* 선택 결과 표시 */}
+      {/* 선택 결과 표시 - Apple 스타일 */}
       {selectedSido && courtInfo && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 space-y-1.5 animate-fadeIn">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-blue-600 font-bold">관할법원</span>
-            <span className="text-gray-800">{courtInfo.name}</span>
+        <div className="bg-apple-blue-50 border border-apple-blue-100 rounded-apple-lg p-4 space-y-2 animate-fadeIn mt-4">
+          <div className="flex items-center gap-2 text-[14px]">
+            <span className="text-apple-blue-500 font-semibold">관할법원</span>
+            <span className="text-apple-gray-800 font-medium">{courtInfo.name}</span>
             {isMainCourt && (
-              <span className="bg-green-100 text-green-700 text-xs px-1.5 py-0.5 rounded-full">
+              <span className="bg-apple-green-500 text-white text-[11px] px-2 py-0.5 rounded-full font-medium">
                 회생법원
               </span>
             )}
           </div>
           {workIsBetter && (
-            <p className="text-xs text-purple-600 font-medium">
-              ✨ 직장 주소 기준 회생법원으로 진행 (더 유리)
+            <p className="text-[13px] text-apple-blue-500 font-medium">
+              직장 주소 기준 회생법원으로 진행 (더 유리)
             </p>
           )}
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-blue-600 font-bold">최우선변제금</span>
-            <span className="text-gray-800">{(priorityAmount / 10000).toLocaleString()}만원</span>
+          <div className="flex items-center gap-2 text-[14px]">
+            <span className="text-apple-blue-500 font-semibold">최우선변제금</span>
+            <span className="text-apple-gray-800 font-medium">{(priorityAmount / 10000).toLocaleString()}만원</span>
           </div>
           {isMainCourt && (
-            <p className="text-xs text-green-700">
+            <p className="text-[12px] text-apple-gray-500">
               회생법원 관할이므로 배우자 재산이 청산가치에 포함되지 않습니다
             </p>
           )}
         </div>
       )}
 
-      {/* 버튼 */}
-      <div className="grid grid-cols-2 gap-3">
-        {onBack && (
+      {/* 버튼 - Apple 스타일 */}
+      <div className="mt-auto pt-6">
+        <div className="grid grid-cols-2 gap-3">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="py-4 rounded-apple-lg text-[17px] font-semibold bg-apple-gray-100 text-apple-gray-700 hover:bg-apple-gray-200 transition-all duration-200 active:scale-[0.98]"
+            >
+              이전
+            </button>
+          )}
           <button
-            onClick={onBack}
-            className="py-4 rounded-xl text-[17px] font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+            onClick={handleNext}
+            disabled={!homeRegion}
+            className={`py-4 rounded-apple-lg text-[17px] font-semibold transition-all duration-200 ${
+              onBack ? "" : "col-span-2"
+            } ${
+              homeRegion
+                ? "bg-apple-blue-500 hover:bg-apple-blue-600 active:bg-apple-blue-700 active:scale-[0.98] text-white shadow-apple-button"
+                : "bg-apple-gray-100 text-apple-gray-400 cursor-not-allowed"
+            }`}
           >
-            ← 이전
+            다음
           </button>
-        )}
-        <button
-          onClick={handleNext}
-          disabled={!homeRegion}
-          className={`py-4 rounded-xl text-[17px] font-semibold transition-all ${
-            onBack ? "" : "col-span-2"
-          } ${
-            homeRegion
-              ? "bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white"
-              : "bg-gray-100 text-gray-400 cursor-not-allowed"
-          }`}
-        >
-          다음 →
-        </button>
+        </div>
       </div>
     </div>
   );

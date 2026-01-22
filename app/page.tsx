@@ -24,6 +24,7 @@ const LAST_UPDATED = "2025.01.22";
 const PHONE_NUMBER = "02-6101-3100";
 
 const UPDATE_HISTORY = [
+  { date: "2025.01.22", content: "Apple 스타일 디자인 시스템 적용" },
   { date: "2025.01.22", content: "UX/UI 개선, SEO 최적화, 코드 구조 개선" },
   { date: "2025.01.06", content: "웰컴 화면 격려 명언 추가" },
   { date: "2025.01.06", content: "결과 화면 한 화면에 맞게 콤팩트하게 개선" },
@@ -124,26 +125,27 @@ export default function Home() {
 
   return (
     <div className="min-h-dvh bg-white flex flex-col">
-      {/* 헤더 - 웰컴/결과 화면 제외 */}
+      {/* 헤더 - Apple 스타일 */}
       {currentStep >= 1 && currentStep <= totalSteps && (
-        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100">
-          <div className="max-w-lg mx-auto px-5 h-14 flex items-center justify-between">
+        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-apple-gray-200">
+          <div className="max-w-lg mx-auto px-5 h-12 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <button
                 onClick={handleBack}
-                className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 -ml-2 hover:bg-apple-gray-100 rounded-full transition-all duration-200 active:scale-95"
               >
-                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <svg className="w-5 h-5 text-apple-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <span className="text-sm font-semibold text-gray-900">회생의 기적</span>
+              <span className="text-[15px] font-semibold text-apple-gray-800">회생의 기적</span>
             </div>
-            <span className="text-xs text-gray-500">{currentStep}/{totalSteps}</span>
+            <span className="text-[13px] text-apple-gray-400 font-medium">{currentStep}/{totalSteps}</span>
           </div>
-          <div className="h-1 bg-gray-100">
+          {/* Apple 스타일 프로그레스 바 */}
+          <div className="h-[3px] bg-apple-gray-100">
             <div
-              className="h-full bg-blue-500 transition-all duration-500 ease-out"
+              className="h-full bg-apple-blue-500 transition-all duration-500 ease-apple"
               style={{ width: `${(currentStep / totalSteps) * 100}%` }}
             />
           </div>
@@ -153,71 +155,82 @@ export default function Home() {
       {/* 메인 컨텐츠 */}
       <main className="flex-1 flex flex-col">
         <div className="max-w-lg mx-auto w-full flex-1 flex flex-col">
-          {/* 웰컴 화면 (step 0) */}
+          {/* 웰컴 화면 (step 0) - Apple 스타일 */}
           {currentStep === 0 && (
-            <div className="flex-1 flex flex-col px-6 py-8 animate-fadeIn">
+            <div className="flex-1 flex flex-col px-6 py-10 animate-fadeIn">
               <div className="flex-1 flex flex-col justify-center -mt-8">
-                <div className="mb-10">
-                  <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full text-xs font-semibold mb-5">
-                    <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></span>
+                <div className="mb-12">
+                  <div className="inline-flex items-center gap-2 bg-apple-gray-100 text-apple-gray-600 px-3 py-1.5 rounded-full text-[13px] font-medium mb-6">
+                    <span className="w-1.5 h-1.5 bg-apple-blue-500 rounded-full animate-subtlePulse"></span>
                     회생의 기적
                   </div>
-                  <h1 className="text-[34px] font-bold text-gray-900 leading-tight mb-4">
+                  <h1 className="text-[40px] font-bold text-apple-gray-900 leading-[1.1] tracking-tight mb-5">
                     빚, 얼마나<br/>줄일 수 있을까요?
                   </h1>
-                  <p className="text-lg text-gray-500">
+                  <p className="text-[19px] text-apple-gray-500 leading-relaxed">
                     1분이면 탕감율을 알 수 있어요
                   </p>
                 </div>
 
-                <div className="space-y-3.5">
+                <div className="space-y-4">
                   {["무료로 계산할 수 있어요", "개인정보는 저장하지 않아요", "전문가가 직접 확인해드려요"].map((text, i) => (
-                    <div key={i} className="flex items-center gap-3 text-gray-600">
-                      <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                    <div key={i} className="flex items-center gap-3.5 text-apple-gray-600">
+                      <div className="w-6 h-6 rounded-full bg-apple-blue-50 flex items-center justify-center flex-shrink-0">
+                        <svg className="w-3.5 h-3.5 text-apple-blue-500" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       </div>
-                      <span className="text-[15px]">{text}</span>
+                      <span className="text-[16px]">{text}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="pt-6">
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-5 mb-4 shadow-sm">
+              <div className="pt-8">
+                {/* 통계 카드 - Apple 스타일 */}
+                <div className="bg-apple-gray-50 rounded-apple-xl p-5 mb-5">
                   <div className="flex items-center justify-around">
                     <div className="text-center">
-                      <p className="text-xs text-gray-500 mb-1">누적 이용자</p>
-                      <p className="text-2xl font-bold text-blue-600">{displayCount.toLocaleString()}<span className="text-lg">명</span></p>
+                      <p className="text-[12px] text-apple-gray-400 mb-1.5 font-medium">누적 이용자</p>
+                      <p className="text-[28px] font-bold text-apple-gray-800 tracking-tight">
+                        {displayCount.toLocaleString()}
+                        <span className="text-[17px] font-semibold text-apple-gray-500 ml-0.5">명</span>
+                      </p>
                     </div>
-                    <div className="w-px h-14 bg-gray-200"></div>
+                    <div className="w-px h-12 bg-apple-gray-200"></div>
                     <div className="text-center">
-                      <p className="text-xs text-gray-500 mb-1">24시간 내 최고</p>
-                      <p className="text-2xl font-bold text-green-600">{displayRate}<span className="text-lg">%</span><span className="text-sm font-medium text-gray-500 ml-0.5">탕감</span></p>
+                      <p className="text-[12px] text-apple-gray-400 mb-1.5 font-medium">24시간 내 최고</p>
+                      <p className="text-[28px] font-bold text-apple-green-500 tracking-tight">
+                        {displayRate}
+                        <span className="text-[17px] font-semibold">%</span>
+                        <span className="text-[13px] font-medium text-apple-gray-400 ml-1">탕감</span>
+                      </p>
                     </div>
                   </div>
                 </div>
-                <div className="text-center text-xs text-gray-400">
-                  <span className="font-medium text-gray-500">블랙스톤 법률사무소</span> · <span>최종수정 {LAST_UPDATED}</span>
+                <div className="text-center text-[12px] text-apple-gray-400">
+                  <span className="font-medium text-apple-gray-500">블랙스톤 법률사무소</span>
+                  <span className="mx-2">·</span>
+                  <span>최종수정 {LAST_UPDATED}</span>
                 </div>
 
+                {/* 업데이트 이력 모달 - Apple 스타일 */}
                 {showUpdateHistory && (
-                  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowUpdateHistory(false)}>
-                    <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-scaleIn" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-gray-900">업데이트 이력</h3>
-                        <button onClick={() => setShowUpdateHistory(false)} className="p-1 hover:bg-gray-100 rounded-full transition-colors">
-                          <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 backdrop-blur-sm" onClick={() => setShowUpdateHistory(false)}>
+                    <div className="bg-white rounded-apple-xl p-6 max-w-sm w-full shadow-apple-lg animate-scaleIn" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-between mb-5">
+                        <h3 className="text-[19px] font-bold text-apple-gray-800">업데이트 이력</h3>
+                        <button onClick={() => setShowUpdateHistory(false)} className="p-1.5 hover:bg-apple-gray-100 rounded-full transition-colors">
+                          <svg className="w-5 h-5 text-apple-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
                       </div>
-                      <div className="space-y-3 max-h-80 overflow-y-auto">
+                      <div className="space-y-3.5 max-h-80 overflow-y-auto">
                         {UPDATE_HISTORY.map((item, index) => (
-                          <div key={index} className="flex gap-3 text-sm">
-                            <span className="text-gray-400 whitespace-nowrap">{item.date}</span>
-                            <span className="text-gray-700">{item.content}</span>
+                          <div key={index} className="flex gap-3 text-[14px]">
+                            <span className="text-apple-gray-400 whitespace-nowrap font-medium">{item.date}</span>
+                            <span className="text-apple-gray-600">{item.content}</span>
                           </div>
                         ))}
                       </div>
@@ -326,16 +339,16 @@ export default function Home() {
         </div>
       </main>
 
-      {/* 하단 CTA - 웰컴 화면에서만 */}
+      {/* 하단 CTA - Apple 스타일 */}
       {currentStep === 0 && (
-        <div className="sticky bottom-0 bg-white border-t border-gray-100 px-5 pt-4 pb-safe">
+        <div className="sticky bottom-0 bg-white/80 backdrop-blur-xl border-t border-apple-gray-100 px-5 pt-4 pb-safe">
           <div className="max-w-lg mx-auto">
             <button
               onClick={() => {
                 fetch('/api/track-start', { method: 'POST' }).catch(() => {});
                 setCurrentStep(1);
               }}
-              className="w-full bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-semibold py-4 rounded-xl transition-colors text-[17px]"
+              className="w-full bg-apple-blue-500 hover:bg-apple-blue-600 active:bg-apple-blue-700 active:scale-[0.98] text-white font-semibold py-4 rounded-apple-lg transition-all duration-200 text-[17px] shadow-apple-button"
             >
               내 탕감률 확인하기
             </button>
@@ -343,28 +356,28 @@ export default function Home() {
         </div>
       )}
 
-      {/* 플로팅 상담 버튼 */}
+      {/* 플로팅 상담 버튼 - Apple 스타일 */}
       {currentStep >= 1 && (
-        <div className="fixed right-3 bottom-1/4 z-50 flex flex-col gap-3">
+        <div className="fixed right-4 bottom-1/4 z-50 flex flex-col gap-3">
           <a
             href={KAKAO_CONSULTATION_URL}
             target="_blank"
             rel="noopener"
-            className="flex items-center gap-2 px-4 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-900 rounded-full shadow-lg transition-all hover:scale-105"
+            className="flex items-center gap-2 px-4 py-3 bg-[#FEE500] hover:bg-[#F5DC00] text-[#3C1E1E] rounded-full shadow-apple-md transition-all duration-200 active:scale-95"
           >
-            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 3C6.48 3 2 6.58 2 11c0 2.76 1.81 5.18 4.5 6.57-.15.53-.5 1.93-.57 2.24-.09.38.14.37.29.27.12-.08 1.89-1.26 2.66-1.77.7.1 1.42.16 2.12.16 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/>
             </svg>
-            <span className="text-sm font-semibold whitespace-nowrap">바로상담</span>
+            <span className="text-[14px] font-semibold whitespace-nowrap">바로상담</span>
           </a>
           <a
             href={`tel:${PHONE_NUMBER}`}
-            className="flex items-center gap-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-lg transition-all hover:scale-105"
+            className="flex items-center gap-2 px-4 py-3 bg-apple-blue-500 hover:bg-apple-blue-600 text-white rounded-full shadow-apple-md transition-all duration-200 active:scale-95"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
             </svg>
-            <span className="text-sm font-semibold whitespace-nowrap">전화상담</span>
+            <span className="text-[14px] font-semibold whitespace-nowrap">전화상담</span>
           </a>
         </div>
       )}
