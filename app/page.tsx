@@ -20,13 +20,13 @@ import { useStats } from "@/app/hooks/useStats";
 import { useToast } from "@/app/hooks/useToast";
 import { KAKAO_CONSULTATION_URL } from "@/app/config/consultation";
 
-const LAST_UPDATED = "2025.01.06";
+const LAST_UPDATED = "2025.01.22";
 const PHONE_NUMBER = "02-6101-3100";
 
 const UPDATE_HISTORY = [
+  { date: "2025.01.22", content: "UX/UI 개선, SEO 최적화, 코드 구조 개선" },
   { date: "2025.01.06", content: "웰컴 화면 격려 명언 추가" },
   { date: "2025.01.06", content: "결과 화면 한 화면에 맞게 콤팩트하게 개선" },
-  { date: "2025.01.02", content: "결과 화면 UI/UX 대폭 개선 (도파민 효과)" },
 ];
 
 const initialFormData: FormData = {
