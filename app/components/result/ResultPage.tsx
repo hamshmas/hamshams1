@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import type { FormData, CalculationResult, HousingType, MaritalStatus } from "@/app/types";
-import { getCourtName } from "@/utils/courtJurisdiction";
 import { generateConsultationMessage } from "@/utils/generateConsultationMessage";
 import { ConsultationModal, CopySuccessNotification } from "@/app/components/consultation";
 import { KAKAO_CONSULTATION_URL, COPY_SUCCESS_NOTIFICATION_DURATION } from "@/app/config/consultation";
 import { supabase } from "@/lib/supabase";
 import { CelebrationEffects } from "./CelebrationEffects";
+import { useToast } from "@/app/hooks/useToast";
 
 interface ResultPageProps {
   result: CalculationResult;
@@ -65,6 +65,7 @@ export function ResultPage({
   const [animatedAmount, setAnimatedAmount] = useState(0);
   const hasSaved = useRef(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const toast = useToast();
 
   // 채무액과 재산 비교
   const hasMoreAssetThanDebt = formData.assetValue >= formData.totalDebt;
@@ -196,7 +197,7 @@ export function ResultPage({
 
   const handleContactSubmit = async () => {
     if (!name.trim() || !phone.trim()) {
-      alert("이름과 연락처를 모두 입력해주세요.");
+      toast.warning("이름과 연락처를 모두 입력해주세요.");
       return;
     }
 
@@ -207,7 +208,7 @@ export function ResultPage({
   // 전화상담 신청 핸들러
   const handlePhoneConsultation = async () => {
     if (!name.trim() || !phone.trim()) {
-      alert("이름과 연락처를 모두 입력해주세요.");
+      toast.warning("이름과 연락처를 모두 입력해주세요.");
       return;
     }
 
@@ -215,7 +216,7 @@ export function ResultPage({
 
     // 상담 신청 정보 저장
     try {
-      const response = await fetch('/api/consultation/save', {
+      await fetch('/api/consultation/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -225,16 +226,11 @@ export function ResultPage({
           calculationResult: result,
         }),
       });
-
-      if (response.ok) {
-        alert('전화상담 신청이 완료되었습니다.\n담당자가 곧 연락드리겠습니다.');
-      } else {
-        alert('전화상담 신청이 완료되었습니다.\n담당자가 곧 연락드리겠습니다.');
-      }
     } catch (error) {
       console.error('상담 신청 저장 실패:', error);
-      alert('전화상담 신청이 완료되었습니다.\n담당자가 곧 연락드리겠습니다.');
     }
+
+    toast.success("전화상담 신청이 완료되었습니다. 담당자가 곧 연락드리겠습니다.");
   };
 
   const sendConsultationMessage = async () => {
