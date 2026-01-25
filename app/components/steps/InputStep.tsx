@@ -84,17 +84,17 @@ export function InputStep({
       )}
 
       {/* 질문 영역 - Apple 스타일 */}
-      <div className="mb-10">
+      <div className="mb-10 animate-slideUp">
         <h2 className="text-[28px] font-bold text-apple-gray-800 leading-tight tracking-tight mb-3">
           {title}
         </h2>
-        <p className="text-[15px] text-apple-gray-500 leading-relaxed">{subtitle}</p>
+        <p className="text-[17px] text-apple-gray-500 leading-relaxed font-normal">{subtitle}</p>
       </div>
 
       {/* 입력 영역 - Apple 스타일 */}
       <div className="flex-1">
-        <div className="relative mb-6">
-          <div className="flex items-baseline border-b-2 border-apple-gray-200 focus-within:border-apple-blue-500 transition-all duration-200 pb-3">
+        <div className="relative mb-6 animate-scaleIn delay-100">
+          <div className="flex items-baseline border-b border-apple-gray-300 focus-within:border-apple-blue-500 transition-all duration-300 pb-2 group">
             <input
               ref={inputRef}
               type="text"
@@ -102,16 +102,16 @@ export function InputStep({
               value={value}
               onChange={(e) => setValue(handleNumberInput(e.target.value))}
               onKeyPress={(e) => e.key === 'Enter' && isValid && handleSubmit()}
-              className="flex-1 text-[36px] font-bold text-apple-gray-800 outline-none bg-transparent placeholder:text-apple-gray-300 tracking-tight"
+              className="flex-1 text-[40px] font-bold text-apple-gray-800 outline-none bg-transparent placeholder:text-apple-gray-200 tracking-tight transition-colors group-hover:placeholder:text-apple-gray-300"
               placeholder="0"
             />
-            <span className="text-[18px] font-medium text-apple-gray-400 ml-2">
+            <span className="text-[20px] font-medium text-apple-gray-400 ml-2 mb-1">
               {unitType === 'count' ? '명' : '원'}
             </span>
           </div>
           {/* 한글 금액 표시 */}
           {unitType === 'won' && value && parseNumberFromFormatted(value) > 0 && (
-            <p className="text-[15px] text-apple-blue-500 mt-3 font-medium">
+            <p className="text-[15px] text-apple-blue-500 mt-3 font-medium animate-fadeIn">
               {formatKoreanCurrency(parseNumberFromFormatted(value))}
             </p>
           )}
@@ -132,13 +132,11 @@ export function InputStep({
           <button
             onClick={handleSubmit}
             disabled={!isValid}
-            className={`py-4 rounded-apple-lg text-[17px] font-semibold transition-all duration-200 ${
-              onBack ? '' : 'col-span-2'
-            } ${
-              isValid
+            className={`py-4 rounded-apple-lg text-[17px] font-semibold transition-all duration-200 ${onBack ? '' : 'col-span-2'
+              } ${isValid
                 ? 'bg-apple-blue-500 hover:bg-apple-blue-600 active:bg-apple-blue-700 active:scale-[0.98] text-white shadow-apple-button'
                 : 'bg-apple-gray-100 text-apple-gray-400 cursor-not-allowed'
-            }`}
+              }`}
           >
             다음
           </button>

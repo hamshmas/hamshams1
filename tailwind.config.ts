@@ -102,6 +102,12 @@ const config: Config = {
       },
       transitionTimingFunction: {
         'apple': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        'spring-gentle': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        'spring-bouncy': 'cubic-bezier(0.4, 0, 0.2, 1.4)',
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'apple-gradient': 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
       },
     },
   },

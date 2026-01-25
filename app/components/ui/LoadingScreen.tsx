@@ -17,9 +17,11 @@ const LOADING_STEPS = [
 ];
 
 export function LoadingScreen() {
-  const [currentStep, setCurrentStep] = useState(0);
   const [currentMessage, setCurrentMessage] = useState(0);
   const [progress, setProgress] = useState(0);
+
+  // progress에 따라 currentStep 계산 (0-25%: 0, 25-50%: 1, 50-75%: 2, 75-100%: 3)
+  const currentStep = Math.min(Math.floor(progress / 25), LOADING_STEPS.length - 1);
 
   useEffect(() => {
     const progressInterval = setInterval(() => {
@@ -29,17 +31,12 @@ export function LoadingScreen() {
       });
     }, 20);
 
-    const stepInterval = setInterval(() => {
-      setCurrentStep(prev => (prev + 1) % LOADING_STEPS.length);
-    }, 500);
-
     const messageInterval = setInterval(() => {
       setCurrentMessage(prev => (prev + 1) % CTA_MESSAGES.length);
-    }, 1000);
+    }, 500);
 
     return () => {
       clearInterval(progressInterval);
-      clearInterval(stepInterval);
       clearInterval(messageInterval);
     };
   }, []);

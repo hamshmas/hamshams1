@@ -46,6 +46,20 @@ html {
     padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
   }
 
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
   /* 동적 뷰포트 높이 (iOS Safari 대응) */
   .min-h-dvh {
     min-height: 100vh;

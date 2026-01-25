@@ -24,7 +24,8 @@
       "Bash(gh auth status:*)",
       "Bash(git remote set-url:*)",
       "Bash(node test-referer.js:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(wc:*)"
     ],
     "deny": [],
     "ask": []
