@@ -205,11 +205,10 @@ export function AssetIntegratedForm({
               <button
                 key={item.type}
                 onClick={() => setHousingType(item.type)}
-                className={`p-3 rounded-apple text-center transition-all duration-200 ${
-                  housingType === item.type
+                className={`p-3 rounded-apple text-center transition-all duration-200 ${housingType === item.type
                     ? "bg-apple-blue-500 text-white shadow-apple-sm"
                     : "bg-apple-gray-100 text-apple-gray-700 hover:bg-apple-gray-200"
-                }`}
+                  }`}
               >
                 <p className="font-semibold text-[14px]">{item.label}</p>
               </button>
@@ -243,43 +242,93 @@ export function AssetIntegratedForm({
 
         {/* 담보대출 */}
         {housingType === "owned" && (
-          <div className="space-y-2 animate-fadeIn">
-            <label className="text-[14px] font-semibold text-apple-gray-600">담보대출 (근저당)</label>
-            <div className="flex items-baseline border-b-2 border-apple-gray-200 focus-within:border-apple-blue-500 transition-all duration-200 pb-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                value={mortgageAmount}
-                onChange={(e) => setMortgageAmount(formatNumber(e.target.value))}
-                onBlur={() => checkSmallValue(parseNumber(mortgageAmount), "mortgage")}
-                className="flex-1 text-[24px] font-bold text-apple-gray-800 outline-none bg-transparent placeholder:text-apple-gray-300 tracking-tight"
-                placeholder="0"
-              />
-              <span className="text-[16px] font-medium text-apple-gray-400 ml-2">원</span>
+          <div className="space-y-3 animate-fadeIn">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <label className="text-[15px] font-semibold text-apple-gray-700">담보대출 (근저당)</label>
+                <div className="group relative">
+                  <svg className="w-4 h-4 text-apple-gray-400 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-gray-800 text-white text-[11px] rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 text-center">
+                    등기부등본상 채권최고액이 아닌 실제 대출 잔액을 입력해주세요
+                  </div>
+                </div>
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={mortgageAmount === "0" || mortgageAmount === ""}
+                  onChange={(e) => {
+                    if (e.target.checked) setMortgageAmount("0");
+                    else setMortgageAmount("");
+                  }}
+                  className="w-4 h-4 rounded text-apple-blue-500 focus:ring-apple-blue-500 border-gray-300"
+                />
+                <span className="text-[13px] text-apple-gray-500">대출 없음</span>
+              </label>
             </div>
-            {parseNumber(mortgageAmount) > 0 && (
-              <p className="text-[14px] text-apple-blue-500 font-medium">{formatKoreanCurrency(parseNumber(mortgageAmount))}</p>
+
+            {(mortgageAmount !== "0" || document.activeElement?.tagName === "INPUT") && (
+              <div className="animate-slideUp">
+                <div className="flex items-baseline border-b-2 border-apple-gray-200 focus-within:border-apple-blue-500 transition-all duration-200 pb-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={mortgageAmount === "0" ? "" : mortgageAmount}
+                    onChange={(e) => setMortgageAmount(formatNumber(e.target.value))}
+                    onBlur={() => checkSmallValue(parseNumber(mortgageAmount), "mortgage")}
+                    className="flex-1 text-[24px] font-bold text-apple-gray-800 outline-none bg-transparent placeholder:text-apple-gray-300 tracking-tight"
+                    placeholder="0"
+                  />
+                  <span className="text-[16px] font-medium text-apple-gray-400 ml-2">원</span>
+                </div>
+                {parseNumber(mortgageAmount) > 0 && (
+                  <p className="text-[14px] text-apple-blue-500 font-medium mt-1">{formatKoreanCurrency(parseNumber(mortgageAmount))}</p>
+                )}
+              </div>
             )}
           </div>
         )}
 
         {/* 기타 자산 */}
-        <div className="space-y-2">
-          <label className="text-[14px] font-semibold text-apple-gray-600">기타 자산</label>
-          <p className="text-[12px] text-apple-gray-400">예금, 주식, 자동차, 보험 해지환급금 등</p>
-          <div className="flex items-baseline border-b-2 border-apple-gray-200 focus-within:border-apple-blue-500 transition-all duration-200 pb-2">
-            <input
-              type="text"
-              inputMode="numeric"
-              value={otherAsset}
-              onChange={(e) => setOtherAsset(formatNumber(e.target.value))}
-              className="flex-1 text-[24px] font-bold text-apple-gray-800 outline-none bg-transparent placeholder:text-apple-gray-300 tracking-tight"
-              placeholder="0"
-            />
-            <span className="text-[16px] font-medium text-apple-gray-400 ml-2">원</span>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <label className="text-[15px] font-semibold text-apple-gray-700">기타 자산</label>
+              <p className="text-[12px] text-apple-gray-400">예금, 주식, 자동차, 보험 해지환급금 등</p>
+            </div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={otherAsset === "0" || otherAsset === ""}
+                onChange={(e) => {
+                  if (e.target.checked) setOtherAsset("0");
+                  else setOtherAsset("");
+                }}
+                className="w-4 h-4 rounded text-apple-blue-500 focus:ring-apple-blue-500 border-gray-300"
+              />
+              <span className="text-[13px] text-apple-gray-500">없음</span>
+            </label>
           </div>
-          {parseNumber(otherAsset) > 0 && (
-            <p className="text-[14px] text-apple-blue-500 font-medium">{formatKoreanCurrency(parseNumber(otherAsset))}</p>
+
+          {(otherAsset !== "0" || document.activeElement?.tagName === "INPUT") && (
+            <div className="animate-slideUp">
+              <div className="flex items-baseline border-b-2 border-apple-gray-200 focus-within:border-apple-blue-500 transition-all duration-200 pb-2">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={otherAsset === "0" ? "" : otherAsset}
+                  onChange={(e) => setOtherAsset(formatNumber(e.target.value))}
+                  className="flex-1 text-[24px] font-bold text-apple-gray-800 outline-none bg-transparent placeholder:text-apple-gray-300 tracking-tight"
+                  placeholder="0"
+                />
+                <span className="text-[16px] font-medium text-apple-gray-400 ml-2">원</span>
+              </div>
+              {parseNumber(otherAsset) > 0 && (
+                <p className="text-[14px] text-apple-blue-500 font-medium mt-1">{formatKoreanCurrency(parseNumber(otherAsset))}</p>
+              )}
+            </div>
           )}
         </div>
 
@@ -292,21 +341,19 @@ export function AssetIntegratedForm({
                 setHasSpouse(false);
                 setSpouseAsset("");
               }}
-              className={`p-3.5 rounded-apple text-center transition-all duration-200 ${
-                hasSpouse === false
+              className={`p-3.5 rounded-apple text-center transition-all duration-200 ${hasSpouse === false
                   ? "bg-apple-blue-500 text-white shadow-apple-sm"
                   : "bg-apple-gray-100 text-apple-gray-700 hover:bg-apple-gray-200"
-              }`}
+                }`}
             >
               <p className="font-semibold text-[15px]">미혼/이혼</p>
             </button>
             <button
               onClick={() => setHasSpouse(true)}
-              className={`p-3.5 rounded-apple text-center transition-all duration-200 ${
-                hasSpouse === true
+              className={`p-3.5 rounded-apple text-center transition-all duration-200 ${hasSpouse === true
                   ? "bg-apple-blue-500 text-white shadow-apple-sm"
                   : "bg-apple-gray-100 text-apple-gray-700 hover:bg-apple-gray-200"
-              }`}
+                }`}
             >
               <p className="font-semibold text-[15px]">기혼</p>
             </button>
@@ -365,11 +412,10 @@ export function AssetIntegratedForm({
           <button
             onClick={handleSubmit}
             disabled={!isValid}
-            className={`py-4 rounded-apple-lg text-[17px] font-semibold transition-all duration-200 ${
-              isValid
+            className={`py-4 rounded-apple-lg text-[17px] font-semibold transition-all duration-200 ${isValid
                 ? "bg-apple-blue-500 hover:bg-apple-blue-600 active:bg-apple-blue-700 active:scale-[0.98] text-white shadow-apple-button"
                 : "bg-apple-gray-100 text-apple-gray-400 cursor-not-allowed"
-            }`}
+              }`}
           >
             다음
           </button>

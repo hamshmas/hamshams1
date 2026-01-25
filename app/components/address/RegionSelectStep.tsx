@@ -62,21 +62,25 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
         <p className="text-[15px] text-apple-gray-500">관할법원과 최우선변제금 계산에 사용됩니다</p>
       </div>
 
-      {/* 집 주소 선택 그리드 - Apple 스타일 */}
-      <div className="grid grid-cols-3 gap-2 mb-4">
+      {/* 집 주소 선택 그리드 - Apple 스타일 Refined */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
         {SIDO_LIST.map((sido) => {
           const isSelected = homeRegion === sido.value;
           return (
             <button
               key={sido.value}
-              onClick={() => setHomeRegion(sido.value)}
-              className={`py-3 px-2 rounded-apple text-center transition-all duration-200 ${
-                isSelected
-                  ? "bg-apple-blue-500 text-white shadow-apple-sm"
-                  : "bg-apple-gray-100 hover:bg-apple-gray-200 text-apple-gray-800"
-              }`}
+              onClick={() => {
+                setHomeRegion(sido.value);
+                if (!showWorkInput && !workRegion) {
+                  // Optional: maybe ask regarding work? for now just select
+                }
+              }}
+              className={`py-3.5 px-2 rounded-apple-lg text-center transition-all duration-300 ease-spring-bouncy ${isSelected
+                  ? "bg-apple-blue-500 text-white shadow-apple-md scale-[1.02] ring-2 ring-apple-blue-200 ring-offset-1"
+                  : "bg-apple-gray-100 hover:bg-apple-gray-200 text-apple-gray-700 hover:scale-[1.01]"
+                }`}
             >
-              <p className={`font-medium text-[13px] ${isSelected ? "text-white" : "text-apple-gray-800"}`}>
+              <p className={`font-semibold text-[14px] ${isSelected ? "text-white" : "text-apple-gray-700"}`}>
                 {sido.label}
               </p>
             </button>
@@ -84,27 +88,35 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
         })}
       </div>
 
-      {/* 직장 주소 입력 토글 - Apple 스타일 */}
+      <div className="border-t border-apple-gray-100 my-6"></div>
+
+      {/* 직장 주소 입력 토글 - Apple 스타일 Refined */}
       {homeRegion && !showWorkInput && (
         <button
           onClick={() => setShowWorkInput(true)}
-          className="w-full py-3 text-[14px] text-apple-blue-500 hover:text-apple-blue-600 font-medium transition-colors"
+          className="w-full py-4 px-4 bg-apple-blue-50 hover:bg-apple-blue-100 rounded-apple-lg border border-apple-blue-100 text-[15px] text-apple-blue-600 font-semibold transition-all duration-200 flex items-center justify-center gap-2 group mb-4"
         >
-          직장 주소도 입력하기 (선택)
+          <span>직장 주소도 입력하기</span>
+          <svg className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
         </button>
       )}
 
-      {/* 직장 주소 선택 - Apple 스타일 */}
+      {/* 직장 주소 선택 - Apple 스타일 Refined */}
       {showWorkInput && (
-        <div className="space-y-3 animate-fadeIn mt-2">
+        <div className="space-y-4 animate-slideUp bg-apple-gray-50 p-5 rounded-apple-xl border border-apple-gray-100 mb-4">
           <div className="flex items-center justify-between">
-            <label className="text-[14px] font-semibold text-apple-gray-600">직장 지역</label>
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-4 bg-apple-blue-500 rounded-full"></div>
+              <label className="text-[15px] font-bold text-apple-gray-800">직장 지역</label>
+            </div>
             <button
               onClick={() => {
                 setShowWorkInput(false);
                 setWorkRegion(null);
               }}
-              className="text-[13px] text-apple-gray-400 hover:text-apple-gray-600 transition-colors"
+              className="text-[13px] text-apple-gray-400 hover:text-red-500 transition-colors px-2 py-1 rounded-md hover:bg-red-50 font-medium"
             >
               취소
             </button>
@@ -116,19 +128,21 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
                 <button
                   key={sido.value}
                   onClick={() => setWorkRegion(sido.value)}
-                  className={`py-2.5 px-2 rounded-apple text-center transition-all duration-200 ${
-                    isSelected
-                      ? "bg-apple-blue-500 text-white shadow-apple-sm"
-                      : "bg-apple-gray-100 hover:bg-apple-gray-200 text-apple-gray-800"
-                  }`}
+                  className={`py-3 px-2 rounded-apple-lg text-center transition-all duration-200 ${isSelected
+                      ? "bg-apple-blue-500 text-white shadow-apple-sm scale-[1.02]"
+                      : "bg-white border border-apple-gray-200 hover:border-apple-gray-300 text-apple-gray-700 hover:bg-apple-gray-50"
+                    }`}
                 >
-                  <p className={`font-medium text-[12px] ${isSelected ? "text-white" : "text-apple-gray-800"}`}>
+                  <p className={`font-medium text-[13px] ${isSelected ? "text-white" : "text-apple-gray-700"}`}>
                     {sido.label}
                   </p>
                 </button>
               );
             })}
           </div>
+          <p className="text-[12px] text-apple-gray-500 leading-relaxed bg-white p-3 rounded-lg border border-apple-gray-200">
+            💡 <span className="font-semibold text-apple-blue-600">Tip</span> 직장 관할 법원이 더 유리한 경우, 자동으로 직장 기준 회생법원을 안내해 드립니다.
+          </p>
         </div>
       )}
 
@@ -175,13 +189,11 @@ export function RegionSelectStep({ onNext, onBack }: RegionSelectStepProps) {
           <button
             onClick={handleNext}
             disabled={!homeRegion}
-            className={`py-4 rounded-apple-lg text-[17px] font-semibold transition-all duration-200 ${
-              onBack ? "" : "col-span-2"
-            } ${
-              homeRegion
+            className={`py-4 rounded-apple-lg text-[17px] font-semibold transition-all duration-200 ${onBack ? "" : "col-span-2"
+              } ${homeRegion
                 ? "bg-apple-blue-500 hover:bg-apple-blue-600 active:bg-apple-blue-700 active:scale-[0.98] text-white shadow-apple-button"
                 : "bg-apple-gray-100 text-apple-gray-400 cursor-not-allowed"
-            }`}
+              }`}
           >
             다음
           </button>
